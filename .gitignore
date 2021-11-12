@@ -1,5 +1,6 @@
 build/
 dist/
 Pyllab-*/
+Pyllab/__init__.c
 *.so
 *.a
