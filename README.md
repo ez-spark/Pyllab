@@ -1,6 +1,6 @@
 # Building .whl package
 
-# On Linux/Mac:
+- On Linux/Mac:
 
 ```
 sh create_dynamic.sh
