@@ -18,7 +18,7 @@ setup(
     name="Pyllab",
     version="0.0.1",
     packages=find_packages(),
-    author="Arin Khare",
+    author="Riccardo Viviano, Matteo Galdi",
     description="Deep learning library",
     long_description=long_description,
     long_description_content_type='text/markdown',
