@@ -1,4 +1,4 @@
-- Install
+# Install
 ```
  pip install Pyllab==0.0.1
 ```
@@ -6,7 +6,7 @@
 or
 
 
-- Build .whl package On Linux/Mac:
+# Build .whl package On Linux/Mac:
 ```
 sh create_dynamic.sh
 sh build_python_library.sh
