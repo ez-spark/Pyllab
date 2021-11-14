@@ -30,7 +30,7 @@ To repair the .whl file
 
 - It is a pain in the Ass. Why?
 
-Pyllab is a cython library compiling .C files that uses poix calls system. Now you can see the problem here. Just follow me in this journey:
+Pyllab is a cython library compiling .C files that uses posix calls system. Now you can see the problem here. Just follow me in this journey:
 
 
 - Install Mingw with MYSYS2: https://www.msys2.org/ follow the steps and also the passages to install mingw-w64 
