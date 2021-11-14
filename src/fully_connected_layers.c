@@ -531,7 +531,7 @@ void save_fcl(fcl* f, int n){
     FILE* fw;
     char* s = (char*)malloc(sizeof(char)*256);
     char* t = ".bin";
-    s = itoa(n,s);
+    s = itoa_p(n,s);
     s = strcat(s,t);
     
     fw = fopen(s,"a+");

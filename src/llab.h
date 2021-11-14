@@ -32,9 +32,7 @@ SOFTWARE.
 #include <string.h>
 #include <time.h>
 #include <pthread.h>
-#include <sys/socket.h> 
 #include <sys/types.h>
-#include <arpa/inet.h>
 #include <unistd.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -750,7 +748,6 @@ typedef struct bn BN;
 
 #include "attention.h"
 #include "batch_norm_layers.h"
-#include "client.h"
 #include "clipping_gradient.h"
 #include "convolutional.h"
 #include "convolutional_layers.h"
@@ -776,7 +773,6 @@ typedef struct bn BN;
 #include "rmodel.h"
 #include "positional_encoding.h"
 #include "scaled_l2_norm_layers.h"
-#include "server.h"
 #include "struct_conn.h"
 #include "struct_conn_handler.h"
 #include "training.h"
