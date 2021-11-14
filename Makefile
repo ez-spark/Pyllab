@@ -8,7 +8,7 @@ PROGTESTS = $(patsubst %.c,%,$(SRCSTEST))
 
 CC:= gcc
 
-CFLAGS:= -O3 -mavx2 -g -pg -fPIC
+CFLAGS:= -O3 -mavx2 
 LDLIBS:= -lm -lpthread
 LABLIB:= -lllab
 
@@ -18,9 +18,14 @@ all: $(PROGS)
 	$(CC) -c $< -o $@.o $(CFLAGS) $(LDLIBS)
 
 create: $(DIR)
-	ar r libllab.a $(DIR)*.o
+	ar r libllab.lib $(DIR)*.o
 	rm $(DIR)*.o
 
-dynamic: $(DIR)
+shared: $(DIR)
 	gcc $(DIR)*.o -shared -o libllab.so 
+	rm $(DIR)*.o
+
+
+shared_windows: $(DIR)
+	gcc $(DIR)*.o -shared -o libllab.dll 
 	rm $(DIR)*.o
