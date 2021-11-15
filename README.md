@@ -82,9 +82,10 @@ elif msc_ver == '1916':
 
 - Now other bug fix: go to Python37\include\pyconfig.h and add these lines:
 
+ ```
  /* Compiler specific defines */
  
- ```
+
 #ifdef __MINGW32__
 #ifdef _WIN64
 #define MS_WIN64
@@ -101,3 +102,13 @@ elif msc_ver == '1916':
  - https://stackoverflow.com/questions/34135280/valueerror-unknown-ms-compiler-version-1900 (vcruntime140-dll lacking dll)
  - https://bugs.python.org/file40608/patch.diff (function fix, changing from 1900 to 1916 was my guess and it worked, it enables the use of the .dll previously installed)
  - https://github.com/cython/cython/issues/3405 (For the ifdef stuff, cython bug)
+
+# Install .whl files
+
+Once you have created the .whl file, you can install locally using pip:
+
+ ```
+ pip install package.whl
+ ```
+ 
+ (On windows you colud be forced to link the path to import the library in python)
