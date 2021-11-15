@@ -54,11 +54,13 @@ print(locate_python)
 
 - Create the file Python37\Lib\distutils\distutils.cfg that should look like this:
 
+```
 [build]
 compiler=mingw32
  
 [build_ext]
 compiler=mingw32
+```
 
 - Download this .dll file https://it.dllfile.net/microsoft/vcruntime140-dll:
 
@@ -93,10 +95,14 @@ elif msc_ver == '1916':
 #endif
 ```
 
-- Now you can run from MYSYS2 sh build_python_library.sh
+- Now you can run from MYSYS2:
+
+```
+sh build_python_library.sh
+```
 
 - Links:
- - https://www.msys2.org/ (To got MYSYS2 with mingw-w64)
+ - https://www.msys2.org/ (To get MYSYS2 with mingw-w64)
  - https://wiki.python.org/moin/WindowsCompilers (distutils.cfg)
  - https://datatofish.com/locate-python-windows/ (Python folder search script)
  - https://stackoverflow.com/questions/34135280/valueerror-unknown-ms-compiler-version-1900 (vcruntime140-dll lacking dll)
@@ -105,7 +111,7 @@ elif msc_ver == '1916':
 
 # Install .whl files
 
-Once you have created the .whl file, you can install locally using pip:
+Once you have created the .whl file, you can install it locally using pip:
 
  ```
  pip install package.whl
