@@ -106,7 +106,7 @@ void save_vector(vector_struct* v, int n){
     FILE* fw;
     char* s = (char*)malloc(sizeof(char)*256);
     char* tt = ".bin";
-    s = itoa_p(n,s);
+    s = itoa(n,s);
     s = strcat(s,tt);
     
     fw = fopen(s,"a+");

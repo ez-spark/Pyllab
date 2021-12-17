@@ -129,7 +129,7 @@ int read_files(char** name, char* directory){
  *             @int i:= the number that want to be converted in string
  *             @char b[]:= an array where the string will be stored
  * */
-char* itoa_p(int i, char b[]){
+char* itoa(int i, char b[]){
     char const digit[] = "0123456789";
     char* p = b;
     if(i<0){
@@ -811,7 +811,7 @@ char** get_files(int index1, int n_files){
         files[i][1] = '/';
         files[i][2] = '\0';
         char* b = (char*)malloc(sizeof(char)*256);
-        b = itoa_p((i+index1),b);
+        b = itoa((i+index1),b);
         strcat(files[i],b);
         strcat(files[i],temp);
         free(b);
@@ -919,6 +919,7 @@ void set_vector_with_value(float value, float* v, int dimension){
         v[i] = value;
     }
 }
+
 void set_int_vector_with_value(int value, int* v, int dimension){
     int i;
     for(i = 0; i < dimension; i++){

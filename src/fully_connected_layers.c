@@ -40,8 +40,38 @@ SOFTWARE.
  *             @ int feed_forward_flag:= either FULLY_FEED_FORWARD or EDGE_POPUP
  * */
 fcl* fully_connected(int input, int output, int layer, int dropout_flag, int activation_flag, float dropout_threshold, int n_groups, int normalization_flag, int training_mode, int feed_forward_flag){
-    if(!input || !output || layer < 0){
+    if(input <= 0 || output <= 0 || layer < 0){
         fprintf(stderr,"Error: input, output params must be > 0 and layer > -1\n");
+        exit(1);
+    }
+    
+    if (dropout_flag != NO_DROPOUT && dropout_flag != DROPOUT && dropout_flag != DROPOUT_TEST){
+        fprintf(stderr,"Error, you must set the dropout flag properly!\n");
+        exit(1);
+    }
+    
+    if(activation_flag != NO_ACTIVATION && activation_flag != SIGMOID && activation_flag != TANH && activation_flag != RELU && activation_flag != SOFTMAX && activation_flag != LEAKY_RELU && activation_flag != ELU){
+        fprintf(stderr,"Error, you must set the activation flag properly!\n");
+        exit(1);
+    } 
+    
+    if(dropout_threshold > 1 || dropout_threshold < 0){
+        fprintf(stderr,"Error: you should set thedropout_threshold in [0,1]\n");
+        exit(1);
+    }
+    
+    if(training_mode != EDGE_POPUP && training_mode != FREEZE_TRAINING && training_mode != GRADIENT_DESCENT){
+        fprintf(stderr,"Error, you should set the training mode properly!\n");
+        exit(1);
+    }
+    
+    if(feed_forward_flag != FULLY_FEED_FORWARD && feed_forward_flag != EDGE_POPUP){
+        fprintf(stderr,"Error: you should set your feed forward flag properly!\n");
+        exit(1);
+    }
+    
+    if(normalization_flag != GROUP_NORMALIZATION && normalization_flag != LAYER_NORMALIZATION && normalization_flag != LOCAL_RESPONSE_NORMALIZATION && normalization_flag != NO_NORMALIZATION){
+        fprintf(stderr,"Error: you should set your normalization flag properly!\n");
         exit(1);
     }
     
@@ -49,7 +79,7 @@ fcl* fully_connected(int input, int output, int layer, int dropout_flag, int act
         normalization_flag = LAYER_NORMALIZATION;
     
     if(normalization_flag == LAYER_NORMALIZATION){
-        if(n_groups == 0 || output==n_groups){
+        if(n_groups <= 0 || output<=n_groups || output%n_groups != 0){
             fprintf(stderr,"Error: your groups must perfectly divide your output neurons\n");
             exit(1);
         }
@@ -144,7 +174,7 @@ fcl* fully_connected(int input, int output, int layer, int dropout_flag, int act
         f->post_activation = (float*)calloc(output,sizeof(float));
     else
         f->post_activation = NULL;
-    if(f->normalization_flag == LAYER_NORMALIZATION && f->feed_forward_flag != ONLY_DROPOUT)
+    if((f->normalization_flag == LAYER_NORMALIZATION || f->normalization_flag == LOCAL_RESPONSE_NORMALIZATION) && f->feed_forward_flag != ONLY_DROPOUT)
         f->post_normalization = (float*)calloc(output,sizeof(float));
     else
         f->post_normalization = NULL;
@@ -194,8 +224,38 @@ fcl* fully_connected(int input, int output, int layer, int dropout_flag, int act
  *             @ int feed_forward_flag:= either FULLY_FEED_FORWARD or EDGE_POPUP
  * */
 fcl* fully_connected_without_arrays(int input, int output, int layer, int dropout_flag, int activation_flag, float dropout_threshold, int n_groups, int normalization_flag, int training_mode, int feed_forward_flag){
-    if(!input || !output || layer < 0){
+    if(input <= 0 || output <= 0 || layer < 0){
         fprintf(stderr,"Error: input, output params must be > 0 and layer > -1\n");
+        exit(1);
+    }
+    
+    if (dropout_flag != NO_DROPOUT && dropout_flag != DROPOUT && dropout_flag != DROPOUT_TEST){
+        fprintf(stderr,"Error, you must set the dropout flag properly!\n");
+        exit(1);
+    }
+    
+    if(activation_flag != NO_ACTIVATION && activation_flag != SIGMOID && activation_flag != TANH && activation_flag != RELU && activation_flag != SOFTMAX && activation_flag != LEAKY_RELU && activation_flag != ELU){
+        fprintf(stderr,"Error, you must set the activation flag properly!\n");
+        exit(1);
+    } 
+    
+    if(dropout_threshold > 1 || dropout_threshold < 0){
+        fprintf(stderr,"Error: you should set thedropout_threshold in [0,1]\n");
+        exit(1);
+    }
+    
+    if(training_mode != EDGE_POPUP && training_mode != FREEZE_TRAINING && training_mode != GRADIENT_DESCENT){
+        fprintf(stderr,"Error, you should set the training mode properly!\n");
+        exit(1);
+    }
+    
+    if(feed_forward_flag != FULLY_FEED_FORWARD && feed_forward_flag != EDGE_POPUP){
+        fprintf(stderr,"Error: you should set your feed forward flag properly!\n");
+        exit(1);
+    }
+    
+    if(normalization_flag != GROUP_NORMALIZATION && normalization_flag != LAYER_NORMALIZATION && normalization_flag != LOCAL_RESPONSE_NORMALIZATION && normalization_flag != NO_NORMALIZATION){
+        fprintf(stderr,"Error: you should set your normalization flag properly!\n");
         exit(1);
     }
     
@@ -203,7 +263,7 @@ fcl* fully_connected_without_arrays(int input, int output, int layer, int dropou
         normalization_flag = LAYER_NORMALIZATION;
     
     if(normalization_flag == LAYER_NORMALIZATION){
-        if(n_groups == 0 || output==n_groups){
+        if(n_groups <= 0 || output<=n_groups || output%n_groups != 0){
             fprintf(stderr,"Error: your groups must perfectly divide your output neurons\n");
             exit(1);
         }
@@ -254,8 +314,38 @@ fcl* fully_connected_without_arrays(int input, int output, int layer, int dropou
  *             @ int normalization_flag:= either NO_NORMALIZATION or LAYER_NORMALIZATION 
  * */
 fcl* fully_connected_without_learning_parameters(int input, int output, int layer, int dropout_flag, int activation_flag, float dropout_threshold, int n_groups, int normalization_flag, int training_mode, int feed_forward_flag){
-    if(!input || !output || layer < 0){
+    if(input <= 0 || output <= 0 || layer < 0){
         fprintf(stderr,"Error: input, output params must be > 0 and layer > -1\n");
+        exit(1);
+    }
+    
+    if (dropout_flag != NO_DROPOUT && dropout_flag != DROPOUT && dropout_flag != DROPOUT_TEST){
+        fprintf(stderr,"Error, you must set the dropout flag properly!\n");
+        exit(1);
+    }
+    
+    if(activation_flag != NO_ACTIVATION && activation_flag != SIGMOID && activation_flag != TANH && activation_flag != RELU && activation_flag != SOFTMAX && activation_flag != LEAKY_RELU && activation_flag != ELU){
+        fprintf(stderr,"Error, you must set the activation flag properly!\n");
+        exit(1);
+    } 
+    
+    if(dropout_threshold > 1 || dropout_threshold < 0){
+        fprintf(stderr,"Error: you should set thedropout_threshold in [0,1]\n");
+        exit(1);
+    }
+    
+    if(training_mode != EDGE_POPUP && training_mode != FREEZE_TRAINING && training_mode != GRADIENT_DESCENT){
+        fprintf(stderr,"Error, you should set the training mode properly!\n");
+        exit(1);
+    }
+    
+    if(feed_forward_flag != FULLY_FEED_FORWARD && feed_forward_flag != EDGE_POPUP){
+        fprintf(stderr,"Error: you should set your feed forward flag properly!\n");
+        exit(1);
+    }
+    
+    if(normalization_flag != GROUP_NORMALIZATION && normalization_flag != LAYER_NORMALIZATION && normalization_flag != LOCAL_RESPONSE_NORMALIZATION && normalization_flag != NO_NORMALIZATION){
+        fprintf(stderr,"Error: you should set your normalization flag properly!\n");
         exit(1);
     }
     
@@ -263,7 +353,7 @@ fcl* fully_connected_without_learning_parameters(int input, int output, int laye
         normalization_flag = LAYER_NORMALIZATION;
     
     if(normalization_flag == LAYER_NORMALIZATION){
-        if(n_groups == 0 || output==n_groups){
+        if(n_groups <= 0 || output<=n_groups || output%n_groups != 0){
             fprintf(stderr,"Error: your groups must perfectly divide your output neurons\n");
             exit(1);
         }
@@ -358,7 +448,7 @@ fcl* fully_connected_without_learning_parameters(int input, int output, int laye
         f->post_activation = (float*)calloc(output,sizeof(float));
     else
         f->post_activation = NULL;
-    if(f->normalization_flag == LAYER_NORMALIZATION && f->feed_forward_flag != ONLY_DROPOUT)
+    if((f->normalization_flag == LAYER_NORMALIZATION || f->normalization_flag == LOCAL_RESPONSE_NORMALIZATION) && f->feed_forward_flag != ONLY_DROPOUT)
         f->post_normalization = (float*)calloc(output,sizeof(float));
     else
         f->post_normalization = NULL;
@@ -405,7 +495,7 @@ int exists_activation_fcl(fcl* f){
 }
 
 int exists_normalization_fcl(fcl* f){
-    return f->normalization_flag == LAYER_NORMALIZATION && f->feed_forward_flag != ONLY_DROPOUT;
+    return (f->normalization_flag == LAYER_NORMALIZATION || f->normalization_flag == LOCAL_RESPONSE_NORMALIZATION) && f->feed_forward_flag != ONLY_DROPOUT;
 }
 
 /* Given a fcl* structure this function frees the space allocated by this structure
@@ -525,13 +615,13 @@ void free_fully_connected_complementary_edge_popup(fcl* f){
  * 
  * */
 void save_fcl(fcl* f, int n){
-    if(f == NULL)
+    if(f == NULL || n<0)
         return;
     int i;
     FILE* fw;
     char* s = (char*)malloc(sizeof(char)*256);
     char* t = ".bin";
-    s = itoa_p(n,s);
+    s = itoa(n,s);
     s = strcat(s,t);
     
     fw = fopen(s,"a+");
@@ -1228,6 +1318,8 @@ fcl* reset_fcl_for_edge_popup(fcl* f){
  * 
  * */
 uint64_t size_of_fcls(fcl* f){
+    if(f == NULL)
+        return 0;
     uint64_t sum = 0;
     if(exists_params_fcl(f)){
         sum+=(f->output*2+f->output*f->input)*sizeof(float) + f->output*sizeof(int);
@@ -1262,6 +1354,8 @@ uint64_t size_of_fcls(fcl* f){
  * 
  * */
 uint64_t size_of_fcls_without_learning_parameters(fcl* f){
+    if(f==NULL)
+        return 0;
     uint64_t sum = 0;
 
     if(exists_d_params_fcl(f)){
@@ -1298,35 +1392,40 @@ uint64_t size_of_fcls_without_learning_parameters(fcl* f){
  * 
  * */
 void paste_fcl(fcl* f,fcl* copy){
-    if(f == NULL)
+    if(f == NULL || copy == NULL)
+        return;
+    if(f->output != copy->output)
+        return;
+    int in_out = f->output*f->input;
+    if(in_out != copy->input*copy->output)
         return;
     copy->k_percentage = f->k_percentage;
-    if(exists_params_fcl(f)){
-        copy_array(f->weights,copy->weights,f->output*f->input);
+    if(exists_params_fcl(f) && exists_params_fcl(copy)){
+        copy_array(f->weights,copy->weights,in_out);
         copy_array(f->biases,copy->biases,f->output);
         copy_int_array(f->active_output_neurons,copy->active_output_neurons,f->output);
     }
-    if(exists_d_params_fcl(f)){
-        copy_array(f->d_weights,copy->d_weights,f->output*f->input);
-        copy_array(f->d1_weights,copy->d1_weights,f->output*f->input);
-        copy_array(f->d2_weights,copy->d2_weights,f->output*f->input);
-        copy_array(f->d3_weights,copy->d3_weights,f->output*f->input);
+    if(exists_d_params_fcl(f) && exists_d_params_fcl(copy)){
+        copy_array(f->d_weights,copy->d_weights,in_out);
+        copy_array(f->d1_weights,copy->d1_weights,in_out);
+        copy_array(f->d2_weights,copy->d2_weights,in_out);
+        copy_array(f->d3_weights,copy->d3_weights,in_out);
         
         copy_array(f->d_biases,copy->d_biases,f->output);
         copy_array(f->d1_biases,copy->d1_biases,f->output);
         copy_array(f->d2_biases,copy->d2_biases,f->output);
         copy_array(f->d3_biases,copy->d3_biases,f->output);
     }
-    if(exists_edge_popup_stuff_fcl(f)){
-        copy_array(f->scores,copy->scores,f->input*f->output);
-        copy_array(f->d_scores,copy->d_scores,f->input*f->output);
-        copy_array(f->d1_scores,copy->d1_scores,f->input*f->output);
-        copy_array(f->d2_scores,copy->d2_scores,f->input*f->output);
-        copy_array(f->d3_scores,copy->d3_scores,f->input*f->output);
-        copy_int_array(f->indices,copy->indices,f->input*f->output);
+    if(exists_edge_popup_stuff_fcl(f) && exists_edge_popup_stuff_fcl(copy)){
+        copy_array(f->scores,copy->scores,in_out);
+        copy_array(f->d_scores,copy->d_scores,in_out);
+        copy_array(f->d1_scores,copy->d1_scores,in_out);
+        copy_array(f->d2_scores,copy->d2_scores,in_out);
+        copy_array(f->d3_scores,copy->d3_scores,in_out);
+        copy_int_array(f->indices,copy->indices,in_out);
     }
     
-    if(f->normalization_flag == LAYER_NORMALIZATION){
+    if(f->normalization_flag == LAYER_NORMALIZATION && copy->normalization_flag == LAYER_NORMALIZATION){
         paste_bn(f->layer_norm,copy->layer_norm);
     }
     return;
@@ -1343,20 +1442,25 @@ void paste_fcl(fcl* f,fcl* copy){
  * 
  * */
 void paste_fcl_without_learning_parameters(fcl* f,fcl* copy){
-    if(f == NULL)
+    if(f == NULL || copy == NULL)
+        return;
+    if(f->output != copy->output)
+        return;
+    int in_out = f->output*f->input;
+    if(in_out != copy->input*copy->output)
         return;
     copy->k_percentage = f->k_percentage;
 
-    if(exists_d_params_fcl(f)){
-        copy_array(f->d_weights,copy->d_weights,f->output*f->input);
+    if(exists_d_params_fcl(f) && exists_d_params_fcl(copy)){
+        copy_array(f->d_weights,copy->d_weights,in_out);
         
         copy_array(f->d_biases,copy->d_biases,f->output);
     }
-    if(exists_edge_popup_stuff_fcl(f)){
-        copy_array(f->d_scores,copy->d_scores,f->input*f->output);
+    if(exists_edge_popup_stuff_fcl(f) && exists_edge_popup_stuff_fcl(copy)){
+        copy_array(f->d_scores,copy->d_scores,in_out);
     }
     
-    if(f->normalization_flag == LAYER_NORMALIZATION){
+    if(f->normalization_flag == LAYER_NORMALIZATION && copy->normalization_flag == LAYER_NORMALIZATION){
         paste_bn_without_learning_parameters(f->layer_norm,copy->layer_norm);
     }
     return;
@@ -1401,27 +1505,32 @@ void paste_w_fcl(fcl* f,fcl* copy){
  *                @ float tau:= the tau param
  * */
 void slow_paste_fcl(fcl* f,fcl* copy, float tau){
-    if(f == NULL)
+    if(f == NULL || copy == NULL)
+        return;
+    if(f->output != copy->output)
+        return;
+    int in_out = f->output*f->input;
+    if(in_out != copy->input*copy->output)
         return;
     int i;
-    for(i = 0; i < f->output*f->input; i++){
+    for(i = 0; i < in_out; i++){
         if(i < f->output){
-            if(exists_params_fcl(f))
+            if(exists_params_fcl(f) && exists_params_fcl(copy))
             copy->biases[i] = tau*f->biases[i] + (1-tau)*copy->biases[i];
-            if(exists_d_params_fcl(f)){
+            if(exists_d_params_fcl(f) && exists_d_params_fcl(copy)){
                 copy->d1_biases[i] = tau*f->d1_biases[i] + (1-tau)*copy->d1_biases[i];
                 copy->d2_biases[i] = tau*f->d2_biases[i] + (1-tau)*copy->d2_biases[i];
                 copy->d3_biases[i] = tau*f->d3_biases[i] + (1-tau)*copy->d3_biases[i];
             }
         }
-        if(exists_params_fcl(f))
+        if(exists_params_fcl(f) && exists_params_fcl(copy))
         copy->weights[i] = tau*f->weights[i] + (1-tau)*copy->weights[i];
-        if(exists_d_params_fcl(f)){
+        if(exists_d_params_fcl(f) && exists_d_params_fcl(copy)){
             copy->d1_weights[i] = tau*f->d1_weights[i] + (1-tau)*copy->d1_weights[i];
             copy->d2_weights[i] = tau*f->d2_weights[i] + (1-tau)*copy->d2_weights[i];
             copy->d3_weights[i] = tau*f->d3_weights[i] + (1-tau)*copy->d3_weights[i];
         }
-        if(exists_edge_popup_stuff_fcl(f)){
+        if(exists_edge_popup_stuff_fcl(f) && exists_edge_popup_stuff_fcl(copy)){
             copy->scores[i] = tau*f->scores[i] + (1-tau)*copy->scores[i];
             copy->d1_scores[i] = tau*f->d1_scores[i] + (1-tau)*copy->d1_scores[i];
             copy->d2_scores[i] = tau*f->d2_scores[i] + (1-tau)*copy->d2_scores[i];
@@ -1430,23 +1539,26 @@ void slow_paste_fcl(fcl* f,fcl* copy, float tau){
         
     }
     
-    if(exists_edge_popup_stuff_fcl(copy)){
-        for(i = 0; i < f->input*f->output; i++){
+    if(exists_edge_popup_stuff_fcl(copy) && exists_edge_popup_stuff_fcl(f)){
+        for(i = 0; i < in_out; i++){
             copy->indices[i] = i;
         }
         
-        sort(copy->scores,copy->indices,0,f->output*f->input-1);
+        sort(copy->scores,copy->indices,0,in_out-1);
         free(copy->active_output_neurons);
         copy->active_output_neurons = get_used_outputs(copy,NULL,FCLS,copy->output);
         
     }
     
-    if(f->normalization_flag == LAYER_NORMALIZATION)
+    if(f->normalization_flag == LAYER_NORMALIZATION && copy->normalization_flag == LAYER_NORMALIZATION){
         slow_paste_bn(f->layer_norm,copy->layer_norm,tau);
+    }
     return;
 }
 
 uint64_t count_weights_fcl(fcl* f){
+    if(f == NULL)
+        return 0;
     return (uint64_t)(f->input*f->output*f->k_percentage);
 }
 /* this function gives the number of float params for biases and weights in a fcl
@@ -1457,6 +1569,8 @@ uint64_t count_weights_fcl(fcl* f){
  *                 @ flc* f:= the fully-connected layer
  * */
 uint64_t get_array_size_params(fcl* f){
+    if(f == NULL || !exists_d_params_fcl(f) || !exists_params_fcl(f))
+        return 0;
     uint64_t sum = 0;
     if(f->normalization_flag == LAYER_NORMALIZATION){
         sum += (uint64_t)f->layer_norm->vector_dim*2;
@@ -1473,6 +1587,8 @@ uint64_t get_array_size_params(fcl* f){
  *                 @ flc* f:= the fully-connected layer
  * */
 uint64_t get_array_size_scores_fcl(fcl* f){
+    if(f == NULL || !exists_edge_popup_stuff_fcl(f))
+        return 0;
     return (uint64_t)f->input*f->output;
 }
 
@@ -1485,6 +1601,8 @@ uint64_t get_array_size_scores_fcl(fcl* f){
  *                 @ flc* f:= the fully-connected layer
  * */
 uint64_t get_array_size_weights(fcl* f){
+    if(f == NULL || !exists_params_fcl(f))
+        return 0;
     uint64_t sum = 0;
     if(f->normalization_flag == LAYER_NORMALIZATION){
         sum += (uint64_t)f->layer_norm->vector_dim*2;
@@ -1501,6 +1619,8 @@ uint64_t get_array_size_weights(fcl* f){
  *                 @ float* vector:= the vector where is copyed everything
  * */
 void memcopy_vector_to_params(fcl* f, float* vector){
+    if(f == NULL || vector == NULL || !exists_params_fcl(f))
+        return;
     memcpy(f->weights,vector,f->input*f->output*sizeof(float));
     memcpy(f->biases,&vector[f->input*f->output],f->output*sizeof(float));
     if(f->normalization_flag == LAYER_NORMALIZATION){
@@ -1518,6 +1638,8 @@ void memcopy_vector_to_params(fcl* f, float* vector){
  *                 @ float* vector:= the vector where is copyed everything
  * */
 void memcopy_vector_to_scores(fcl* f, float* vector){
+    if(f == NULL || vector == NULL || !exists_edge_popup_stuff_fcl(f))
+        return;
     memcpy(f->scores,vector,f->input*f->output*sizeof(float));
 }
 
@@ -1530,6 +1652,8 @@ void memcopy_vector_to_scores(fcl* f, float* vector){
  *                 @ float* vector:= the vector where is copyed everything
  * */
 void memcopy_params_to_vector(fcl* f, float* vector){
+    if(f == NULL || !exists_params_fcl(f))
+        return;
     memcpy(vector,f->weights,f->input*f->output*sizeof(float));
     memcpy(&vector[f->input*f->output],f->biases,f->output*sizeof(float));
     if(f->normalization_flag == LAYER_NORMALIZATION){
@@ -1547,6 +1671,8 @@ void memcopy_params_to_vector(fcl* f, float* vector){
  *                 @ float* vector:= the vector where is copyed everything
  * */
 void memcopy_weights_to_vector(fcl* f, float* vector){
+    if(f == NULL || !exists_params_fcl(f))
+        return;
     memcpy(vector,f->weights,f->input*f->output*sizeof(float));
     if(f->normalization_flag == LAYER_NORMALIZATION){
         memcpy(&vector[f->input*f->output],f->layer_norm->gamma,f->layer_norm->vector_dim*sizeof(float));
@@ -1563,6 +1689,8 @@ void memcopy_weights_to_vector(fcl* f, float* vector){
  *                 @ float* vector:= the vector where is copyed everything
  * */
 void memcopy_vector_to_weights(fcl* f, float* vector){
+    if(f == NULL || !exists_params_fcl(f))
+        return;
     memcpy(f->weights,vector,f->input*f->output*sizeof(float));
     if(f->normalization_flag == LAYER_NORMALIZATION){
         memcpy(f->layer_norm->gamma,&vector[f->input*f->output],f->layer_norm->vector_dim*sizeof(float));
@@ -1579,6 +1707,8 @@ void memcopy_vector_to_weights(fcl* f, float* vector){
  *                 @ float* vector:= the vector where is copyed everything
  * */
 void memcopy_scores_to_vector(fcl* f, float* vector){
+    if(f == NULL || vector == NULL || !exists_edge_popup_stuff_fcl(f))
+        return;
     memcpy(vector,f->scores,f->input*f->output*sizeof(float));
 }
 /* this function pastes the dweights and dbiases from a vector into in a fcl structure
@@ -1590,6 +1720,8 @@ void memcopy_scores_to_vector(fcl* f, float* vector){
  *                 @ float* vector:= the vector where is copyed everything
  * */
 void memcopy_vector_to_derivative_params(fcl* f, float* vector){
+    if(f == NULL || !exists_d_params_fcl(f))
+        return;
     memcpy(f->d_weights,vector,f->input*f->output*sizeof(float));
     memcpy(f->d_biases,&vector[f->input*f->output],f->output*sizeof(float));
     if(f->normalization_flag == LAYER_NORMALIZATION){
@@ -1608,6 +1740,8 @@ void memcopy_vector_to_derivative_params(fcl* f, float* vector){
  *                 @ float* vector:= the vector where is copyed everything
  * */
 void memcopy_derivative_params_to_vector(fcl* f, float* vector){
+    if(f == NULL || !exists_d_params_fcl(f))
+        return;
     memcpy(vector,f->d_weights,f->input*f->output*sizeof(float));
     memcpy(&vector[f->input*f->output],f->d_biases,f->output*sizeof(float));
     if(f->normalization_flag == LAYER_NORMALIZATION){
@@ -1621,6 +1755,8 @@ void memcopy_derivative_params_to_vector(fcl* f, float* vector){
  *             @ fcl* f:= the fully connected layer
  * */
 void set_fully_connected_biases_to_zero(fcl* f){
+    if(f == NULL || !exists_params_fcl(f))
+        return;
     int i;
     for(i = 0; i < f->output; i++){
         f->biases[i] = 0;
@@ -1632,6 +1768,8 @@ void set_fully_connected_biases_to_zero(fcl* f){
  *             @ fcl* f:= the fully connected layer
  * */
 void set_fully_connected_unused_weights_to_zero(fcl* f){
+    if(f == NULL || f->indices == NULL || f->weights == NULL)
+        return;
     int i;
     for(i = 0; i < f->output*f->input-f->output*f->input*f->k_percentage; i++){
         f->weights[f->indices[i]] = 0;
@@ -1661,8 +1799,15 @@ void sum_score_fcl(fcl* input1, fcl* input2, fcl* output){
  *                 @ fcl* output:= the output fcl layer
  * */
 void compare_score_fcl(fcl* input1, fcl* input2, fcl* output){
+    if(input1 == NULL || input2 == NULL || output == NULL)
+        return;
+    if(!exists_edge_popup_stuff_fcl(input1) || !exists_edge_popup_stuff_fcl(output) || !exists_edge_popup_stuff_fcl(input2))
+        return;
+    int in_out = input1->input*input1->output;
+    if(in_out != input2->input*input2->output || in_out != output->input*output->output)
+        return;
     int i;
-    for(i = 0; i < input1->input*input1->output; i++){
+    for(i = 0; i < in_out; i++){
         if(input1->scores[i] > input2->scores[i])
             output->scores[i] = input1->scores[i];
         else
@@ -1679,8 +1824,15 @@ void compare_score_fcl(fcl* input1, fcl* input2, fcl* output){
  *                 @ fcl* output:= the output fcl layer
  * */
 void compare_score_fcl_with_vector(fcl* input1, float* input2, fcl* output){
+    if(input1 == NULL || input2 == NULL || output == NULL)
+        return;
+    if(!exists_edge_popup_stuff_fcl(input1) || !exists_edge_popup_stuff_fcl(output))
+        return;
+    int in_out = input1->input*input1->output;
+    if(in_out != in_out != output->input*output->output)
+        return;
     int i;
-    for(i = 0; i < input1->input*input1->output; i++){
+    for(i = 0; i < in_out; i++){
         if(input1->scores[i] > input2[i])
             output->scores[i] = input1->scores[i];
         else
@@ -1732,6 +1884,8 @@ void set_fcl_only_dropout(fcl* f){
  *                 @ fcl* f:= the fully connected layer
  * */
 void reset_score_fcl(fcl* f){
+    if(f == NULL || f->scores == NULL)
+        return;
     if(f->feed_forward_flag == NO_DROPOUT)
         return;
     int i;
@@ -1803,6 +1957,8 @@ fcl* reset_edge_popup_d_fcl(fcl* f){
  *                 @ fcl* f:= the fully connected layer
  * */
 void set_low_score_fcl(fcl* f){
+    if(f == NULL || f->scores == NULL)
+        return;
     if(f->feed_forward_flag == NO_DROPOUT)
         return;
     int i;

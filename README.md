@@ -8,23 +8,31 @@ or
 
 # Build .whl package On Linux/Mac:
 ```
-sh create_shared.sh
-sh build_python_library.sh
+sh generate_weeh_unix.sh
 ```
 
-- On Linux specifically run:
+- On Linux specifically you have to fix the wheel package:
 
 ```
 docker run -i -t -v `pwd`:/io quay.io/pypa/manylinux1_x86_64 /bin/bash
 ```
 
-and
+go in /io and move the libllab.so to /usr/local/lib/
 
 ```
-auditwheel repair package.whl
+cd io
+mv libllab.so /usr/local/lib/
 ```
 
-To repair the .whl file
+Then repair the wheel package it.
+
+```
+cd dist
+auditwheel repair package.whl --plat manylinux2014_x86_64
+```
+
+in the wheelhouse directory you have the fixed wheel package
+
 
 # Build .whl package on Windows
 
@@ -113,8 +121,13 @@ sh build_python_library.sh
 
 Once you have created the .whl file, you can install it locally using pip:
 
- ```
- pip install package.whl
- ```
- 
- (On windows you colud be forced to link the path to import the library in python)
+```
+pip install package.whl
+```
+# Import the library in python
+
+```
+import pyllab
+```
+
+

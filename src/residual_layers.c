@@ -43,7 +43,7 @@ SOFTWARE.
  * 
  * */
 rl* residual(int channels, int input_rows, int input_cols, int n_cl, cl** cls){
-    if(!channels || !input_rows || !input_cols || (!n_cl) || (!n_cl && cls != NULL)){
+    if(channels<=0 || input_rows<=0 || input_cols<=0 || n_cl<=0 || cls == NULL){
         fprintf(stderr,"Error: channels, input rows, input cols params must be > 0 and or n_cl or n_fcl must be > 0\n");
         exit(1);
     }
@@ -61,6 +61,8 @@ rl* residual(int channels, int input_rows, int input_cols, int n_cl, cl** cls){
 
 /* Given a rl* structure this function frees the space allocated by this structure*/
 void free_residual(rl* r){
+    if(r == NULL)
+        return;
     int i;
     for(i = 0; i < r->n_cl; i++){
         free_convolutional(r->cls[i]);
@@ -72,6 +74,8 @@ void free_residual(rl* r){
 }
 /* Given a rl* structure this function frees the space allocated by this structure*/
 void free_residual_without_learning_parameters(rl* r){
+    if(r == NULL)
+        return;
     int i;
     for(i = 0; i < r->n_cl; i++){
         free_convolutional_without_learning_parameters(r->cls[i]);
@@ -83,6 +87,8 @@ void free_residual_without_learning_parameters(rl* r){
 }
 /* Given a rl* structure this function frees the space allocated by this structure*/
 void free_residual_without_arrays(rl* r){
+    if(r == NULL)
+        return;
     int i;
     for(i = 0; i < r->n_cl; i++){
         free_convolutional_without_arrays(r->cls[i]);
@@ -106,13 +112,13 @@ void free_residual_without_arrays(rl* r){
  * 
  * */
 void save_rl(rl* f, int n){
-    if(f == NULL)
+    if(f == NULL || n < 0)
         return;
     int i;
     FILE* fw;
     char* s = (char*)malloc(sizeof(char)*256);
     char* t = ".bin";
-    s = itoa_p(n,s);
+    s = itoa(n,s);
     s = strcat(s,t);
     
     fw = fopen(s,"a+");
@@ -446,6 +452,8 @@ rl* reset_rl_for_edge_popup(rl* f){
  * 
  * */
 uint64_t size_of_rls(rl* f){
+    if(f == NULL)
+        return 0;
     int i;
     uint64_t sum = 0;
     for(i = 0; i < f->n_cl; i++){
@@ -465,6 +473,8 @@ uint64_t size_of_rls(rl* f){
  * 
  * */
 uint64_t size_of_rls_without_learning_parameters(rl* f){
+    if (f == NULL)
+        return 0;
     int i;
     uint64_t sum = 0;
     for(i = 0; i < f->n_cl; i++){
@@ -479,6 +489,8 @@ uint64_t size_of_rls_without_learning_parameters(rl* f){
 
 
 uint64_t count_weights_rl(rl* r){
+    if(r == NULL)
+        return 0;
     int i;
     uint64_t sum = 0;
     for(i = 0; i < r->n_cl; i++){
@@ -497,7 +509,7 @@ uint64_t count_weights_rl(rl* r){
  * 
  * */
 void paste_rl(rl* f, rl* copy){
-    if(f == NULL)
+    if(f == NULL || copy == NULL)
         return;
     
     int i;
@@ -518,7 +530,7 @@ void paste_rl(rl* f, rl* copy){
  * 
  * */
 void paste_rl_without_learning_parameters(rl* f, rl* copy){
-    if(f == NULL)
+    if(f == NULL || copy == NULL)
         return;
     
     int i;
@@ -542,7 +554,7 @@ void paste_rl_without_learning_parameters(rl* f, rl* copy){
  * 
  * */
 void paste_w_rl(rl* f, rl* copy){
-    if(f == NULL)
+    if(f == NULL || copy == NULL)
         return;
     
     int i;
@@ -562,7 +574,7 @@ void paste_w_rl(rl* f, rl* copy){
  *                @ float tau:= the tau param
  * */
 void slow_paste_rl(rl* f, rl* copy,float tau){
-    if(f == NULL)
+    if(f == NULL || copy == NULL)
         return;
     
     int i;
@@ -583,6 +595,8 @@ void slow_paste_rl(rl* f, rl* copy,float tau){
  *                 @ rl* f:= the residual layer
  * */
 uint64_t get_array_size_params_rl(rl* f){
+    if(f == NULL)
+        return 0;
     uint64_t sum = 0,i;
     for(i = 0; i < f->n_cl; i++){
         sum+=(uint64_t)get_array_size_params_cl(f->cls[i]);
@@ -599,6 +613,8 @@ uint64_t get_array_size_params_rl(rl* f){
  *                 @ rl* f:= the residual layer
  * */
 uint64_t get_array_size_scores_rl(rl* f){
+    if(f == NULL)
+        return 0;
     uint64_t sum = 0,i;
     for(i = 0; i < f->n_cl; i++){
         sum+=(uint64_t)get_array_size_scores_cl(f->cls[i]);
@@ -614,6 +630,8 @@ uint64_t get_array_size_scores_rl(rl* f){
  *                 @ rl* f:= the residual layer
  * */
 uint64_t get_array_size_weights_rl(rl* f){
+    if(f == NULL)
+        return 0;
     uint64_t sum = 0,i;
     for(i = 0; i < f->n_cl; i++){
         sum+=(uint64_t)get_array_size_weights_cl(f->cls[i]);
@@ -630,6 +648,8 @@ uint64_t get_array_size_weights_rl(rl* f){
  *                 @ float* vector:= the vector where is copyed everything
  * */
 void memcopy_vector_to_params_rl(rl* f, float* vector){
+    if(f == NULL || vector == NULL)
+        return;
     int sum = 0,i;
     for(i = 0; i < f->n_cl; i++){
         memcopy_vector_to_params_cl(f->cls[i],&vector[sum]);
@@ -646,6 +666,8 @@ void memcopy_vector_to_params_rl(rl* f, float* vector){
  *                 @ float* vector:= the vector where is copyed everything
  * */
 void memcopy_vector_to_weights_rl(rl* f, float* vector){
+    if(f == NULL || vector == NULL)
+        return;
     int sum = 0,i;
     for(i = 0; i < f->n_cl; i++){
         memcopy_vector_to_weights_cl(f->cls[i],&vector[sum]);
@@ -662,6 +684,8 @@ void memcopy_vector_to_weights_rl(rl* f, float* vector){
  *                 @ float* vector:= the vector where is copyed everything
  * */
 void memcopy_vector_to_scores_rl(rl* f, float* vector){
+    if(f == NULL || vector == NULL)
+        return;
     int sum = 0,i;
     for(i = 0; i < f->n_cl; i++){
         memcopy_vector_to_scores_cl(f->cls[i],&vector[sum]);
@@ -677,6 +701,8 @@ void memcopy_vector_to_scores_rl(rl* f, float* vector){
  *                 @ float* vector:= the vector where is copyed everything
  * */
 void memcopy_params_to_vector_rl(rl* f, float* vector){
+    if(f == NULL || vector == NULL)
+        return;
     int sum = 0,i;
     for(i = 0; i < f->n_cl; i++){
         memcopy_params_to_vector_cl(f->cls[i],&vector[sum]);
@@ -693,6 +719,8 @@ void memcopy_params_to_vector_rl(rl* f, float* vector){
  *                 @ float* vector:= the vector where is copyed everything
  * */
 void memcopy_weights_to_vector_rl(rl* f, float* vector){
+    if(f == NULL || vector == NULL)
+        return;
     int sum = 0,i;
     for(i = 0; i < f->n_cl; i++){
         memcopy_weights_to_vector_cl(f->cls[i],&vector[sum]);
@@ -709,6 +737,8 @@ void memcopy_weights_to_vector_rl(rl* f, float* vector){
  *                 @ float* vector:= the vector where is copyed everything
  * */
 void memcopy_scores_to_vector_rl(rl* f, float* vector){
+    if(f == NULL || vector == NULL)
+        return;
     int sum = 0,i;
     for(i = 0; i < f->n_cl; i++){
         memcopy_scores_to_vector_cl(f->cls[i],&vector[sum]);
@@ -725,6 +755,8 @@ void memcopy_scores_to_vector_rl(rl* f, float* vector){
  *                 @ float* vector:= the vector where is copyed everything
  * */
 void memcopy_vector_to_derivative_params_rl(rl* f, float* vector){
+    if(f == NULL || vector == NULL)
+        return;
     int sum = 0,i;
     for(i = 0; i < f->n_cl; i++){
         memcopy_vector_to_derivative_params_cl(f->cls[i],&vector[sum]);
@@ -742,6 +774,8 @@ void memcopy_vector_to_derivative_params_rl(rl* f, float* vector){
  *                 @ float* vector:= the vector where is copyed everything
  * */
 void memcopy_derivative_params_to_vector_rl(rl* f, float* vector){
+    if(f == NULL || vector == NULL)
+        return;
     int sum = 0,i;
     for(i = 0; i < f->n_cl; i++){
         memcopy_derivative_params_to_vector_cl(f->cls[i],&vector[sum]);
@@ -755,6 +789,8 @@ void memcopy_derivative_params_to_vector_rl(rl* f, float* vector){
  *             @ rl* r:= the residual layer
  * */
 void set_residual_biases_to_zero(rl* r){
+    if(r == NULL)
+        return;
     int i;
     for(i = 0; i < r->n_cl; i++){
         set_convolutional_biases_to_zero(r->cls[i]);
@@ -771,6 +807,8 @@ void set_residual_biases_to_zero(rl* r){
  *             @ int* used_input:= the used input at the end of the rl layer must be != NULL
  * */
 int* get_used_kernels_rl(rl* c, int* used_input){
+    if(c == NULL || used_input == NULL)
+        return NULL;
     int* ch = (int*)calloc(c->channels,sizeof(int));
     copy_int_array(c->cls[c->n_cl-1]->used_kernels,ch,c->channels);
     int i;
@@ -795,6 +833,8 @@ int* get_used_kernels_rl(rl* c, int* used_input){
  *                 @ rl* output:= the output residual layer
  * */
 void sum_score_rl(rl* input1, rl* input2, rl* output){
+    if(input1 == NULL || input2 == NULL || output == NULL)
+        return;
     int i;
     for(i = 0; i < input1->n_cl; i++){
         sum_score_cl(input1->cls[i],input2->cls[i],output->cls[i]);
@@ -811,6 +851,8 @@ void sum_score_rl(rl* input1, rl* input2, rl* output){
  *                 @ rl* output:= the output residual layer
  * */
 void compare_score_rl(rl* input1, rl* input2, rl* output){
+    if(input1 == NULL || input2 == NULL || output == NULL)
+        return;
     int i;
     for(i = 0; i < input1->n_cl; i++){
         compare_score_cl(input1->cls[i],input2->cls[i],output->cls[i]);
@@ -828,6 +870,8 @@ void compare_score_rl(rl* input1, rl* input2, rl* output){
  *                 @ rl* output:= the output residual layer
  * */
 void compare_score_rl_with_vector(rl* input1, float* input2, rl* output){
+    if(input1 == NULL || input2 == NULL || output == NULL)
+        return;
     int i;
     uint64_t sum = 0;
     for(i = 0; i < input1->n_cl; i++){
@@ -845,6 +889,8 @@ void compare_score_rl_with_vector(rl* input1, float* input2, rl* output){
  *                 @ float value:= the value
  * */
 void dividing_score_rl(rl* f, float value){
+    if(f == NULL)
+        return;
     int i;
     for(i = 0; i < f->n_cl; i++){
         dividing_score_cl(f->cls[i],value);
@@ -859,6 +905,8 @@ void dividing_score_rl(rl* f, float value){
  *                 @ rl* f:= the reisdual layer
  * */
 void reset_score_rl(rl* f){
+    if(f == NULL)
+        return;
     int i;
     for(i = 0; i < f->n_cl; i++){
         reset_score_cl(f->cls[i]);
@@ -870,6 +918,8 @@ void reset_score_rl(rl* f){
  * for more details
  * */
 void reinitialize_weights_according_to_scores_rl(rl* f, float percentage, float goodness){
+    if(f == NULL)
+        return;
     int i;
     for(i = 0; i < f->n_cl; i++){
         reinitialize_weights_according_to_scores_cl(f->cls[i],percentage,goodness);
@@ -884,6 +934,8 @@ void reinitialize_weights_according_to_scores_rl(rl* f, float percentage, float 
  *             @ rl* f:= the residual layer
  * */
 void reinitialize_w_rl(rl* f){
+    if(f == NULL)
+        return;
     int i;
     for(i = 0; i < f->n_cl; i++){
         reinitialize_w_cl(f->cls[i]);
@@ -907,6 +959,8 @@ rl* reset_edge_popup_d_rl(rl* f){
  *                 @ rl* f:= the reisdual layer
  * */
 void set_low_score_rl(rl* f){
+    if(f == NULL)
+        return;
     int i;
     for(i = 0; i < f->n_cl; i++){
         set_low_score_cl(f->cls[i]);

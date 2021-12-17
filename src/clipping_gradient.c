@@ -258,6 +258,8 @@ void general_clipping_gradient(model** m, rmodel** r,transformer** t, transforme
  * */
  
 void clipping_gradient(model* m, float threshold) {
+     if(m == NULL)
+        return;
      double sum = 0;
      sum += sum_all_quadratic_derivative_weights_fcls(m->fcls, m->n_fcl);
      sum += sum_all_quadratic_derivative_weights_cls(m->cls, m->n_cl);
@@ -280,6 +282,8 @@ void clipping_gradient(model* m, float threshold) {
  * */
  
 float sum_all_quadratic_derivative_weights_m(model* m) {
+     if(m == NULL)
+        return 0;
      double sum = 0;
      sum += sum_all_quadratic_derivative_weights_fcls(m->fcls, m->n_fcl);
      sum += sum_all_quadratic_derivative_weights_cls(m->cls, m->n_cl);
@@ -298,6 +302,8 @@ float sum_all_quadratic_derivative_weights_m(model* m) {
  * */
  
 void clipping_gradient_rmodel(rmodel* m, float threshold) {
+     if(m == NULL)
+        return;
      double sum = 0;
      int i,j;
      sum += sum_all_quadratic_derivative_weights_lstms(m->lstms,m->layers);
@@ -318,6 +324,8 @@ void clipping_gradient_rmodel(rmodel* m, float threshold) {
  * */
  
 void clipping_gradient_transf_encoder(transformer_encoder* t, float threshold) {
+     if(t == NULL)
+        return;
      double sum = 0;
      int i,j;
      sum += sum_all_quadratic_derivative_weights_m(t->m);
@@ -362,6 +370,8 @@ void clipping_gradient_transf_encoder(transformer_encoder* t, float threshold) {
  * */
  
 void clipping_gradient_transf_decoder(transformer_decoder* t, float threshold) {
+     if(t == NULL)
+        return;
      double sum = 0;
      int i,j;
      sum += sum_all_quadratic_derivative_weights_m(t->e->m);
@@ -428,6 +438,8 @@ void clipping_gradient_transf_decoder(transformer_decoder* t, float threshold) {
  * */
  
 void clipping_gradient_transf(transformer* t, float threshold) {
+     if(t == NULL)
+        return;
      float sum = 0;
      int i,j;
      for(i = 0; i < t->n_te; i++){
@@ -532,6 +544,8 @@ void clipping_gradient_transf(transformer* t, float threshold) {
  * 
  * */
 void clipping_gradient_vae_model(vaemodel* vm, float threshold) {
+     if(vm == NULL)
+        return;
      double sum = 0;
      sum += sum_all_quadratic_derivative_weights_fcls(vm->encoder->fcls, vm->encoder->n_fcl);
      sum += sum_all_quadratic_derivative_weights_cls(vm->encoder->cls, vm->encoder->n_cl);
@@ -563,6 +577,8 @@ void clipping_gradient_vae_model(vaemodel* vm, float threshold) {
   * 
   * */
 void clip_rls(rl** rls, int n, float threshold,float norm){
+    if(rls == NULL || n <= 0)
+        return;
     int i;
     for(i = 0; i < n; i++){
         clip_cls(rls[i]->cls, rls[i]->n_cl, threshold, norm);
@@ -582,6 +598,8 @@ void clip_rls(rl** rls, int n, float threshold,float norm){
   * 
   * */
 void clip_cls(cl** cls, int n, float threshold, float norm){
+    if(cls == NULL || n <= 0)
+        return;
     int j,k,z;
     float div = threshold/norm;
     for(j = 0; j < n; j++){
@@ -630,6 +648,9 @@ void clip_cls(cl** cls, int n, float threshold, float norm){
   * 
   * */
 void clip_fcls(fcl** fcls, int n, float threshold, float norm){
+    if(fcls == NULL || n <= 0)
+        return;
+        
     int i,j;
     float div = threshold/norm;
     for(i = 0; i < n; i++){
@@ -667,6 +688,8 @@ void clip_fcls(fcl** fcls, int n, float threshold, float norm){
   * 
   * */
 void clip_lstms(lstm** lstms, int n, float threshold, float norm){
+    if(lstms == NULL || n <= 0)
+        return;
     int i,j;
     float div = (threshold)/(norm);
     for(i = 0; i < n; i++){
@@ -724,13 +747,17 @@ void clip_lstms(lstm** lstms, int n, float threshold, float norm){
   * 
   * */
 void clip_bns(bn** bns, int n, float threshold, float norm){
+    if(bns == NULL || n <= 0)
+        return;
     int i,j;
     float div = threshold/norm;
     for(i = 0; i < n; i++){
-        if(bns[i]->training_mode == GRADIENT_DESCENT){
-            for(j = 0; j < bns[i]->vector_dim; j++){
-                bns[i]->d_gamma[j]*=div;
-                bns[i]->d_beta[j]*=div;
+        if(bns[i] != NULL){
+            if(bns[i]->training_mode == GRADIENT_DESCENT){
+                for(j = 0; j < bns[i]->vector_dim; j++){
+                    bns[i]->d_gamma[j]*=div;
+                    bns[i]->d_beta[j]*=div;
+                }
             }
         }
     }
@@ -749,6 +776,8 @@ void clip_bns(bn** bns, int n, float threshold, float norm){
   * 
   * */
 void clip_scaled_l2(scaled_l2_norm** l, int n, float threshold, float norm){
+    if(l == NULL || n <= 0)
+        return;
     int i,j;
     float div = threshold/norm;
     for(i = 0; i < n; i++){
@@ -768,6 +797,8 @@ void clip_scaled_l2(scaled_l2_norm** l, int n, float threshold, float norm){
   * 
   * */
 float sum_all_quadratic_derivative_weights_rls(rl** rls, int n){
+    if(rls == NULL || n <= 0)
+        return 0;
     int i;
     float sum = 0;
     for(i = 0; i < n; i++){
@@ -786,6 +817,8 @@ float sum_all_quadratic_derivative_weights_rls(rl** rls, int n){
   * 
   * */
 float sum_all_quadratic_derivative_weights_cls(cl** cls, int n){
+    if(cls == NULL || n <= 0)
+        return 0;
     int j,k,z;
     float sum = 0,temp;
     for(j = 0; j < n; j++){
@@ -836,6 +869,8 @@ float sum_all_quadratic_derivative_weights_cls(cl** cls, int n){
   * 
   * */
 float sum_all_quadratic_derivative_weights_scaled_l2_norm(scaled_l2_norm** l, int n){
+    if(l == NULL || n <= 0)
+        return 0;
     int i;
     float sum = 0;
     for(i = 0; i < n; i++){
@@ -856,6 +891,8 @@ float sum_all_quadratic_derivative_weights_scaled_l2_norm(scaled_l2_norm** l, in
   * 
   * */
 float sum_all_quadratic_derivative_weights_fcls(fcl** fcls, int n){
+    if(fcls == NULL || n <= 0)
+        return 0;
     int i,j;
     float sum = 0,temp;
     for(i = 0; i < n; i++){
@@ -896,6 +933,8 @@ float sum_all_quadratic_derivative_weights_fcls(fcl** fcls, int n){
   * 
   * */
 float sum_all_quadratic_derivative_weights_lstms(lstm** lstms, int n){
+    if(lstms == NULL || n <= 0)
+        return 0;
     int i,j;
     float sum = 0,temp;
     for(i = 0; i < n; i++){
@@ -967,6 +1006,8 @@ float sum_all_quadratic_derivative_weights_lstms(lstm** lstms, int n){
   * 
   * */
 float sum_all_quadratic_derivative_weights_bns(bn** bns, int n){
+    if(bns == NULL || n <= 0)
+        return 0;
     int i,j;
     float sum = 0,temp;
     for(i = 0; i < n; i++){
@@ -988,6 +1029,8 @@ float sum_all_quadratic_derivative_weights_bns(bn** bns, int n){
  * the adaptive gradient clipping try to replace the batch normalization in neural networks, since there is this clipping
  * that acts as a sort of normalization no other normalization layers should be used, or at least this is my guess*/
 void adaptive_gradient_clipping_lstm(lstm* f ,float threshold, float epsilon){
+    if(f == NULL)
+        return;
     int i,j,k;
     float sum_w;
     float sum_g;
@@ -1079,6 +1122,8 @@ void adaptive_gradient_clipping_lstm(lstm* f ,float threshold, float epsilon){
 
 /* https://arxiv.org/abs/2102.06171 */
 void adaptive_gradient_clipping_fcl(fcl* f ,float threshold, float epsilon){
+    if(f == NULL)
+        return;
     int i,j;
     float sum_w;
     float sum_g;
@@ -1129,6 +1174,8 @@ void adaptive_gradient_clipping_fcl(fcl* f ,float threshold, float epsilon){
 }
 /* https://arxiv.org/abs/2102.06171 */
 void adaptive_gradient_clipping_cl(cl* f ,float threshold, float epsilon){
+    if(f == NULL)
+        return;
     int i,j;
     float sum_w;
     float sum_g;
@@ -1182,6 +1229,8 @@ void adaptive_gradient_clipping_cl(cl* f ,float threshold, float epsilon){
 }
 /* https://arxiv.org/abs/2102.06171 */
 void adaptive_gradient_clipping_rl(rl* f ,float threshold, float epsilon){
+    if(f == NULL)
+        return;
     int i;
     for(i = 0; i < f->n_cl; i++){
         adaptive_gradient_clipping_cl(f->cls[i],threshold,epsilon);
@@ -1190,6 +1239,8 @@ void adaptive_gradient_clipping_rl(rl* f ,float threshold, float epsilon){
 
 
 void adaptive_gradient_clipping_model(model* m, float threshold, float epsilon){
+    if(m == NULL)
+        return;
     int i;
     for(i = 0; i < m->n_fcl; i++){
         adaptive_gradient_clipping_fcl(m->fcls[i],threshold,epsilon);
@@ -1203,6 +1254,8 @@ void adaptive_gradient_clipping_model(model* m, float threshold, float epsilon){
 }
 
 void adaptive_gradient_clipping_rmodel(rmodel* r, float threshold, float epsilon){
+    if(r == NULL)
+        return;
     int i;
     for(i = 0; i < r->n_lstm; i++){
         adaptive_gradient_clipping_lstm(r->lstms[i],threshold,epsilon);
@@ -1211,6 +1264,8 @@ void adaptive_gradient_clipping_rmodel(rmodel* r, float threshold, float epsilon
 
 
 void adaptive_gradient_clipping_encoder_transformer(transformer_encoder* e, float threshold, float epsilon){
+    if(e == NULL)
+        return;
     int i;
     for(i = 0; i < e->n_head; i++){
         adaptive_gradient_clipping_model(e->q[i],threshold,epsilon);
@@ -1224,6 +1279,8 @@ void adaptive_gradient_clipping_encoder_transformer(transformer_encoder* e, floa
 
 
 void adaptive_gradient_clipping_decoder_transformer(transformer_decoder* t, float threshold, float epsilon){
+    if(t == NULL)
+        return;
     adaptive_gradient_clipping_encoder_transformer(t->e,threshold,epsilon);
     int i;
     for(i = 0; i < t->n_head; i++){
@@ -1236,6 +1293,8 @@ void adaptive_gradient_clipping_decoder_transformer(transformer_decoder* t, floa
 
 
 void adaptive_gradient_clipping_transformer(transformer* t, float threshold, float epsilon){
+    if(t == NULL)
+        return;
     int i;
     for(i = 0; i < t->n_te; i++){
         adaptive_gradient_clipping_encoder_transformer(t->te[i],threshold,epsilon);

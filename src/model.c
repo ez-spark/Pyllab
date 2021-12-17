@@ -342,7 +342,13 @@ void free_model_without_arrays(model* m){
 
 
 
+float* get_output_layer_from_model(model* m){
+    return m->output_layer;
+}
 
+int get_output_dimension_from_model(model* m){
+    return m->output_dimension;
+}
 
 /* This function copies a model using the copy function for the layers
  * see layers.c file
@@ -754,7 +760,7 @@ void save_model(model* m, int n){
     FILE* fw;
     char* s = (char*)malloc(sizeof(char)*256);
     char* t = ".bin";
-    s = itoa_p(n,s);
+    s = itoa(n,s);
     s = strcat(s,t);
     
     fw = fopen(s,"a+");
@@ -831,7 +837,7 @@ void save_model_given_directory(model* m, int n, char* directory){
     char* ss = (char*)malloc(sizeof(char)*256);
     ss[0] = '\0';
     char* t = ".bin";
-    s = itoa_p(n,s);
+    s = itoa(n,s);
     s = strcat(s,t);
     ss = strcat(ss,directory);
     ss = strcat(ss,s);
@@ -1871,7 +1877,7 @@ void ff_fcl_cl(fcl* f1, cl* f2){
                     max_pooling_feed_forward(&pooltemp[i*f2->input_rows*f2->input_cols], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->input_rows, f2->input_cols, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                 }
                 else{
-                    avarage_pooling_feed_forward(&pooltemp[i*f2->input_rows*f2->input_cols], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->input_rows, f2->input_cols, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
+                    AVERAGE_POOLING_feed_forward(&pooltemp[i*f2->input_rows*f2->input_cols], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->input_rows, f2->input_cols, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                 }
             }
                
@@ -1880,7 +1886,7 @@ void ff_fcl_cl(fcl* f1, cl* f2){
                     max_pooling_feed_forward(&f2->post_normalization[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                 }
                 else{
-                    avarage_pooling_feed_forward(&f2->post_normalization[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
+                    AVERAGE_POOLING_feed_forward(&f2->post_normalization[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                 }
             }
             
@@ -1889,7 +1895,7 @@ void ff_fcl_cl(fcl* f1, cl* f2){
                     max_pooling_feed_forward(&f2->post_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                 }
                 else{
-                    avarage_pooling_feed_forward(&f2->post_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
+                    AVERAGE_POOLING_feed_forward(&f2->post_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                 }
             }
             
@@ -1898,7 +1904,7 @@ void ff_fcl_cl(fcl* f1, cl* f2){
                     max_pooling_feed_forward(&f2->pre_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                 }
                 else{
-                    avarage_pooling_feed_forward(&f2->pre_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
+                    AVERAGE_POOLING_feed_forward(&f2->pre_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                 }
             }
         }
@@ -2364,7 +2370,7 @@ void ff_fcl_cl_without_learning_parameters(fcl* f1, cl* f2, cl* f3){
                     max_pooling_feed_forward(&pooltemp[i*f2->input_rows*f2->input_cols], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->input_rows, f2->input_cols, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                 }
                 else{
-                    avarage_pooling_feed_forward(&pooltemp[i*f2->input_rows*f2->input_cols], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->input_rows, f2->input_cols, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
+                    AVERAGE_POOLING_feed_forward(&pooltemp[i*f2->input_rows*f2->input_cols], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->input_rows, f2->input_cols, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                 }
             }
                
@@ -2373,7 +2379,7 @@ void ff_fcl_cl_without_learning_parameters(fcl* f1, cl* f2, cl* f3){
                     max_pooling_feed_forward(&f2->post_normalization[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                 }
                 else{
-                    avarage_pooling_feed_forward(&f2->post_normalization[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
+                    AVERAGE_POOLING_feed_forward(&f2->post_normalization[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                 }
             }
             
@@ -2382,7 +2388,7 @@ void ff_fcl_cl_without_learning_parameters(fcl* f1, cl* f2, cl* f3){
                     max_pooling_feed_forward(&f2->post_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                 }
                 else{
-                    avarage_pooling_feed_forward(&f2->post_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
+                    AVERAGE_POOLING_feed_forward(&f2->post_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                 }
             }
             
@@ -2391,7 +2397,7 @@ void ff_fcl_cl_without_learning_parameters(fcl* f1, cl* f2, cl* f3){
                     max_pooling_feed_forward(&f2->pre_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                 }
                 else{
-                    avarage_pooling_feed_forward(&f2->pre_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
+                    AVERAGE_POOLING_feed_forward(&f2->pre_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                 }
             }
         }
@@ -2946,7 +2952,7 @@ void ff_cl_cl(cl* f1, cl* f2){
                         max_pooling_feed_forward(&pooltemp[i*f2->input_rows*f2->input_cols], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->input_rows, f2->input_cols, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                     }
                     else{
-                        avarage_pooling_feed_forward(&pooltemp[i*f2->input_rows*f2->input_cols], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->input_rows, f2->input_cols, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
+                        AVERAGE_POOLING_feed_forward(&pooltemp[i*f2->input_rows*f2->input_cols], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->input_rows, f2->input_cols, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                     }
                 }
                 else if(f2->normalization_flag){
@@ -2954,7 +2960,7 @@ void ff_cl_cl(cl* f1, cl* f2){
                         max_pooling_feed_forward(&f2->post_normalization[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                     }
                     else{
-                        avarage_pooling_feed_forward(&f2->post_normalization[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
+                        AVERAGE_POOLING_feed_forward(&f2->post_normalization[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                     }
                 }
                 
@@ -2964,7 +2970,7 @@ void ff_cl_cl(cl* f1, cl* f2){
                         max_pooling_feed_forward(&f2->post_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                     }
                     else{
-                        avarage_pooling_feed_forward(&f2->post_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
+                        AVERAGE_POOLING_feed_forward(&f2->post_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                     }
                 }
                 
@@ -2973,7 +2979,7 @@ void ff_cl_cl(cl* f1, cl* f2){
                         max_pooling_feed_forward(&f2->pre_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                     }
                     else{
-                        avarage_pooling_feed_forward(&f2->pre_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
+                        AVERAGE_POOLING_feed_forward(&f2->pre_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                     }
                 }
             }
@@ -3260,7 +3266,7 @@ void ff_cl_cl_without_learning_parameters(cl* f1, cl* f2, cl* f3){
                         max_pooling_feed_forward(&pooltemp[i*f2->input_rows*f2->input_cols], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->input_rows, f2->input_cols, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                     }
                     else{
-                        avarage_pooling_feed_forward(&pooltemp[i*f2->input_rows*f2->input_cols], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->input_rows, f2->input_cols, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
+                        AVERAGE_POOLING_feed_forward(&pooltemp[i*f2->input_rows*f2->input_cols], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->input_rows, f2->input_cols, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                     }
                 }
                 else if(f2->normalization_flag){
@@ -3268,7 +3274,7 @@ void ff_cl_cl_without_learning_parameters(cl* f1, cl* f2, cl* f3){
                         max_pooling_feed_forward(&f2->post_normalization[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                     }
                     else{
-                        avarage_pooling_feed_forward(&f2->post_normalization[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
+                        AVERAGE_POOLING_feed_forward(&f2->post_normalization[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                     }
                 }
                 
@@ -3278,7 +3284,7 @@ void ff_cl_cl_without_learning_parameters(cl* f1, cl* f2, cl* f3){
                         max_pooling_feed_forward(&f2->post_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                     }
                     else{
-                        avarage_pooling_feed_forward(&f2->post_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
+                        AVERAGE_POOLING_feed_forward(&f2->post_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                     }
                 }
                 
@@ -3287,7 +3293,7 @@ void ff_cl_cl_without_learning_parameters(cl* f1, cl* f2, cl* f3){
                         max_pooling_feed_forward(&f2->pre_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                     }
                     else{
-                        avarage_pooling_feed_forward(&f2->pre_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
+                        AVERAGE_POOLING_feed_forward(&f2->pre_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                     }
                 }
             }
@@ -3787,10 +3793,10 @@ float* bp_fcl_cl(fcl* f1, cl* f2, float* error){
         }
     }
     
-    else if(f2->pooling_flag == AVARAGE_POOLING){
+    else if(f2->pooling_flag == AVERAGE_POOLING){
         for(i = 0; i < f2->n_kernels; i++){
             if(f2->used_kernels[i])
-            avarage_pooling_back_prop(&f2->temp[i*f2->rows1*f2->cols1], &error[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
+            AVERAGE_POOLING_back_prop(&f2->temp[i*f2->rows1*f2->cols1], &error[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
         }
     }
     
@@ -4383,10 +4389,10 @@ float* bp_fcl_cl_without_learning_parameters(fcl* f1, cl* f2,cl* f3, float* erro
         }
     }
     
-    else if(f2->pooling_flag == AVARAGE_POOLING){
+    else if(f2->pooling_flag == AVERAGE_POOLING){
         for(i = 0; i < f2->n_kernels; i++){
             if(f3->used_kernels[i])
-            avarage_pooling_back_prop(&f2->temp[i*f2->rows1*f2->cols1], &error[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
+            AVERAGE_POOLING_back_prop(&f2->temp[i*f2->rows1*f2->cols1], &error[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
         }
     }
     
@@ -4965,11 +4971,11 @@ float* bp_cl_cl(cl* f1, cl* f2, float* error){
         }
     }
     
-    else if(f2->pooling_flag == AVARAGE_POOLING){
+    else if(f2->pooling_flag == AVERAGE_POOLING){
         //printf("avarage pooling bp\n");
         for(i = 0; i < f2->n_kernels; i++){
             if(f2->used_kernels[i]){
-                avarage_pooling_back_prop(&f2->temp[i*f2->rows1*f2->cols1], &error[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
+                AVERAGE_POOLING_back_prop(&f2->temp[i*f2->rows1*f2->cols1], &error[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
             }
         }
     }
@@ -5507,11 +5513,11 @@ float* bp_cl_cl_without_learning_parameters(cl* f1, cl* f2,cl* f3, float* error)
         }
     }
     
-    else if(f2->pooling_flag == AVARAGE_POOLING){
+    else if(f2->pooling_flag == AVERAGE_POOLING){
         //printf("avarage pooling bp\n");
         for(i = 0; i < f2->n_kernels; i++){
             if(f3->used_kernels[i]){
-                avarage_pooling_back_prop(&f2->temp[i*f2->rows1*f2->cols1], &error[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
+                AVERAGE_POOLING_back_prop(&f2->temp[i*f2->rows1*f2->cols1], &error[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
             }
         }
     }
@@ -7020,7 +7026,8 @@ void model_tensor_input_ff_without_learning_parameters(model* m, model* m2, int 
 float* model_tensor_input_bp(model* m, int tensor_depth, int tensor_i, int tensor_j, float* input, float* error, int error_dimension){
     if(m == NULL)
         return NULL;
-        
+    if(error_dimension != m->output_dimension)
+        return NULL;
     int i,j,z,w,count,count2,z2,k1 = m->n_fcl, k2 = m->n_cl, k3 = 0;
     for(i = 0; i < m->n_rl; i++){
         k3+=m->rls[i]->n_cl;
@@ -7352,7 +7359,8 @@ float* model_tensor_input_bp(model* m, int tensor_depth, int tensor_i, int tenso
 float* model_tensor_input_bp_without_learning_parameters(model* m, model* m2, int tensor_depth, int tensor_i, int tensor_j, float* input, float* error, int error_dimension){
     if(m == NULL)
         return NULL;
-        
+    if(m->output_dimension != error_dimension)
+        return NULL;
     int i,j,z,w,count,count2,z2,k1 = m->n_fcl, k2 = m->n_cl, k3 = 0;
     for(i = 0; i < m->n_rl; i++){
         k3+=m->rls[i]->n_cl;
@@ -7678,6 +7686,8 @@ float* model_tensor_input_bp_without_learning_parameters(model* m, model* m2, in
  * 
  * */
 uint64_t count_weights(model* m){
+    if(m == NULL)
+        return 0;
     int i;
     uint64_t sum = 0;
     for(i = 0; i < m->n_fcl; i++){
@@ -7704,6 +7714,8 @@ uint64_t count_weights(model* m){
  *                 @ rl* f:= the residual layer
  * */
 uint64_t get_array_size_params_model(model* f){
+    if(f == NULL)
+        return 0;
     uint64_t sum = 0,i;
     for(i = 0; i < f->n_fcl; i++){
         sum+=get_array_size_params(f->fcls[i]);
@@ -7729,6 +7741,8 @@ uint64_t get_array_size_params_model(model* f){
  *                 @ rl* f:= the residual layer
  * */
 uint64_t get_array_size_weights_model(model* f){
+    if(f == NULL)
+        return 0;
     uint64_t sum = 0,i;
     for(i = 0; i < f->n_fcl; i++){
         sum+=get_array_size_weights(f->fcls[i]);
@@ -7754,6 +7768,8 @@ uint64_t get_array_size_weights_model(model* f){
  *                 @ rl* f:= the residual layer
  * */
 uint64_t get_array_size_scores_model(model* f){
+    if(f == NULL)
+        return 0;
     uint64_t sum = 0,i;
     for(i = 0; i < f->n_fcl; i++){
         sum+=get_array_size_scores_fcl(f->fcls[i]);
@@ -7780,6 +7796,8 @@ uint64_t get_array_size_scores_model(model* f){
  * Pay attention: doesn't take in consideration of batch normalization layers inside fully connected ones
  * */
 void memcopy_vector_to_params_model(model* f, float* vector){
+    if(f == NULL || vector == NULL)
+        return;
     uint64_t sum = 0,i;
     for(i = 0; i < f->n_fcl; i++){
         memcopy_vector_to_params(f->fcls[i],&vector[sum]);
@@ -8469,6 +8487,8 @@ model* reset_edge_popup_d_model(model* m){
 }
 
 int check_model_last_layer(model* m){
+    if(m == NULL)
+        return -1;
     int i;
     for(i = 0; i < m->layers && m->sla[i][0]; i++);
     
@@ -8491,6 +8511,8 @@ int check_model_last_layer(model* m){
  *                 @ model* f:= the model
  * */
 void set_low_score_model(model* f){
+    if(f == NULL)
+        return;
     int i;
     for(i = 0; i < f->n_fcl; i++){
         set_low_score_fcl(f->fcls[i]);
@@ -8502,3 +8524,112 @@ void set_low_score_model(model* f){
         set_low_score_rl(f->rls[i]);
     }
 }
+
+void make_the_model_only_for_ff(model* m){
+    if(m == NULL)
+        return;
+    int i,j;
+    for(i = 0; i < m->n_fcl; i++){
+        make_the_fcl_only_for_ff(m->fcls[i]);
+    }
+    for(i = 0; i < m->n_cl; i++){
+        make_the_cl_only_for_ff(m->cls[i]);
+    }
+    for(i = 0; i < m->n_rl; i++){
+        for(j = 0; j < m->rls[i]->n_cl; j++){
+            make_the_cl_only_for_ff(m->rls[i]->cls[j]);
+        }
+        
+    }
+}
+
+void set_model_beta(model* m, float beta1, float beta2){
+    if(m == NULL)
+        return;
+    m->beta1_adam = beta1;
+    m->beta2_adam = beta2;
+}
+
+float get_beta1_from_model(model* m){
+    if(m == NULL)
+        return -1;
+    return m->beta1_adam;
+}
+float get_beta2_from_model(model* m){
+    if(m == NULL)
+        return -1;
+    return m->beta2_adam;
+}
+
+void set_ith_layer_training_mode_model(model* m, int ith, int training_flag){
+    if(m == NULL || training_flag != FREEZE_TRAINING && training_flag != EDGE_POPUP && training_flag != GRADIENT_DESCENT)
+        return;
+    int i,j;
+    for(i = 0; i < m->n_fcl; i++){
+        if(m->fcls[i]->layer == ith){
+            m->fcls[i]->training_mode = training_flag;
+            return;
+        }
+    }
+    for(i = 0; i < m->n_cl; i++){
+        if(m->cls[i]->layer == ith){
+            m->cls[i]->training_mode = training_flag;
+            return;
+        }
+    }
+    for(i = 0; i < m->n_rl; i++){
+        for(j = 0; j < m->rls[i]->n_cl; j++){
+            if(m->rls[i]->cls[j]->layer == ith){
+                m->rls[i]->cls[j]->training_mode = training_flag;
+                return;
+            }
+        }
+    }    
+}
+
+void set_k_percentage_of_ith_layer_model(model* m, int ith, float k_percentage){
+    if(m == NULL || k_percentage < 0 || k_percentage > 1)
+        return;
+    int i,j,z;
+    for(i = 0; i < m->n_fcl; i++){
+        if(m->fcls[i]->layer == ith){
+            if(!exists_edge_popup_stuff_fcl(m->fcls[i]))
+                return;
+            m->fcls[i]->k_percentage = k_percentage;
+            free(m->fcls[i]->active_output_neurons);
+            m->fcls[i]->active_output_neurons = get_used_outputs(m->fcls[i],NULL,FCLS,m->fcls[i]->output);
+            return;
+        }
+    }
+    for(i = 0; i < m->n_cl; i++){
+        if(m->cls[i]->layer == ith){
+            if (!exists_edge_popup_stuff_cl(m->cls[i]))
+                return;
+            m->cls[i]->k_percentage = k_percentage;
+            int size = m->cls[i]->n_kernels*m->cls[i]->channels*m->cls[i]->kernel_rows*m->cls[i]->kernel_cols;
+            int size2 = size*k_percentage;
+            set_int_vector_with_value(0,m->cls[i]->used_kernels,m->cls[i]->n_kernels);
+            for(z = size-size2;z < size; z++){
+                m->cls[i]->used_kernels[(int)(m->cls[i]->indices[z]/(m->cls[i]->channels*m->cls[i]->kernel_rows*m->cls[i]->kernel_cols))] = 1;
+            }
+            return;
+        }
+    }
+    for(i = 0; i < m->n_rl; i++){
+        for(j = 0; j < m->rls[i]->n_cl; j++){
+            if(m->rls[i]->cls[j]->layer == ith){
+                if (!exists_edge_popup_stuff_cl(m->rls[i]->cls[j]))
+                    return;
+                m->rls[i]->cls[j]->k_percentage = k_percentage;
+                int size = m->rls[i]->cls[j]->n_kernels*m->rls[i]->cls[j]->channels*m->rls[i]->cls[j]->kernel_rows*m->rls[i]->cls[j]->kernel_cols;
+                int size2 = size*k_percentage;
+                set_int_vector_with_value(0,m->rls[i]->cls[j]->used_kernels,m->rls[i]->cls[j]->n_kernels);
+                for(z = size-size2;z < size; z++){
+                    m->rls[i]->cls[j]->used_kernels[(int)(m->rls[i]->cls[j]->indices[z]/(m->rls[i]->cls[j]->channels*m->rls[i]->cls[j]->kernel_rows*m->rls[i]->cls[j]->kernel_cols))] = 1;
+                }
+                return;
+            }
+        }
+    }    
+}
+

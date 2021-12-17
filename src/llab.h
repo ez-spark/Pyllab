@@ -80,7 +80,7 @@ SOFTWARE.
 //pooling (2d)
 #define NO_POOLING 0
 #define MAX_POOLING 1
-#define AVARAGE_POOLING 2
+#define AVERAGE_POOLING 2
 
 //dropout
 #define NO_DROPOUT 0
@@ -705,31 +705,22 @@ typedef struct struct_conn{
     
 }struct_conn;
 
+
 typedef struct struct_conn_handler{
-    int n_models, n_rmodels, n_encoders, n_decoders, n_transformers, n_l2s, n_vectors, n_total_structures, n_struct_conn, n_targets, n_inputs;
-    model** m;//n_models
-    rmodel** r;
-    transformer_encoder** e;
-    transformer_decoder** d;
-    transformer** t;
-    scaled_l2_norm** l2;
-    vector_struct** v;
-    struct_conn** s;
-    int** models;//n_models X n_struct_conn, 0 nothing, 1 input, 2 output
-    int** rmodels;//n_rmodels X n_struct_conn, 0 nothing, 1 input, 2 output
-    int** encoders;//n_encoders X n_struct_conn, 0 nothing, 1 input, 2 output
-    int** decoders;//n_decoders X n_struct_conn, 0 nothing, 1 input, 2 output
-    int** transformers;//n_transformers X n_struct_conn, 0 nothing, 1 input, 2 output
-    int** l2s;//n_models X n_l2s, 0 nothing, 1 input, 2 output
-    int** vectors;//n_vectors X n_struct_conn, 0 nothing, 1 input, 2 output
-    float** targets;//the second pointer for each target is a pointer of a given dataset stored elsewhere
-    int* targets_index;
-    int* targets_size;
-    int* targets_error_flag;
-    float** targets_weights;
-    float* targets_threshold1;
-    float* targets_threshold2;
-    float* targets_gamma;
+	int visited,struct_type_flag,error_flag,n_inputs,n_outputs,id,depth;
+    vector_struct* input;
+    struct struct_conn_handler** inputs;
+    struct struct_conn_handler** outputs;
+    vector_struct* output;
+    float lambda;
+    float huber1;
+    float huber2;
+    float* alpha;
+    model* m;
+    rmodel* r;
+    transformer_encoder* e;// for now just model rmodel and transformer encoder
+    vector_struct* v;
+    scaled_l2_norm* l2;
 }struct_conn_handler;
 
 typedef struct error_handler{
@@ -748,6 +739,7 @@ typedef struct bn BN;
 
 #include "attention.h"
 #include "batch_norm_layers.h"
+#include "client.h"
 #include "clipping_gradient.h"
 #include "convolutional.h"
 #include "convolutional_layers.h"
@@ -773,6 +765,7 @@ typedef struct bn BN;
 #include "rmodel.h"
 #include "positional_encoding.h"
 #include "scaled_l2_norm_layers.h"
+#include "server.h"
 #include "struct_conn.h"
 #include "struct_conn_handler.h"
 #include "training.h"

@@ -31,5 +31,7 @@ int multiple_instance_single_csv_file_parser(float** input, float** output,char*
 int single_instance_single_file_parser(float* input, float* output,char* filename,int input_size);
 int single_instance_multiple_file_parser(float** input, float** output,char** filename,int input_size, int n_files);
 int multiple_instance_single_file_parser(float** input, float** output,char* filename,int input_size);
-
+model* parse_model_file(char* filename);
+float** get_inputs_from_multiple_instances_single_char_binary_file_with_single_softmax_output(char* filename,int input_dimension, int instances);
+float** get_outputs_from_multiple_instances_single_char_binary_file_with_single_softmax_output(char* filename,int input_dimension,int output_dimension, int instances);
 #endif

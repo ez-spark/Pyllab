@@ -2,7 +2,8 @@ from libc.stdio cimport FILE
 from libc cimport stdint
 ctypedef stdint.uint64_t uint64_t
 
-
+cdef extern from "Python.h":
+    const char* PyUnicode_AsUTF8(object unicode)
 
 cdef extern from "../src/llab.h":
     ctypedef struct bn:
@@ -134,7 +135,7 @@ cdef extern from "../src/llab.h":
     cdef enum:
         MAX_POOLING
     cdef enum:
-        AVARAGE_POOLING
+        AVERAGE_POOLING
     cdef enum:
         NO_DROPOUT
     cdef enum:
@@ -339,9 +340,6 @@ cdef extern from "../src/batch_norm_layers.h":
     void paste_w_bn(bn* b1, bn* b2)
     bn* reset_bn_except_partial_derivatives(bn* b)
     
-cdef extern from "../src/client.h":
-    bint run_client(int port, char* server_address, int buffer_size, int reading_pipe, int writing_pipe)
-    void contact_server(int sockfd, int buffer_size, int reading_pipe, int writing_pipe)
 
 cdef extern from "../src/clipping_gradient.h":
     void clipping_gradient(model* m, float threshold)
@@ -716,6 +714,14 @@ cdef extern from "../src/model.h":
     float* model_tensor_input_bp_without_learning_parameters(model* m, model* m2, int tensor_depth, int tensor_i, int tensor_j, float* input, float* error, int error_dimension)
     float* ff_error_bp_model_once_opt(model* m,model* m2, int tensor_depth, int tensor_i, int tensor_j, float* input, float* output)
     void free_model_without_arrays(model* m)
+    void make_the_model_only_for_ff(model* m)
+    float* get_output_layer_from_model(model* m)
+    int get_output_dimension_from_model(model* m)
+    void set_model_beta(model* m, float beta1, float beta2)
+    float get_beta1_from_model(model* m)
+    float get_beta2_from_model(model* m)
+    void set_ith_layer_training_mode_model(model* m, int ith, int training_flag)
+    void set_k_percentage_of_ith_layer_model(model* m, int ith, float k_percentage)
     
 cdef extern from "../src/multi_core_model.h":
     void* model_thread_ff(void* _args)
@@ -730,7 +736,8 @@ cdef extern from "../src/multi_core_model.h":
     void* model_thread_bp_opt(void* _args)
     void ff_error_bp_model_multicore_opt(model** m, model* m2, int depth, int rows, int cols, float** inputs, int mini_batch_size, int threads,float** outputs, float** returning_error)
     void* model_thread_ff_bp_opt(void* _args)
-
+    model* sum_models_partial_derivatives_multithread(model** batch_m, model* m, int n, int depth)
+    
 cdef extern from "../src/multi_core_rmodel.h":
     void* rmodel_thread_ff(void* _args)
     void* rmodel_thread_bp(void* _args)
@@ -740,6 +747,13 @@ cdef extern from "../src/multi_core_rmodel.h":
     void* rmodel_thread_bp_opt(void* _args)
     void ff_rmodel_lstm_multicore_opt(float*** hidden_states, float*** cell_states, float*** input_model, rmodel** m, int mini_batch_size, int threads, rmodel* m2)
     void bp_rmodel_lstm_multicore_opt(float*** hidden_states, float*** cell_states, float*** input_model, rmodel** m, float*** error_model, int mini_batch_size, int threads, float**** returning_error, float*** returning_input_error, rmodel* m2)
+
+cdef extern from "../src/learning_rate_decay.h":
+    void constant_decay(float* lr, float decay, float minimum);
+    void time_based_decay(float* lr, float decay, float minimum, int iterations)
+    void step_decay(float* lr, float initial_lr, float drop, float minimum, int epoch, int epochs_drop)
+    void cosine_annealing(float* lr, float lr_minimum, float lr_maximum, int epoch, int epoch_threshold)
+    void update_lr(float* lr, float lr_minimum, float lr_maximum,float initial_lr, float decay, int epoch, int epoch_threshold, int lr_decay_flag)
 
 cdef extern from "../src/multi_core_vae_model.h":
     void* vae_model_thread_ff(void* _args)
@@ -853,6 +867,9 @@ cdef extern from "../src/parser.h":
     bint single_instance_single_file_parser(float* input, float* output,char* filename,int input_size)
     bint single_instance_multiple_file_parser(float** input, float** output,char** filename,int input_size, int n_files)
     bint multiple_instance_single_file_parser(float** input, float** output,char* filename,int input_size)
+    model* parse_model_file(char* filename)
+    float** get_inputs_from_multiple_instances_single_char_binary_file_with_single_softmax_output(char* filename,int input_dimension, int instances)
+    float** get_outputs_from_multiple_instances_single_char_binary_file_with_single_softmax_output(char* filename,int input_dimension,int output_dimension, int instances)
 
 cdef extern from "../src/recurrent.h":
     void lstm_ff(float* x, float* h, float* c, float* cell_state, float* hidden_state, float** w, float** u, float** b, float** z, int input_size, int output_size)
@@ -1020,9 +1037,6 @@ cdef extern from "../src/scaled_l2_norm_layers.h":
     void slow_paste_scaled_l2_norm(scaled_l2_norm* f,scaled_l2_norm* copy, float tau)
     scaled_l2_norm* reset_scaled_l2_norm_except_partial_derivatives(scaled_l2_norm* f)
 
-cdef extern from "../src/server.h":
-    int run_server(int port, int max_num_conn, int* reading_pipes, int* writing_pipes, int buffer_size, char* ip)
-    void* server_thread(void* _args)
     
 cdef extern from "../src/struct_conn.h":
     struct_conn* structure_connection(int id, model* m1, model* m2, rmodel* r1, rmodel* r2, transformer_encoder* e1, transformer_encoder* e2, transformer_decoder* d1, transformer_decoder* d2, transformer* t1, transformer* t2, scaled_l2_norm* l1, scaled_l2_norm* l2, vector_struct* v1, vector_struct* v2, vector_struct* v3, int input1_type, int input2_type, int output_type, int* input_temporal_index,int* input_encoder_indeces, int* input_decoder_indeces_left, int* input_decoder_indeces_down, int* input_transf_encoder_indeces, int* input_transf_decoder_indeces, int* rmodel_input_left, int* rmodel_input_down, int decoder_left_input, int decoder_down_input, int transf_dec_input, int transf_enc_input, int concatenate_flag, int input_size, int model_input_index, int temporal_encoding_model_size, int vector_index)
@@ -1034,20 +1048,6 @@ cdef extern from "../src/struct_conn.h":
     void ff_struc_conn_opt(struct_conn* real_s, struct_conn* s, int transformer_flag)
     void paste_struct_conn(struct_conn* s, struct_conn* copy)
     void free_struct_conn(struct_conn* s)
-    
-cdef extern from "../src/struct_conn_handler.h":
-    struct_conn_handler* init_mother_of_all_structs(int n_inputs, int n_models,int n_rmodels,int n_encoders,int n_decoders,int n_transformers,int n_l2s,int n_vectors,int n_total_structures,int n_struct_conn,int n_targets, model** m, rmodel** r, transformer_encoder** e,transformer_decoder** d,transformer** t,scaled_l2_norm** l2,vector_struct** v,struct_conn** s, int** models, int** rmodels,int** encoders,int** decoders,int** transformers,int** l2s,int** vectors,float** targets,int* targets_index,int* targets_error_flag,float** targets_weights,float* targets_threshold1,float* targets_threshold2,float* targets_gamma, int* targets_size)
-    void free_struct_conn_handler(struct_conn_handler* s)
-    void free_struct_conn_handler_without_learning_parameters(struct_conn_handler* s)
-    struct_conn_handler* copy_struct_conn_handler(struct_conn_handler* s)
-    struct_conn_handler* copy_struct_conn_handler_without_learning_parameters(struct_conn_handler* s)
-    void paste_struct_conn_handler(struct_conn_handler* s, struct_conn_handler* copy)
-    void paste_struct_conn_handler_without_learning_parameters(struct_conn_handler* s, struct_conn_handler* copy)
-    void slow_paste_struct_conn_handler(struct_conn_handler* s, struct_conn_handler* copy, float tau)
-    void reset_struct_conn_handler(struct_conn_handler* s)
-    void reset_struct_conn_handler_without_learning_parameters(struct_conn_handler* s)
-    uint64_t size_of_struct_conn_handler(struct_conn_handler* s)
-    uint64_t size_of_struct_conn_handler_without_learning_parameters(struct_conn_handler* s)
 
 
 cdef extern from "../src/training.h":

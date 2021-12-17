@@ -542,7 +542,7 @@ void max_pooling_back_prop(float* input, float* output_error, int input_i, int i
  *             @ int stride2:= the stride used to pool for the cols
  *             @ int padding:= the optional padding added to the output
  * */
-void avarage_pooling_feed_forward(float* input, float* output, int input_i, int input_j, int sub_pool_i, int sub_pool_j, int stride1, int stride2, int padding){
+void AVERAGE_POOLING_feed_forward(float* input, float* output, int input_i, int input_j, int sub_pool_i, int sub_pool_j, int stride1, int stride2, int padding){
     int i,j,k1,k2;
     int output_i = (input_i-sub_pool_i)/stride1 + 1 + 2*padding;
     int output_j = (input_j-sub_pool_j)/stride2 + 1 + 2*padding;
@@ -577,7 +577,7 @@ void avarage_pooling_feed_forward(float* input, float* output, int input_i, int 
  *             @ int padding:= the optional padding added to the output
  *             
  * */
-void avarage_pooling_back_prop(float* input_error, float* output_error, int input_i, int input_j, int sub_pool_i, int sub_pool_j, int stride1, int stride2, int padding){
+void AVERAGE_POOLING_back_prop(float* input_error, float* output_error, int input_i, int input_j, int sub_pool_i, int sub_pool_j, int stride1, int stride2, int padding){
     int i,j,k1,k2;
     int output_i = (input_i-sub_pool_i)/stride1 + 1 + 2*padding;
     int output_j = (input_j-sub_pool_j)/stride2 + 1 + 2*padding;

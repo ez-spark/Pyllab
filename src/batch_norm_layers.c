@@ -33,7 +33,12 @@ SOFTWARE.
  * 
  * */
 bn* batch_normalization(int batch_size, int vector_input_dimension){
-
+    
+    if(batch_size <= 0 || vector_input_dimension < 1){
+        fprintf(stderr,"Error: batch size <= 0 and vector_input:dimension < 1 are not admissible!\n");
+        exit(1);
+    }
+    
     int i;
     bn* b = (bn*)malloc(sizeof(bn));
     b->batch_size = batch_size; 
@@ -86,7 +91,12 @@ bn* batch_normalization(int batch_size, int vector_input_dimension){
  * 
  * */
 bn* batch_normalization_without_arrays(int batch_size, int vector_input_dimension){
-
+    if(batch_size <= 0 || vector_input_dimension < 1){
+        fprintf(stderr,"Error: batch size <= 0 and vector_input:dimension < 1 are not admissible!\n");
+        exit(1);
+    }
+    
+    
     int i;
     bn* b = (bn*)malloc(sizeof(bn));
     b->batch_size = batch_size; 
@@ -107,8 +117,9 @@ bn* batch_normalization_without_arrays(int batch_size, int vector_input_dimensio
  * 
  * */
 bn* batch_normalization_without_learning_parameters(int batch_size, int vector_input_dimension){
-    if(batch_size <= 1 || vector_input_dimension < 1){
-        fprintf(stderr,"Warning: remember if you are using online learning (batch_size = 1) batch normalization is useless, and remember also that vector input dimension must be >= 1\n");
+    if(batch_size <= 0 || vector_input_dimension < 1){
+        fprintf(stderr,"Error: batch size <= 0 and vector_input:dimension < 1 are not admissible!\n");
+        exit(1);
     }
     int i;
     bn* b = (bn*)malloc(sizeof(bn));
@@ -252,13 +263,13 @@ void free_batch_normalization(bn* b){
  * 
  * */
 void save_bn(bn* b, int n){
-    if(b == NULL)
+    if(b == NULL || n < 0)
         return;
     int i;
     FILE* fw;
     char* s = (char*)malloc(sizeof(char)*256);
     char* t = ".bin";
-    s = itoa_p(n,s);
+    s = itoa(n,s);
     s = strcat(s,t);
     
     fw = fopen(s,"a+");
@@ -554,6 +565,8 @@ bn* reset_bn_except_partial_derivatives(bn* b){
  * 
  * */
 uint64_t size_of_bn(bn* b){
+	if (b == NULL)
+		return 0;
     uint64_t sum = 0;
     sum+= (b->batch_size*b->vector_dim*5);
     sum+= (b->vector_dim*13);
@@ -568,6 +581,8 @@ uint64_t size_of_bn(bn* b){
  * 
  * */
 uint64_t size_of_bn_without_learning_parameters(bn* b){
+	if(b == NULL)
+		return 0;
     uint64_t sum = 0;
     sum+= (b->batch_size*b->vector_dim*5);
     sum+= (b->vector_dim*5);
