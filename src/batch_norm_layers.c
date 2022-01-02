@@ -155,6 +155,7 @@ bn* batch_normalization_without_learning_parameters(int batch_size, int vector_i
     
     
     b->epsilon = EPSILON;
+    b->training_mode = GRADIENT_DESCENT;
     
     return b;
 }

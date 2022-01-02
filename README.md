@@ -8,7 +8,7 @@ or
 
 # Build .whl package On Linux/Mac:
 ```
-sh generate_weeh_unix.sh
+sh generate_wheel_unix.sh
 ```
 
 - On Linux specifically you have to fix the wheel package:

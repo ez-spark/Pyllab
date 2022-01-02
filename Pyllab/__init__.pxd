@@ -2,8 +2,7 @@ from libc.stdio cimport FILE
 from libc cimport stdint
 ctypedef stdint.uint64_t uint64_t
 
-cdef extern from "Python.h":
-    const char* PyUnicode_AsUTF8(object unicode)
+
 
 cdef extern from "../src/llab.h":
     ctypedef struct bn:
@@ -312,8 +311,17 @@ cdef extern from "../src/llab.h":
         SAME_FITNESS_LIMIT
     cdef enum:
         AGE_SIGNIFICANCE
-        
-        
+    cdef enum:
+        LR_NO_DECAY
+    cdef enum:
+        LR_CONSTANT_DECAY
+    cdef enum:
+        LR_TIME_BASED_DECAY
+    cdef enum:
+        LR_STEP_DECAY
+    cdef enum:
+        LR_ANNEALING_DECAY
+     
 cdef extern from "../src/attention.h":
     void self_attention_ff(float* query, float* key, float* value, float* score_matrix,float* score_matrix_softmax,float* output, int dimension, int attention_flag, int k_embedding_dimension, int v_embedding_dimension)
     void self_attention_bp(float* query, float* key, float* value, float* query_error, float* key_error, float* value_error, float* score_matrix,float* score_matrix_softmax,float* score_matrix_error,float* score_matrix_softmax_error,float* output_error, int dimension, int attention_flag, int k_embedding_dimension, int v_embedding_dimension)
@@ -722,6 +730,8 @@ cdef extern from "../src/model.h":
     float get_beta2_from_model(model* m)
     void set_ith_layer_training_mode_model(model* m, int ith, int training_flag)
     void set_k_percentage_of_ith_layer_model(model* m, int ith, float k_percentage)
+    void set_model_beta_adamod(model* m, float beta)
+    float get_beta3_from_model(model* m)
     
 cdef extern from "../src/multi_core_model.h":
     void* model_thread_ff(void* _args)
@@ -792,9 +802,11 @@ cdef extern from "../src/neat_functions.h":
     int shuffle_connection_set(connection** m,int n)
     int shuffle_genome_set(genome** m,int n)
     int save_genome(genome* g, int global_inn_numb_connections, int numb)
-    genome* load_genome(int global_inn_numb_connections)
+    genome* load_genome(int global_inn_numb_connections, char* filename)
     int round_up(float num)
-
+    char* get_genome_array(genome* g, int global_inn_numb_connections)
+    genome* init_genome_from_array(int global_inn_numb_connections, char* g_array)
+    int get_genome_array_size(genome* g, int global_inn_numb_connections)
 
     void connections_mutation(genome* g, int global_inn_numb_connections, float first_thereshold, float second_thereshold)
     int split_random_connection(genome* g,int* global_inn_numb_nodes,int* global_inn_numb_connections, int** dict_connections, int*** matrix_nodes, int*** matrix_connections)
@@ -805,26 +817,44 @@ cdef extern from "../src/neat_functions.h":
     void activate_bias(genome* g)
 
 
-
     float* feed_forward(genome* g1, float* inputs, int global_inn_numb_nodes, int global_inn_numb_connections)
     int ff_reconstruction(genome* g, int** array, node* head, int len, ff** lists,int* size, int* global_j)
     int recursive_computation(int** array, node* head, genome* g, connection* c,float* actual_value)
 
-
     float compute_species_distance(genome* g1, genome* g2, int global_inn_numb_connections)
-    species* create_species(genome** g, int numb_genomes, int global_inn_numb_connections, float species_thereshold, int* total_species)
+    species* create_species(genome** g, int numb_genomes, int global_inn_numb_connections, float species_threshold, int* total_species)
     void free_species(species* s, int total_species, int global_inn_numb_connections)
-    species* put_genome_in_species(genome** g, int numb_genomes, int global_inn_numb_connections, float species_thereshold, int* total_species, species** s)
+    species* put_genome_in_species(genome** g, int numb_genomes, int global_inn_numb_connections, float species_threshold, int* total_species, species** s)
     void free_species_except_for_rapresentatives(species* s, int total_species, int global_inn_numb_connections)
     int get_oldest_age(species* s, int total_species)
+    void delete_species_without_population(species** s, int* total_species, int global_inn_numb_connections)
+    void update_best_specie_fitnesses(species* s, int total_species)
 
     float get_mean_fitness(species* s, int n_species, int oldest_age, float age_significance)
     float get_mean_specie_fitness(species* s, int i,int oldest_age, float age_significance)
     genome** sort_genomes_by_fitness(genome** g, int size)
 
-    neat* init(int max_buffer, int input, int output)
-    void neat_generation_run(neat* nes, genome** gg)
+    neat* init(int input, int output, int initial_popoulation, int species_threshold, int max_population,int generations, float percentage_survivors_per_specie, float connection_mutation_rate, float  new_connection_assignment_rate, float add_connection_big_specie_rate, float add_connection_small_specie_rate, float add_node_specie_rate, float activate_connection_rate, float remove_connection_rate, int children, float crossover_rate, int saving, int limiting_species, int limiting_threshold, int same_fitness_limit, int keep_parents, float age_significance)
+    void neat_generation_run(neat* nes)
     void free_neat(neat* nes)
+    char* get_neat_in_char_vector(neat* nes)
+    neat* init_from_char(char* neat_c, int input, int output, int initial_population, int species_threshold, int max_population,int generations, float percentage_survivors_per_specie, float connection_mutation_rate, float  new_connection_assignment_rate, float add_connection_big_specie_rate, float add_connection_small_specie_rate, float add_node_specie_rate, float activate_connection_rate, float remove_connection_rate, int children, float crossover_rate, int saving, int limiting_species, int limiting_threshold, int same_fitness_limit, int keep_parents, float age_significance)
+    void reset_fitnesses(neat* n)
+    void reset_fitness_ith_genome(neat* nes, int index)
+    float** feed_forward_iths_genome(neat* nes, float** input, int* indices, int n_genome)
+    float* feed_forward_ith_genome(neat* nes, float* input, int index)
+    float get_fitness_of_ith_genome(neat* nes, int index)
+    void increment_fitness_of_genome_ith(neat* nes, int index, float increment)
+    int get_global_innovation_number_nodes(neat* nes)
+    int get_global_innovation_number_connections(neat* nes)
+    int get_lenght_of_char_neat(neat* nes)
+    int get_number_of_genomes(neat* nes)
+    void save_ith_genome(neat* nes, int index, int n)
+    float best_fitness(neat* nes)
+    
+cdef extern from "../src/multi_core_neat.h":
+    void* genome_thread_ff(void* _args)
+    float** feed_forward_multi_thread(int threads, float** inputs,genome** g, int global_inn_numb_nodes, int global_inn_numb_connections)
 
 cdef extern from "../src/noise.h":
     oustrategy* init_oustrategy(int action_dim, float* act_max, float* act_min)
@@ -870,6 +900,11 @@ cdef extern from "../src/parser.h":
     model* parse_model_file(char* filename)
     float** get_inputs_from_multiple_instances_single_char_binary_file_with_single_softmax_output(char* filename,int input_dimension, int instances)
     float** get_outputs_from_multiple_instances_single_char_binary_file_with_single_softmax_output(char* filename,int input_dimension,int output_dimension, int instances)
+    model* parse_model_without_learning_parameters_file(char* filename)
+    model* parse_model_without_arrays_file(char* filename)
+    model* parse_model_str(char* ksource, int size)
+    model* parse_model_without_learning_parameters_str(char* ksource, int size)
+    model* parse_model_without_arrays_str(char* ksource, int size)
 
 cdef extern from "../src/recurrent.h":
     void lstm_ff(float* x, float* h, float* c, float* cell_state, float* hidden_state, float** w, float** u, float** b, float** z, int input_size, int output_size)

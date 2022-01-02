@@ -603,7 +603,7 @@ void clip_cls(cl** cls, int n, float threshold, float norm){
     int j,k,z;
     float div = threshold/norm;
     for(j = 0; j < n; j++){
-        if(cls[j]->convolutional_flag == CONVOLUTION){
+        if(cls[j]->convolutional_flag == CONVOLUTION || cls[j]->convolutional_flag == TRANSPOSED_CONVOLUTION){
             if(cls[j]->training_mode == GRADIENT_DESCENT){
                 for(k = 0; k < cls[j]->n_kernels; k++){
                     for(z = 0; z < cls[j]->channels*cls[j]->kernel_rows*cls[j]->kernel_cols; z++){

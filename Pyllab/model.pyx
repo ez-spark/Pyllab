@@ -3,6 +3,7 @@ from Pyllab import *
 
 cdef class model:
     cdef Pyllab.model* _model
+    cdef Pyllab.model** _models
     cdef fcls
     cdef cls
     cdef rls
@@ -13,10 +14,12 @@ cdef class model:
     cdef int _n_cl
     cdef int _n_rl
     cdef int _layers
+    cdef int threads
     cdef bint _does_have_learning_parameters
     cdef bint _does_have_arrays
     cdef bint _is_only_for_feedforward
     cdef bint _is_from_char
+    cdef bint _is_multithread
     '''
     @ filename := filename from which the model is loaded can be a .txt (setup file) or a .bin (an entire model with also weights and stuff
                   if the mod is true is a .bin basically, or it should be
@@ -26,6 +29,12 @@ cdef class model:
      we are building the model from each class defined in python, we pass all the classes defined in python and et voilà we build in C the struct model
     '''
     def __cinit__(self,filename=None, string = None, bint mod = True, int layers=0, int n_fcl=0, int n_cl=0, int n_rl=0, list fcls=None, list cls=None, list rls=None, bint does_have_learning_parameters = True, bint does_have_arrays = True, bint is_only_for_feedforward = False):
+        check_int(layers)
+        check_int(n_fcl)
+        check_int(n_cl)
+        check_int(n_rl)
+        self._is_multithread = False
+        self.threads = 1
         if filename != None:
             self._does_have_arrays = does_have_arrays
             self._does_have_learning_parameters = does_have_learning_parameters
@@ -90,6 +99,7 @@ cdef class model:
             
             if self._model is NULL:
                 raise MemoryError()
+              
         
     def __dealloc__(self):
         
@@ -101,7 +111,33 @@ cdef class model:
                     Pyllab.free_model_without_learning_parameters(self._model)
             else:
                 Pyllab.free_model_without_arrays(self._model)
-
+        if self.is_multithread:
+            for i in range(self.threads):
+                Pyllab.free_model_without_learning_parameters(self._models[i])
+                free(self._models)
+    
+    def make_multi_thread(self, int threads):
+        if threads < 1:
+            print("Error: the number of threads must be >= 1")
+            exit(1)
+        if self._is_multithread:
+            for i in range(self.threads):
+                Pyllab.free_model_without_learning_parameters(self._models[i])
+            free(self._models):
+        self._models = malloc(sizeof(<Pyllab.model**>)*threads)
+        for i in range(threads):
+            self._models[i] = Pyllab.copy_model_without_learning_parameters(self._model)
+        self._is_multithread = True
+        self.threads = threads
+        
+    def make_single_thread(self):
+        if self._is_multithread:
+            for i in range(self.threads):
+                Pyllab.free_model_without_learning_parameters(self._models[i])
+            free(self._models)
+        self._is_multithread = False
+        self.threads = 1
+        
     def save(self,number_of_file):
         if self._does_have_arrays and self._does_have_learning_parameters:
             Pyllab.save_model(self._model, number_of_file)
@@ -142,10 +178,13 @@ cdef class model:
             else:
                 Pyllab.reset_model_without_learning_parameters(self._model)
     def clip(self, float threshold):
+        check_float(threshold)
         if self._does_have_arrays and self._does_have_learning_parameters:
             Pyllab.clipping_gradient(self._model, threshold)
     
     def adaptive_clip(self, float threshold, float epsilon):
+        check_float(threshold)
+        check_float(epsilon)
         if self._does_have_arrays and self._does_have_learning_parameters:
             Pyllab.adaptive_gradient_clipping_model(self._model,threshold,epsilon)
 
@@ -223,10 +262,16 @@ cdef class model:
         n = Pyllab.get_output_dimension_from_model(self._model)
         return int(n)
     def set_beta1(self, float beta):
+        check_float(beta)
         Pyllab.set_model_beta(self._model, beta, self.get_beta2())
     
     def set_beta2(self, float beta):
+        check_float(beta)
         Pyllab.set_model_beta(self._model, self.get_beta1(), beta)
+        
+    def set_beta3(self, float beta):
+        check_float(beta)
+        Pyllab.set_model_beta_adamod(self._model, beta)
     
     def get_beta1(self):
         b = Pyllab.get_beta1_from_model(self._model)
@@ -235,14 +280,18 @@ cdef class model:
     def get_beta2(self):
         b = Pyllab.get_beta2_from_model(self._model)
         return b
+        
+    def get_beta3(self):
+        b = Pyllab.get_beta2_from_model(self._model)
+        return b
     
     def set_ith_layer_training_mode(self, int ith, int training_flag):
         Pyllab.set_ith_layer_training_mode(self._model,ith,training_flag)
     
     def set_k_percentage_of_ith_layer(self,int ith, float k):
+        check_float(k)
         Pyllab.set_k_percentage_of_ith_layer_model(self._model, ith, k)
-    
-        
+       
 def paste_model(model m1, model m2):
     if m1._does_have_arrays and m1._does_have_learning_parameters and m2._does_have_arrays and m2._does_have_learning_parameters:
         Pyllab.paste_model(m1._model,m2._model)
@@ -357,9 +406,9 @@ def sum_score_model(model m1,model m2, model m_output):
     Pyllab.sum_score_model(m1._model,m2._model,m_output._model)
 
 
-cdef class ModelBatch:
+cdef class modelBatch:
     cdef Pyllab.model** _models
-    cdef models
+    list models
     cdef bint _does_have_learning_parameters
     cdef bint _does_have_arrays
     cdef bint _is_only_for_feedforward

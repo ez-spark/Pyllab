@@ -84,7 +84,17 @@ fcl* fully_connected(int input, int output, int layer, int dropout_flag, int act
             exit(1);
         }
     }
- 
+    
+    if (normalization_flag != NO_NORMALIZATION && dropout_flag != NO_DROPOUT){
+        fprintf(stderr,"Error: bad assignement dropout + normalization not recommended!\n");
+        exit(1);
+    }
+    
+    if((feed_forward_flag == EDGE_POPUP || training_mode == EDGE_POPUP) && normalization_flag == LAYER_NORMALIZATION){
+        fprintf(stderr,"Error: layer normalization should not be matched with edge popup!\n");
+        exit(1);
+    }
+    
     int i,j;
     
     fcl* f = (fcl*)malloc(sizeof(fcl));
@@ -268,6 +278,16 @@ fcl* fully_connected_without_arrays(int input, int output, int layer, int dropou
             exit(1);
         }
     }
+    
+    if (normalization_flag != NO_NORMALIZATION && dropout_flag != NO_DROPOUT){
+        fprintf(stderr,"Error: bad assignement dropout + normalization not recommended!\n");
+        exit(1);
+    }
+    
+    if((feed_forward_flag == EDGE_POPUP || training_mode == EDGE_POPUP) && normalization_flag == LAYER_NORMALIZATION){
+        fprintf(stderr,"Error: layer normalization should not be matched with edge popup!\n");
+        exit(1);
+    }
  
     int i,j;
     
@@ -357,6 +377,16 @@ fcl* fully_connected_without_learning_parameters(int input, int output, int laye
             fprintf(stderr,"Error: your groups must perfectly divide your output neurons\n");
             exit(1);
         }
+    }
+    
+    if (normalization_flag != NO_NORMALIZATION && dropout_flag != NO_DROPOUT){
+        fprintf(stderr,"Error: bad assignement dropout + normalization not recommended!\n");
+        exit(1);
+    }
+    
+    if((feed_forward_flag == EDGE_POPUP || training_mode == EDGE_POPUP) && normalization_flag == LAYER_NORMALIZATION){
+        fprintf(stderr,"Error: layer normalization should not be matched with edge popup!\n");
+        exit(1);
     }
  
     int i,j;
@@ -1569,7 +1599,7 @@ uint64_t count_weights_fcl(fcl* f){
  *                 @ flc* f:= the fully-connected layer
  * */
 uint64_t get_array_size_params(fcl* f){
-    if(f == NULL || !exists_d_params_fcl(f) || !exists_params_fcl(f))
+    if(f == NULL || !exists_params_fcl(f))
         return 0;
     uint64_t sum = 0;
     if(f->normalization_flag == LAYER_NORMALIZATION){
@@ -1786,6 +1816,12 @@ void set_fully_connected_unused_weights_to_zero(fcl* f){
  *                 @ fcl* output:= the output fcl layer
  * */
 void sum_score_fcl(fcl* input1, fcl* input2, fcl* output){
+    if(input1 == NULL || input2 == NULL || output == NULL)
+        return;
+    if(!exists_edge_popup_stuff_fcl(input1) || !exists_edge_popup_stuff_fcl(output) || !exists_edge_popup_stuff_fcl(input2))
+        return;
+    if(input1->input*input1->output != input2->input*input2->output || input1->input*input1->output != output->input*output->output)
+        return;
     sum1D(input1->scores,input2->scores,output->scores,input1->input*input1->output);
 }
 

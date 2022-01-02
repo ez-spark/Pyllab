@@ -188,7 +188,7 @@ SOFTWARE.
 #define POSITIONAL_ENCODING 13
 
 // Neat hyperparams
-#define SPECIES_THERESHOLD 3
+#define SPECIES_THERESHOLD 3 // parameter for specie distance
 #define INITIAL_POPULATION 100
 #define GENERATIONS 600000
 #define PERCENTAGE_SURVIVORS_PER_SPECIE 0.3 //the number of specie survivors is decided by the fitness of the specie/mean fitness * children param, but the genomes taken to reproduce are the best <PERCENTAGE_SURVIVORS_PER_SPECIE>
@@ -516,6 +516,8 @@ typedef struct thread_args_model {
     float** returning_error;
 } thread_args_model;
 
+
+
 typedef struct thread_args_models {
     model** m;
     int n,depth;
@@ -753,6 +755,7 @@ typedef struct bn BN;
 #include "math_functions.h"
 #include "model.h"
 #include "multi_core_model.h"
+#include "multi_core_neat.h"
 #include "multi_core_rmodel.h"
 #include "multi_core_vae_model.h"
 #include "neat_functions.h"

@@ -41,6 +41,19 @@ SOFTWARE.
  * 
  * */
 model* network(int layers, int n_rl, int n_cl, int n_fcl, rl** rls, cl** cls, fcl** fcls){
+    /*if(rls != NULL){
+        printf("there is rls\n");
+    }
+    if(cls != NULL){
+        printf("there is rls\n");
+    }
+    
+    if(cls == NULL){
+        printf("fcls = null\n");
+    }
+    
+    printf("%d\n",n_fcl);
+    */
     if(!layers || (!n_rl && !n_cl && !n_fcl) || (!n_rl && rls != NULL) || (!n_cl && cls!= NULL) || (!n_fcl && fcls != NULL)){
         fprintf(stderr,"Error: layers must be > 0 and at least one between n_rl, n_cl, n_fcl must be > 0\n");
         exit(1); 
@@ -77,76 +90,66 @@ model* network(int layers, int n_rl, int n_cl, int n_fcl, rl** rls, cl** cls, fc
     model* m = (model*)malloc(sizeof(model));
     
     /* sorting conv layers inside residual layers*/
-       
-    for(i = 0; i <  n_rl; i++){
-        for(count = 0; count < rls[i]->n_cl; count++){
-            j = 0;
-            temp = rls[i]->cls[j];
-            position = j;
-            
-            for(k = 1; k < rls[i]->n_cl; k++){
-                if(rls[i]->cls[position]->layer > rls[i]->cls[k]->layer){
-                    rls[i]->cls[position] = rls[i]->cls[k];
-                    rls[i]->cls[k] = temp;
-                    position = k;
-                }
-            }
+    for(k = 0; k < n_rl; k++){
+        for (i = 0; i < rls[k]->n_cl; i++) {     
+            for (j = i+1; j < rls[k]->n_cl; j++) {     
+               if(rls[k]->cls[i]->layer > rls[k]->cls[j]->layer) {    
+                   cl* temp = rls[k]->cls[i];    
+                   rls[k]->cls[i] = rls[k]->cls[j];    
+                   rls[k]->cls[j] = temp;    
+               }     
+            }     
         }
-        /*
-         checking if the convolutional layers of residual layers are sequential
-        for(count = 1; count < rls[i]->n_cl; count++){
-            if(rls[i]->cls[count]->layer - rls[i]->cls[count-1]->layer >= 2){
-                fprintf(stderr,"Error: you have a residual layer with no sequential sub-convolutional-layers\n");
-                exit(1);
-            }
-        }
-        */
-    }
+    }  
     
     /* sorting residual layers*/
+    for (i = 0; i < n_rl; i++) {     
+        for (j = i+1; j < n_rl; j++) {     
+           if(rls[i]->cls[0]->layer > rls[j]->cls[0]->layer) {    
+               rl* temp = rls[i];    
+               rls[i] = rls[j];    
+               rls[j] = temp;    
+           }     
+        }     
+    }
+    
+    
+    /* checking if residual layers have overlapping layers*/
     for(i = 0; i < n_rl; i++){
-        j = 0;
-        temp3 = rls[j];
-        position = j;
-        
-        for(k = 1; k < n_rl; k++){
-            if(rls[position]->cls[0]->layer > rls[k]->cls[0]->layer){
-                rls[position] = rls[k];
-                rls[k] = temp3;
-                position = k;
+        int min_rl = rls[i]->cls[0]->layer;
+        int max_rl = rls[i]->cls[rls[i]->n_cl-1]->layer;
+        for(j = i; j < n_rl; j++){
+            for(k = 0; j < rls[j]->n_cl; k++){
+                if(rls[j]->cls[k]->layer <= max_rl && rls[j]->cls[k]->layer >= min_rl){
+                    fprintf(stderr,"Error: you have overlapping residual layers!\n");
+                    exit(1);
+                }
             }
         }
     }
     
     /* sorting conv layers*/
-    for(i = 0; i < n_cl; i++){
-        j = 0;
-        temp = cls[j];
-        position = j;
-        
-        for(k = 1; k < n_cl; k++){        
-            if(cls[position]->layer > cls[k]->layer){
-                cls[position] = cls[k];
-                cls[k] = temp;
-                position = k;
-            }
-        }
-    }
+    for (i = 0; i < n_cl; i++) {     
+        for (j = i+1; j < n_cl; j++) {     
+           if(cls[i]->layer > cls[j]->layer) {    
+               cl* temp = cls[i];    
+               cls[i] = cls[j];    
+               cls[j] = temp;    
+           }     
+        }     
+    }  
     
     /* sorting fully-connected layers*/
-    for(i = 0; i < n_fcl; i++){
-        j = 0;
-        temp2 = fcls[j];
-        position = j;
-        
-        for(k = 1; k < n_fcl; k++){
-            if(fcls[position]->layer > fcls[k]->layer){
-                fcls[position] = fcls[k];
-                fcls[k] = temp2;
-                position = k;
-            }
-        }
-    }
+    for (i = 0; i < n_fcl; i++) {     
+        for (j = i+1; j < n_fcl; j++) {     
+           if(fcls[i]->layer > fcls[j]->layer) {    
+               fcl* temp = fcls[i];    
+               fcls[i] = fcls[j];    
+               fcls[j] = temp;    
+           }     
+        }     
+    }    
+    
     
     /* checking if the layers are sequential or not*/
     position = 0;
@@ -183,6 +186,68 @@ model* network(int layers, int n_rl, int n_cl, int n_fcl, rl** rls, cl** cls, fc
         }
     }
     
+    for(i = 0; i < n_fcl; i++){
+        for(j = 0; j < n_fcl; j++){
+            if(i != j){
+                if(fcls[i]->layer == fcls[j]->layer){
+                    fprintf(stderr,"Error: you have 2 layers with same layer index!\n");
+                    exit(1);
+                }
+            }
+        }
+        for(j = 0; j < n_cl; j++){
+            if(fcls[i]->layer == cls[j]->layer){
+                fprintf(stderr,"Error: you have 2 layers with same layer index!\n");
+                exit(1);
+            }
+        }
+        for(j = 0; j < n_rl; j++){
+            for(k = 0; k < rls[j]->n_cl; k++){
+                if(fcls[i]->layer == rls[j]->cls[k]->layer){
+                    fprintf(stderr,"Error: you have 2 layers with same layer index!\n");
+                    exit(1);
+                }    
+            }
+            
+        }
+    }
+    for(i = 0; i < n_cl; i++){
+        for(j = 0; j < n_cl; j++){
+            if(i != j){
+                if(cls[i]->layer == cls[j]->layer){
+                    fprintf(stderr,"Error: you have 2 layers with same layer index!\n");
+                    exit(1);
+                }
+            }
+        }
+        for(j = 0; j < n_rl; j++){
+            for(k = 0; k < rls[j]->n_cl; k++){
+                if(cls[i]->layer == rls[j]->cls[k]->layer){
+                    fprintf(stderr,"Error: you have 2 layers with same layer index!\n");
+                    exit(1);
+                }    
+            }
+            
+        }
+    }
+    
+    
+    
+    for(i = 0; i < n_rl; i++){
+        for(j = 0; j < rls[i]->n_cl; j++){
+            for(k = 0; k < n_rl; k++){
+                for(count = 0; count < rls[k]->n_cl; count++){
+                    if(!(i==k && j == count)){
+                        if(rls[i]->cls[j]->layer == rls[k]->cls[count]->layer){
+                            fprintf(stderr,"Error: you have 2 layers with same layer index!\n");
+                            exit(1);
+                        }
+                    }
+                }
+            }
+        }
+    }
+        
     
     /*There is no check if the sizes match or not, this happen during the feed forward*/
     
@@ -221,6 +286,11 @@ model* network(int layers, int n_rl, int n_cl, int n_fcl, rl** rls, cl** cls, fc
     
     else if(sla[i][0] == CLS){
         if(m->cls[m->n_cl-1]->pooling_flag){
+        
+            if(m->cls[m->n_cl-1]->convolutional_flag == NO_CONVOLUTION && m->cls[m->n_cl-1]->stride2_cols == 1 && m->cls[m->n_cl-1]->stride2_rows == 1 && m->cls[m->n_cl-1]->padding2_rows == 0 && m->cls[m->n_cl-1]->padding2_cols == 0 && m->cls[m->n_cl-1]->pooling_rows == 1 && m->cls[m->n_cl-1]->pooling_cols == 1){
+                fprintf(stderr,"Error: your final layer is a useless layer!\n");
+                exit(1);
+            }
             m->output_layer = m->cls[m->n_cl-1]->post_pooling;
             m->output_dimension = m->cls[m->n_cl-1]->rows2*m->cls[m->n_cl-1]->cols2*m->cls[m->n_cl-1]->n_kernels;
         }
@@ -308,6 +378,7 @@ void free_model_without_learning_parameters(model* m){
     free(m->error_alpha);
     free(m);
 }
+
 /* This function frees the space allocated by a model structure
  * 
  * Input:
@@ -1096,7 +1167,6 @@ void ff_fcl_fcl(fcl* f1, fcl* f2){
     }
     
     int i;
-    
     if(f2->feed_forward_flag == ONLY_DROPOUT){
         fprintf(stderr,"Error: use the previous fully connected layer also with dropout do not create another useless layer!\n");
         exit(1);
@@ -1867,7 +1937,10 @@ void ff_fcl_cl(fcl* f1, cl* f2){
         }
     }
     
-    
+    else if(f2->convolutional_flag == NO_CONVOLUTION && f2->stride2_cols == 1 && f2->stride2_rows == 1 && f2->padding2_rows == 0 && f2->padding2_cols == 0 && f2->pooling_rows == 1 && f2->pooling_cols == 1){
+        f2->pooltemp = pooltemp;
+        return;
+    }
     
     /* pooling for f2, if there is any pooling*/
     if(f2->pooling_flag != NO_POOLING){
@@ -1877,7 +1950,7 @@ void ff_fcl_cl(fcl* f1, cl* f2){
                     max_pooling_feed_forward(&pooltemp[i*f2->input_rows*f2->input_cols], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->input_rows, f2->input_cols, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                 }
                 else{
-                    AVERAGE_POOLING_feed_forward(&pooltemp[i*f2->input_rows*f2->input_cols], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->input_rows, f2->input_cols, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
+                    average_pooling_feed_forward(&pooltemp[i*f2->input_rows*f2->input_cols], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->input_rows, f2->input_cols, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                 }
             }
                
@@ -1886,7 +1959,7 @@ void ff_fcl_cl(fcl* f1, cl* f2){
                     max_pooling_feed_forward(&f2->post_normalization[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                 }
                 else{
-                    AVERAGE_POOLING_feed_forward(&f2->post_normalization[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
+                    average_pooling_feed_forward(&f2->post_normalization[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                 }
             }
             
@@ -1895,7 +1968,7 @@ void ff_fcl_cl(fcl* f1, cl* f2){
                     max_pooling_feed_forward(&f2->post_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                 }
                 else{
-                    AVERAGE_POOLING_feed_forward(&f2->post_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
+                    average_pooling_feed_forward(&f2->post_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                 }
             }
             
@@ -1904,7 +1977,7 @@ void ff_fcl_cl(fcl* f1, cl* f2){
                     max_pooling_feed_forward(&f2->pre_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                 }
                 else{
-                    AVERAGE_POOLING_feed_forward(&f2->pre_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
+                    average_pooling_feed_forward(&f2->pre_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                 }
             }
         }
@@ -2360,6 +2433,11 @@ void ff_fcl_cl_without_learning_parameters(fcl* f1, cl* f2, cl* f3){
         }
     }
     
+    else if(f2->convolutional_flag == NO_CONVOLUTION && f2->stride2_cols == 1 && f2->stride2_rows == 1 && f2->padding2_rows == 0 && f2->padding2_cols == 0 && f2->pooling_rows == 1 && f2->pooling_cols == 1){
+        f2->pooltemp = pooltemp;
+        return;
+    }
+    
     
     
     /* pooling for f2, if there is any pooling*/
@@ -2370,7 +2448,7 @@ void ff_fcl_cl_without_learning_parameters(fcl* f1, cl* f2, cl* f3){
                     max_pooling_feed_forward(&pooltemp[i*f2->input_rows*f2->input_cols], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->input_rows, f2->input_cols, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                 }
                 else{
-                    AVERAGE_POOLING_feed_forward(&pooltemp[i*f2->input_rows*f2->input_cols], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->input_rows, f2->input_cols, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
+                    average_pooling_feed_forward(&pooltemp[i*f2->input_rows*f2->input_cols], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->input_rows, f2->input_cols, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                 }
             }
                
@@ -2379,7 +2457,7 @@ void ff_fcl_cl_without_learning_parameters(fcl* f1, cl* f2, cl* f3){
                     max_pooling_feed_forward(&f2->post_normalization[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                 }
                 else{
-                    AVERAGE_POOLING_feed_forward(&f2->post_normalization[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
+                    average_pooling_feed_forward(&f2->post_normalization[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                 }
             }
             
@@ -2388,7 +2466,7 @@ void ff_fcl_cl_without_learning_parameters(fcl* f1, cl* f2, cl* f3){
                     max_pooling_feed_forward(&f2->post_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                 }
                 else{
-                    AVERAGE_POOLING_feed_forward(&f2->post_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
+                    average_pooling_feed_forward(&f2->post_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                 }
             }
             
@@ -2397,7 +2475,7 @@ void ff_fcl_cl_without_learning_parameters(fcl* f1, cl* f2, cl* f3){
                     max_pooling_feed_forward(&f2->pre_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                 }
                 else{
-                    AVERAGE_POOLING_feed_forward(&f2->pre_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
+                    average_pooling_feed_forward(&f2->pre_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                 }
             }
         }
@@ -2437,11 +2515,16 @@ void ff_cl_fcl(cl* f1, fcl* f2){
     
         /* pooling for f1*/
         if(f1->pooling_flag){
+            float* pooltemp = f1->post_pooling;
+            if(f1->convolutional_flag == NO_CONVOLUTION && f1->stride2_cols == 1 && f1->stride2_rows == 1 && f1->padding2_rows == 0 && f1->padding2_cols == 0 && f1->pooling_rows == 1 && f1->pooling_cols == 1){
+                pooltemp = f1->pooltemp;
+            }
+            
             if(f2->feed_forward_flag == FULLY_FEED_FORWARD){
-                fully_connected_feed_forward(f1->post_pooling, f2->pre_activation, f2->weights,f2->biases, f2->input, f2->output);
+                fully_connected_feed_forward(pooltemp, f2->pre_activation, f2->weights,f2->biases, f2->input, f2->output);
             }
             else if(f2->feed_forward_flag == EDGE_POPUP)
-                fully_connected_feed_forward_edge_popup(f1->post_pooling, f2->pre_activation, f2->weights,f2->biases, f2->input, f2->output,f2->indices,f2->input*f2->output*f2->k_percentage);
+                fully_connected_feed_forward_edge_popup(pooltemp, f2->pre_activation, f2->weights,f2->biases, f2->input, f2->output,f2->indices,f2->input*f2->output*f2->k_percentage);
         }
         /* no pooling for f1, but normalization*/
         else if(f1->normalization_flag){
@@ -2515,7 +2598,7 @@ void ff_cl_fcl(cl* f1, fcl* f2){
     if(f2->dropout_flag){
         set_dropout_mask(f2->output, f2->dropout_mask, f2->dropout_threshold);
         if(f2->dropout_flag == DROPOUT){
-            if(f1->feed_forward_flag != ONLY_DROPOUT){
+            if(f2->feed_forward_flag != ONLY_DROPOUT){
                 if(f2->normalization_flag == LAYER_NORMALIZATION)
                     get_dropout_array(f2->output,f2->dropout_mask,f2->post_normalization,f2->dropout_temp);
                 else if(f2->activation_flag){
@@ -2526,8 +2609,13 @@ void ff_cl_fcl(cl* f1, fcl* f2){
             }
             
             else{
-                if(f1->post_pooling)
-                    get_dropout_array(f2->output,f2->dropout_mask,f1->post_pooling,f2->dropout_temp);
+                if(f1->post_pooling){
+                    float* pooltemp = f1->post_pooling;
+                    if(f1->convolutional_flag == NO_CONVOLUTION && f1->stride2_cols == 1 && f1->stride2_rows == 1 && f1->padding2_rows == 0 && f1->padding2_cols == 0 && f1->pooling_rows == 1 && f1->pooling_cols == 1){
+                        pooltemp = f1->pooltemp;
+                    }
+                    get_dropout_array(f2->output,f2->dropout_mask,pooltemp,f2->dropout_temp);
+                }
                 else if(f1->post_normalization)
                     get_dropout_array(f2->output,f2->dropout_mask,f1->post_normalization,f2->dropout_temp);
                 else if(f1->post_activation)
@@ -2573,11 +2661,15 @@ void ff_cl_fcl_without_learning_parameters(cl* f1, fcl* f2, fcl* f3){
     
         /* pooling for f1*/
         if(f1->pooling_flag){
+            float* pooltemp = f1->post_pooling;
+            if(f1->convolutional_flag == NO_CONVOLUTION && f1->stride2_cols == 1 && f1->stride2_rows == 1 && f1->padding2_rows == 0 && f1->padding2_cols == 0 && f1->pooling_rows == 1 && f1->pooling_cols == 1){
+                pooltemp = f1->pooltemp;
+            }
             if(f2->feed_forward_flag == FULLY_FEED_FORWARD){
-                fully_connected_feed_forward(f1->post_pooling, f2->pre_activation, f3->weights,f3->biases, f2->input, f2->output);
+                fully_connected_feed_forward(pooltemp, f2->pre_activation, f3->weights,f3->biases, f2->input, f2->output);
             }
             else if(f2->feed_forward_flag == EDGE_POPUP)
-                fully_connected_feed_forward_edge_popup(f1->post_pooling, f2->pre_activation, f3->weights,f3->biases, f2->input, f2->output,f3->indices,f2->input*f2->output*f2->k_percentage);
+                fully_connected_feed_forward_edge_popup(pooltemp, f2->pre_activation, f3->weights,f3->biases, f2->input, f2->output,f3->indices,f2->input*f2->output*f2->k_percentage);
         }
         /* no pooling for f1, but normalization*/
         else if(f1->normalization_flag){
@@ -2650,7 +2742,7 @@ void ff_cl_fcl_without_learning_parameters(cl* f1, fcl* f2, fcl* f3){
     if(f2->dropout_flag){
         set_dropout_mask(f2->output, f2->dropout_mask, f2->dropout_threshold);
         if(f2->dropout_flag == DROPOUT){
-            if(f1->feed_forward_flag != ONLY_DROPOUT){
+            if(f2->feed_forward_flag != ONLY_DROPOUT){
                 if(f2->normalization_flag == LAYER_NORMALIZATION)
                     get_dropout_array(f2->output,f2->dropout_mask,f2->post_normalization,f2->dropout_temp);
                 else if(f2->activation_flag){
@@ -2661,8 +2753,13 @@ void ff_cl_fcl_without_learning_parameters(cl* f1, fcl* f2, fcl* f3){
             }
             
             else{
-                if(f1->post_pooling)
-                    get_dropout_array(f2->output,f2->dropout_mask,f1->post_pooling,f2->dropout_temp);
+                if(f1->post_pooling){
+                    float* pooltemp = f1->post_pooling;
+                    if(f1->convolutional_flag == NO_CONVOLUTION && f1->stride2_cols == 1 && f1->stride2_rows == 1 && f1->padding2_rows == 0 && f1->padding2_cols == 0 && f1->pooling_rows == 1 && f1->pooling_cols == 1){
+                        pooltemp = f1->pooltemp;
+                    }
+                    get_dropout_array(f2->output,f2->dropout_mask,pooltemp,f2->dropout_temp);
+                }
                 else if(f1->post_normalization)
                     get_dropout_array(f2->output,f2->dropout_mask,f1->post_normalization,f2->dropout_temp);
                 else if(f1->post_activation)
@@ -2700,33 +2797,37 @@ void ff_cl_cl(cl* f1, cl* f2){
     
     /* pooling for f1*/
     if(f1->pooling_flag){
+        float* pooltemp_prev = f1->post_pooling;
+        if(f1->convolutional_flag == NO_CONVOLUTION && f1->stride2_cols == 1 && f1->stride2_rows == 1 && f1->padding2_rows == 0 && f1->padding2_cols == 0 && f1->pooling_rows == 1 && f1->pooling_cols == 1){
+            pooltemp_prev = f1->pooltemp;
+        }
         if(f2->convolutional_flag == CONVOLUTION){
             if(f2->feed_forward_flag == FULLY_FEED_FORWARD){
                 for(i = 0; i < f2->n_kernels; i++){
-                    convolutional_feed_forward(f1->post_pooling, f2->kernels[i], f2->input_rows, f2->input_cols, f2->kernel_rows, f2->kernel_cols, f2->biases[i], f2->channels, &f2->pre_activation[i*f2->rows1*f2->cols1], f2->stride1_rows,f2->stride1_cols, f2->padding1_rows);
+                    convolutional_feed_forward(pooltemp_prev, f2->kernels[i], f2->input_rows, f2->input_cols, f2->kernel_rows, f2->kernel_cols, f2->biases[i], f2->channels, &f2->pre_activation[i*f2->rows1*f2->cols1], f2->stride1_rows,f2->stride1_cols, f2->padding1_rows);
                 }
             }
             
             else if(f2->feed_forward_flag == EDGE_POPUP){
                 //printf("convolutional edge popup after previous pooling\n");
-                convolutional_feed_forward_edge_popup(f1->post_pooling, f2->kernels, f2->input_rows, f2->input_cols, f2->kernel_rows, f2->kernel_cols, f2->biases, f2->channels, f2->pre_activation, f2->stride1_rows,f2->stride1_cols, f2->padding1_rows,f2->indices,f2->n_kernels,f2->n_kernels*f2->channels*f2->kernel_cols*f2->kernel_rows*f2->k_percentage);
+                convolutional_feed_forward_edge_popup(pooltemp_prev, f2->kernels, f2->input_rows, f2->input_cols, f2->kernel_rows, f2->kernel_cols, f2->biases, f2->channels, f2->pre_activation, f2->stride1_rows,f2->stride1_cols, f2->padding1_rows,f2->indices,f2->n_kernels,f2->n_kernels*f2->channels*f2->kernel_cols*f2->kernel_rows*f2->k_percentage);
             }
         }
         
         else if(f2->convolutional_flag == TRANSPOSED_CONVOLUTION){
             if(f2->feed_forward_flag == FULLY_FEED_FORWARD){
                 for(i = 0; i < f2->n_kernels; i++){
-                    transposed_convolutional_feed_forward(f1->post_pooling, f2->kernels[i], f2->input_rows, f2->input_cols, f2->kernel_rows, f2->kernel_cols, f2->biases[i], f2->channels, &f2->pre_activation[i*f2->rows1*f2->cols1], f2->stride1_rows,f2->stride1_cols, f2->padding1_rows);
+                    transposed_convolutional_feed_forward(pooltemp_prev, f2->kernels[i], f2->input_rows, f2->input_cols, f2->kernel_rows, f2->kernel_cols, f2->biases[i], f2->channels, &f2->pre_activation[i*f2->rows1*f2->cols1], f2->stride1_rows,f2->stride1_cols, f2->padding1_rows);
                 }
             }
             
             else if(f2->feed_forward_flag == EDGE_POPUP){
-                transposed_convolutional_feed_forward_edge_popup(f1->post_pooling, f2->kernels, f2->input_rows, f2->input_cols, f2->kernel_rows, f2->kernel_cols, f2->biases, f2->channels, f2->pre_activation, f2->stride1_rows,f2->stride1_cols, f2->padding1_rows,f2->indices,f2->n_kernels,f2->n_kernels*f2->channels*f2->kernel_cols*f2->kernel_rows*f2->k_percentage);
+                transposed_convolutional_feed_forward_edge_popup(pooltemp_prev, f2->kernels, f2->input_rows, f2->input_cols, f2->kernel_rows, f2->kernel_cols, f2->biases, f2->channels, f2->pre_activation, f2->stride1_rows,f2->stride1_cols, f2->padding1_rows,f2->indices,f2->n_kernels,f2->n_kernels*f2->channels*f2->kernel_cols*f2->kernel_rows*f2->k_percentage);
             }
         }
         
         else{
-            pooltemp = f1->post_pooling;
+            pooltemp = pooltemp_prev;
         }    
     }
             
@@ -2899,7 +3000,7 @@ void ff_cl_cl(cl* f1, cl* f2){
         if(f2->activation_flag == SIGMOID){
             for(i = 0; i < f2->n_kernels; i++){
                 if(f2->used_kernels[i]){
-                    sigmoid_array(&f2->pre_activation[i*f2->rows1*f2->cols1 + j*f2->cols1 + f2->padding1_rows],&f2->post_activation[i*f2->rows1*f2->cols1],f2->rows1*f2->cols1);
+                    sigmoid_array(&f2->pre_activation[i*f2->rows1*f2->cols1],&f2->post_activation[i*f2->rows1*f2->cols1],f2->rows1*f2->cols1);
                 }
             }
         }
@@ -2908,7 +3009,7 @@ void ff_cl_cl(cl* f1, cl* f2){
         else if(f2->activation_flag == ELU){
             for(i = 0; i < f2->n_kernels; i++){
                 if(f2->used_kernels[i]){
-                    elu_array(&f2->pre_activation[i*f2->rows1*f2->cols1 + j*f2->cols1 + f2->padding1_rows],&f2->post_activation[i*f2->rows1*f2->cols1],f2->rows1*f2->cols1,ELU_THRESHOLD);
+                    elu_array(&f2->pre_activation[i*f2->rows1*f2->cols1],&f2->post_activation[i*f2->rows1*f2->cols1],f2->rows1*f2->cols1,ELU_THRESHOLD);
                 }
             }
         }
@@ -2940,7 +3041,10 @@ void ff_cl_cl(cl* f1, cl* f2){
         }
     }
     
-    
+    else if(f2->convolutional_flag == NO_CONVOLUTION && f2->stride2_cols == 1 && f2->stride2_rows == 1 && f2->padding2_rows == 0 && f2->padding2_cols == 0 && f2->pooling_rows == 1 && f2->pooling_cols == 1){
+        f2->pooltemp = pooltemp;
+        return;
+    }
     
     /* pooling for f2, if there is any pooling*/
     if(f2->pooling_flag){
@@ -2952,7 +3056,7 @@ void ff_cl_cl(cl* f1, cl* f2){
                         max_pooling_feed_forward(&pooltemp[i*f2->input_rows*f2->input_cols], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->input_rows, f2->input_cols, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                     }
                     else{
-                        AVERAGE_POOLING_feed_forward(&pooltemp[i*f2->input_rows*f2->input_cols], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->input_rows, f2->input_cols, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
+                        average_pooling_feed_forward(&pooltemp[i*f2->input_rows*f2->input_cols], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->input_rows, f2->input_cols, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                     }
                 }
                 else if(f2->normalization_flag){
@@ -2960,7 +3064,7 @@ void ff_cl_cl(cl* f1, cl* f2){
                         max_pooling_feed_forward(&f2->post_normalization[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                     }
                     else{
-                        AVERAGE_POOLING_feed_forward(&f2->post_normalization[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
+                        average_pooling_feed_forward(&f2->post_normalization[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                     }
                 }
                 
@@ -2970,7 +3074,7 @@ void ff_cl_cl(cl* f1, cl* f2){
                         max_pooling_feed_forward(&f2->post_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                     }
                     else{
-                        AVERAGE_POOLING_feed_forward(&f2->post_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
+                        average_pooling_feed_forward(&f2->post_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                     }
                 }
                 
@@ -2979,7 +3083,7 @@ void ff_cl_cl(cl* f1, cl* f2){
                         max_pooling_feed_forward(&f2->pre_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                     }
                     else{
-                        AVERAGE_POOLING_feed_forward(&f2->pre_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
+                        average_pooling_feed_forward(&f2->pre_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                     }
                 }
             }
@@ -3012,33 +3116,37 @@ void ff_cl_cl_without_learning_parameters(cl* f1, cl* f2, cl* f3){
     
     /* pooling for f1*/
     if(f1->pooling_flag){
+        float* pooltemp_prev = f1->post_pooling;
+        if(f1->convolutional_flag == NO_CONVOLUTION && f1->stride2_cols == 1 && f1->stride2_rows == 1 && f1->padding2_rows == 0 && f1->padding2_cols == 0 && f1->pooling_rows == 1 && f1->pooling_cols == 1){
+            pooltemp_prev = f1->pooltemp;
+        }
         if(f2->convolutional_flag == CONVOLUTION){
             if(f2->feed_forward_flag == FULLY_FEED_FORWARD){
                 for(i = 0; i < f2->n_kernels; i++){
-                    convolutional_feed_forward(f1->post_pooling, f3->kernels[i], f2->input_rows, f2->input_cols, f2->kernel_rows, f2->kernel_cols, f3->biases[i], f2->channels, &f2->pre_activation[i*f2->rows1*f2->cols1], f2->stride1_rows,f2->stride1_cols, f2->padding1_rows);
+                    convolutional_feed_forward(pooltemp_prev, f3->kernels[i], f2->input_rows, f2->input_cols, f2->kernel_rows, f2->kernel_cols, f3->biases[i], f2->channels, &f2->pre_activation[i*f2->rows1*f2->cols1], f2->stride1_rows,f2->stride1_cols, f2->padding1_rows);
                 }
             }
             
             else if(f2->feed_forward_flag == EDGE_POPUP){
                 //printf("convolutional edge popup after previous pooling\n");
-                convolutional_feed_forward_edge_popup(f1->post_pooling, f3->kernels, f2->input_rows, f2->input_cols, f2->kernel_rows, f2->kernel_cols, f3->biases, f2->channels, f2->pre_activation, f2->stride1_rows,f2->stride1_cols, f2->padding1_rows,f3->indices,f2->n_kernels,f2->n_kernels*f2->channels*f2->kernel_cols*f2->kernel_rows*f2->k_percentage);
+                convolutional_feed_forward_edge_popup(pooltemp_prev, f3->kernels, f2->input_rows, f2->input_cols, f2->kernel_rows, f2->kernel_cols, f3->biases, f2->channels, f2->pre_activation, f2->stride1_rows,f2->stride1_cols, f2->padding1_rows,f3->indices,f2->n_kernels,f2->n_kernels*f2->channels*f2->kernel_cols*f2->kernel_rows*f2->k_percentage);
             }
         }
         
         else if(f2->convolutional_flag == TRANSPOSED_CONVOLUTION){
             if(f2->feed_forward_flag == FULLY_FEED_FORWARD){
                 for(i = 0; i < f2->n_kernels; i++){
-                    transposed_convolutional_feed_forward(f1->post_pooling, f3->kernels[i], f2->input_rows, f2->input_cols, f2->kernel_rows, f2->kernel_cols, f3->biases[i], f2->channels, &f2->pre_activation[i*f2->rows1*f2->cols1], f2->stride1_rows,f2->stride1_cols, f2->padding1_rows);
+                    transposed_convolutional_feed_forward(pooltemp_prev, f3->kernels[i], f2->input_rows, f2->input_cols, f2->kernel_rows, f2->kernel_cols, f3->biases[i], f2->channels, &f2->pre_activation[i*f2->rows1*f2->cols1], f2->stride1_rows,f2->stride1_cols, f2->padding1_rows);
                 }
             }
             
             else if(f2->feed_forward_flag == EDGE_POPUP){
-                transposed_convolutional_feed_forward_edge_popup(f1->post_pooling, f3->kernels, f2->input_rows, f2->input_cols, f2->kernel_rows, f2->kernel_cols, f3->biases, f2->channels, f2->pre_activation, f2->stride1_rows,f2->stride1_cols, f2->padding1_rows,f3->indices,f2->n_kernels,f2->n_kernels*f2->channels*f2->kernel_cols*f2->kernel_rows*f2->k_percentage);
+                transposed_convolutional_feed_forward_edge_popup(pooltemp_prev, f3->kernels, f2->input_rows, f2->input_cols, f2->kernel_rows, f2->kernel_cols, f3->biases, f2->channels, f2->pre_activation, f2->stride1_rows,f2->stride1_cols, f2->padding1_rows,f3->indices,f2->n_kernels,f2->n_kernels*f2->channels*f2->kernel_cols*f2->kernel_rows*f2->k_percentage);
             }
         }
         
         else{
-            pooltemp = f1->post_pooling;
+            pooltemp = pooltemp_prev;
         }    
     }
             
@@ -3210,7 +3318,7 @@ void ff_cl_cl_without_learning_parameters(cl* f1, cl* f2, cl* f3){
         if(f2->activation_flag == SIGMOID){
             for(i = 0; i < f2->n_kernels; i++){
                 if(f3->used_kernels[i]){
-                    sigmoid_array(&f2->pre_activation[i*f2->rows1*f2->cols1 + j*f2->cols1 + f2->padding1_rows],&f2->post_activation[i*f2->rows1*f2->cols1],f2->rows1*f2->cols1);
+                    sigmoid_array(&f2->pre_activation[i*f2->rows1*f2->cols1],&f2->post_activation[i*f2->rows1*f2->cols1],f2->rows1*f2->cols1);
                 }
             }
         }
@@ -3220,7 +3328,7 @@ void ff_cl_cl_without_learning_parameters(cl* f1, cl* f2, cl* f3){
         else if(f2->activation_flag == ELU){
             for(i = 0; i < f2->n_kernels; i++){
                 if(f3->used_kernels[i]){
-                    elu_array(&f2->pre_activation[i*f2->rows1*f2->cols1 + j*f2->cols1 + f2->padding1_rows],&f2->post_activation[i*f2->rows1*f2->cols1],f2->rows1*f2->cols1,ELU_THRESHOLD);
+                    elu_array(&f2->pre_activation[i*f2->rows1*f2->cols1],&f2->post_activation[i*f2->rows1*f2->cols1],f2->rows1*f2->cols1,ELU_THRESHOLD);
                 }
             }
         }
@@ -3254,7 +3362,10 @@ void ff_cl_cl_without_learning_parameters(cl* f1, cl* f2, cl* f3){
         }
     }
     
-    
+    else if(f2->convolutional_flag == NO_CONVOLUTION && f2->stride2_cols == 1 && f2->stride2_rows == 1 && f2->padding2_rows == 0 && f2->padding2_cols == 0 && f2->pooling_rows == 1 && f2->pooling_cols == 1){
+        f2->pooltemp = pooltemp;
+        return;
+    }
     
     /* pooling for f2, if there is any pooling*/
     if(f2->pooling_flag){
@@ -3266,7 +3377,7 @@ void ff_cl_cl_without_learning_parameters(cl* f1, cl* f2, cl* f3){
                         max_pooling_feed_forward(&pooltemp[i*f2->input_rows*f2->input_cols], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->input_rows, f2->input_cols, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                     }
                     else{
-                        AVERAGE_POOLING_feed_forward(&pooltemp[i*f2->input_rows*f2->input_cols], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->input_rows, f2->input_cols, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
+                        average_pooling_feed_forward(&pooltemp[i*f2->input_rows*f2->input_cols], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->input_rows, f2->input_cols, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                     }
                 }
                 else if(f2->normalization_flag){
@@ -3274,7 +3385,7 @@ void ff_cl_cl_without_learning_parameters(cl* f1, cl* f2, cl* f3){
                         max_pooling_feed_forward(&f2->post_normalization[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                     }
                     else{
-                        AVERAGE_POOLING_feed_forward(&f2->post_normalization[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
+                        average_pooling_feed_forward(&f2->post_normalization[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                     }
                 }
                 
@@ -3284,7 +3395,7 @@ void ff_cl_cl_without_learning_parameters(cl* f1, cl* f2, cl* f3){
                         max_pooling_feed_forward(&f2->post_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                     }
                     else{
-                        AVERAGE_POOLING_feed_forward(&f2->post_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
+                        average_pooling_feed_forward(&f2->post_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                     }
                 }
                 
@@ -3293,7 +3404,7 @@ void ff_cl_cl_without_learning_parameters(cl* f1, cl* f2, cl* f3){
                         max_pooling_feed_forward(&f2->pre_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                     }
                     else{
-                        AVERAGE_POOLING_feed_forward(&f2->pre_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
+                        average_pooling_feed_forward(&f2->pre_activation[i*f2->rows1*f2->cols1], &f2->post_pooling[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
                     }
                 }
             }
@@ -3744,6 +3855,9 @@ float* bp_fcl_fcl_without_learning_parameters(fcl* f1, fcl* f2, fcl* f3, float* 
 float* bp_fcl_cl(fcl* f1, cl* f2, float* error){
     int i,j,k;
     float* temp = f2->temp;
+    if(f2->convolutional_flag == NO_CONVOLUTION && f2->stride2_cols == 1 && f2->stride2_rows == 1 && f2->padding2_rows == 0 && f2->padding2_cols == 0 && f2->pooling_rows == 1 && f2->pooling_cols == 1){
+        return error;
+    }
     /* computing backpropagation for f2*/
     if(f2->pooling_flag == MAX_POOLING){
         if(f2->convolutional_flag == CONVOLUTION || f2->convolutional_flag == TRANSPOSED_CONVOLUTION){
@@ -3796,7 +3910,7 @@ float* bp_fcl_cl(fcl* f1, cl* f2, float* error){
     else if(f2->pooling_flag == AVERAGE_POOLING){
         for(i = 0; i < f2->n_kernels; i++){
             if(f2->used_kernels[i])
-            AVERAGE_POOLING_back_prop(&f2->temp[i*f2->rows1*f2->cols1], &error[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
+            average_pooling_back_prop(&f2->temp[i*f2->rows1*f2->cols1], &error[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
         }
     }
     
@@ -4341,6 +4455,9 @@ float* bp_fcl_cl_without_learning_parameters(fcl* f1, cl* f2,cl* f3, float* erro
     int i,j,k;
     /* computing backpropagation for f2*/
     float* temp = f2->temp;
+    if(f2->convolutional_flag == NO_CONVOLUTION && f2->stride2_cols == 1 && f2->stride2_rows == 1 && f2->padding2_rows == 0 && f2->padding2_cols == 0 && f2->pooling_rows == 1 && f2->pooling_cols == 1){
+        return error;
+    }
     if(f2->pooling_flag == MAX_POOLING){
         if(f2->convolutional_flag == CONVOLUTION || f2->convolutional_flag == TRANSPOSED_CONVOLUTION){
             for(i = 0; i < f2->n_kernels; i++){
@@ -4392,7 +4509,7 @@ float* bp_fcl_cl_without_learning_parameters(fcl* f1, cl* f2,cl* f3, float* erro
     else if(f2->pooling_flag == AVERAGE_POOLING){
         for(i = 0; i < f2->n_kernels; i++){
             if(f3->used_kernels[i])
-            AVERAGE_POOLING_back_prop(&f2->temp[i*f2->rows1*f2->cols1], &error[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
+            average_pooling_back_prop(&f2->temp[i*f2->rows1*f2->cols1], &error[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
         }
     }
     
@@ -4938,6 +5055,9 @@ float* bp_fcl_cl_without_learning_parameters(fcl* f1, cl* f2,cl* f3, float* erro
 float* bp_cl_cl(cl* f1, cl* f2, float* error){
     int i,j,k;
     float* temp = f2->temp;
+    if(f2->convolutional_flag == NO_CONVOLUTION && f2->stride2_cols == 1 && f2->stride2_rows == 1 && f2->padding2_rows == 0 && f2->padding2_cols == 0 && f2->pooling_rows == 1 && f2->pooling_cols == 1){
+        return error;
+    }
     /* computing backpropagation for f2*/
     if(f2->pooling_flag == MAX_POOLING){
         //printf("max pooling bp\n");
@@ -4957,8 +5077,13 @@ float* bp_cl_cl(cl* f1, cl* f2, float* error){
         else{
             for(i = 0; i < f2->n_kernels; i++){
                 if(f2->used_kernels[i]){
-                    if(f1->pooling_flag)
-                        max_pooling_back_prop(&f1->post_pooling[i*f2->rows1*f2->cols1], &error[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows, &f2->temp[i*f2->rows1*f2->cols1]);
+                    if(f1->pooling_flag){
+                        float* pooltemp_prev = f1->post_pooling;
+                        if(f1->convolutional_flag == NO_CONVOLUTION && f1->stride2_cols == 1 && f1->stride2_rows == 1 && f1->padding2_rows == 0 && f1->padding2_cols == 0 && f1->pooling_rows == 1 && f1->pooling_cols == 1){
+                            pooltemp_prev = f1->pooltemp;
+                        }
+                        max_pooling_back_prop(&pooltemp_prev[i*f2->rows1*f2->cols1], &error[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows, &f2->temp[i*f2->rows1*f2->cols1]);
+                    }
                     else if(f1->normalization_flag)
                         max_pooling_back_prop(&f1->post_normalization[i*f2->rows1*f2->cols1], &error[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows, &f2->temp[i*f2->rows1*f2->cols1]);
                     else if(f1->activation_flag)
@@ -4975,7 +5100,7 @@ float* bp_cl_cl(cl* f1, cl* f2, float* error){
         //printf("avarage pooling bp\n");
         for(i = 0; i < f2->n_kernels; i++){
             if(f2->used_kernels[i]){
-                AVERAGE_POOLING_back_prop(&f2->temp[i*f2->rows1*f2->cols1], &error[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
+                average_pooling_back_prop(&f2->temp[i*f2->rows1*f2->cols1], &error[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
             }
         }
     }
@@ -5126,8 +5251,13 @@ float* bp_cl_cl(cl* f1, cl* f2, float* error){
         
         if((f2->training_mode == GRADIENT_DESCENT && f2->feed_forward_flag == FULLY_FEED_FORWARD) || f2->training_mode == FREEZE_TRAINING){
             for(i = 0; i < f2->n_kernels; i++){
-                if(f1->pooling_flag)
-                    convolutional_back_prop(f1->post_pooling, f2->kernels[i], f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,f2->biases[i],f2->channels,&f2->temp[i*f2->rows1*f2->cols1],f2->error2,f2->d_kernels[i], &f2->d_biases[i], f2->stride1_rows,f2->stride1_cols, f2->padding1_rows);                
+                if(f1->pooling_flag){
+                    float* pooltemp_prev = f1->post_pooling;
+                    if(f1->convolutional_flag == NO_CONVOLUTION && f1->stride2_cols == 1 && f1->stride2_rows == 1 && f1->padding2_rows == 0 && f1->padding2_cols == 0 && f1->pooling_rows == 1 && f1->pooling_cols == 1){
+                        pooltemp_prev = f1->pooltemp;
+                    }
+                    convolutional_back_prop(pooltemp_prev, f2->kernels[i], f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,f2->biases[i],f2->channels,&f2->temp[i*f2->rows1*f2->cols1],f2->error2,f2->d_kernels[i], &f2->d_biases[i], f2->stride1_rows,f2->stride1_cols, f2->padding1_rows);                
+                }
                 else if(f1->normalization_flag)
                     convolutional_back_prop(f1->post_normalization, f2->kernels[i], f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,f2->biases[i],f2->channels,&f2->temp[i*f2->rows1*f2->cols1],f2->error2,f2->d_kernels[i], &f2->d_biases[i], f2->stride1_rows,f2->stride1_cols, f2->padding1_rows);                
                 else if(f1->activation_flag){
@@ -5139,8 +5269,13 @@ float* bp_cl_cl(cl* f1, cl* f2, float* error){
         }
         else if(f2->training_mode == FREEZE_BIASES){
             for(i = 0; i < f2->n_kernels; i++){
-                if(f1->pooling_flag)
-                    convolutional_back_prop(f1->post_pooling, f2->kernels[i], f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,f2->biases[i],f2->channels,&f2->temp[i*f2->rows1*f2->cols1],f2->error2,f2->d_kernels[i], NULL, f2->stride1_rows,f2->stride1_cols, f2->padding1_rows);                
+                if(f1->pooling_flag){
+                    float* pooltemp_prev = f1->post_pooling;
+                    if(f1->convolutional_flag == NO_CONVOLUTION && f1->stride2_cols == 1 && f1->stride2_rows == 1 && f1->padding2_rows == 0 && f1->padding2_cols == 0 && f1->pooling_rows == 1 && f1->pooling_cols == 1){
+                        pooltemp_prev = f1->pooltemp;
+                    }
+                    convolutional_back_prop(pooltemp_prev, f2->kernels[i], f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,f2->biases[i],f2->channels,&f2->temp[i*f2->rows1*f2->cols1],f2->error2,f2->d_kernels[i], NULL, f2->stride1_rows,f2->stride1_cols, f2->padding1_rows);                
+                }
                 else if(f1->normalization_flag)
                     convolutional_back_prop(f1->post_normalization, f2->kernels[i], f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,f2->biases[i],f2->channels,&f2->temp[i*f2->rows1*f2->cols1],f2->error2,f2->d_kernels[i], NULL, f2->stride1_rows,f2->stride1_cols, f2->padding1_rows);                
                 else if(f1->activation_flag)
@@ -5152,9 +5287,12 @@ float* bp_cl_cl(cl* f1, cl* f2, float* error){
         
         else if(f2->training_mode == GRADIENT_DESCENT && f2->feed_forward_flag == EDGE_POPUP){
            if(f1->pooling_flag){
-               
-                convolutional_back_prop_edge_popup_ff_gd_bp(f1->post_pooling, f2->kernels, f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,f2->biases,f2->channels,f2->temp,f2->stride1_rows,f2->stride1_cols,f2->padding1_rows,f2->indices,f2->n_kernels,f2->n_kernels*f2->channels*f2->kernel_cols*f2->kernel_rows*f2->k_percentage,f2->d_biases,f2->d_kernels);
-                convolutional_back_prop_edge_popup_for_input(f1->post_pooling, f2->kernels, f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,0,f2->channels,f2->temp,f2->error2,NULL, NULL, f2->stride1_rows,f2->stride1_cols, f2->padding1_rows, f2->d_scores,f2->indices,f2->n_kernels,f2->n_kernels*f2->channels*f2->kernel_cols*f2->kernel_rows*f2->k_percentage);
+                float* pooltemp_prev = f1->post_pooling;
+                if(f1->convolutional_flag == NO_CONVOLUTION && f1->stride2_cols == 1 && f1->stride2_rows == 1 && f1->padding2_rows == 0 && f1->padding2_cols == 0 && f1->pooling_rows == 1 && f1->pooling_cols == 1){
+                    pooltemp_prev = f1->pooltemp;
+                }
+                convolutional_back_prop_edge_popup_ff_gd_bp(pooltemp_prev, f2->kernels, f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,f2->biases,f2->channels,f2->temp,f2->stride1_rows,f2->stride1_cols,f2->padding1_rows,f2->indices,f2->n_kernels,f2->n_kernels*f2->channels*f2->kernel_cols*f2->kernel_rows*f2->k_percentage,f2->d_biases,f2->d_kernels);
+                convolutional_back_prop_edge_popup_for_input(pooltemp_prev, f2->kernels, f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,0,f2->channels,f2->temp,f2->error2,NULL, NULL, f2->stride1_rows,f2->stride1_cols, f2->padding1_rows, f2->d_scores,f2->indices,f2->n_kernels,f2->n_kernels*f2->channels*f2->kernel_cols*f2->kernel_rows*f2->k_percentage);
             }
             
             else if(f1->normalization_flag){
@@ -5178,12 +5316,16 @@ float* bp_cl_cl(cl* f1, cl* f2, float* error){
         
         else if(f2->training_mode == EDGE_POPUP){
             if(f1->pooling_flag){
+                float* pooltemp_prev = f1->post_pooling;
+                if(f1->convolutional_flag == NO_CONVOLUTION && f1->stride2_cols == 1 && f1->stride2_rows == 1 && f1->padding2_rows == 0 && f1->padding2_cols == 0 && f1->pooling_rows == 1 && f1->pooling_cols == 1){
+                    pooltemp_prev = f1->pooltemp;
+                }
                 //printf("convolution bp after pooling\n");
                 for(i = 0; i < f2->n_kernels; i++){
-                    convolutional_back_prop_edge_popup(f1->post_pooling, f2->kernels[i], f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,f2->biases[i],f2->channels,&f2->temp[i*f2->rows1*f2->cols1],f2->error2,NULL, NULL, f2->stride1_rows,f2->stride1_cols, f2->padding1_rows, &f2->d_scores[i*f2->channels*f2->kernel_rows*f2->kernel_cols]);
+                    convolutional_back_prop_edge_popup(pooltemp_prev, f2->kernels[i], f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,f2->biases[i],f2->channels,&f2->temp[i*f2->rows1*f2->cols1],f2->error2,NULL, NULL, f2->stride1_rows,f2->stride1_cols, f2->padding1_rows, &f2->d_scores[i*f2->channels*f2->kernel_rows*f2->kernel_cols]);
                 }
                 
-                convolutional_back_prop_edge_popup_for_input(f1->post_pooling, f2->kernels, f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,0,f2->channels,f2->temp,f2->error2,NULL, NULL, f2->stride1_rows,f2->stride1_cols, f2->padding1_rows, f2->d_scores,f2->indices,f2->n_kernels,f2->n_kernels*f2->channels*f2->kernel_cols*f2->kernel_rows*f2->k_percentage);
+                convolutional_back_prop_edge_popup_for_input(pooltemp_prev, f2->kernels, f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,0,f2->channels,f2->temp,f2->error2,NULL, NULL, f2->stride1_rows,f2->stride1_cols, f2->padding1_rows, f2->d_scores,f2->indices,f2->n_kernels,f2->n_kernels*f2->channels*f2->kernel_cols*f2->kernel_rows*f2->k_percentage);
             }
             
             else if(f1->normalization_flag){
@@ -5361,8 +5503,13 @@ float* bp_cl_cl(cl* f1, cl* f2, float* error){
         
         if((f2->training_mode == GRADIENT_DESCENT && f2->feed_forward_flag == FULLY_FEED_FORWARD) || f2->training_mode == FREEZE_TRAINING){
             for(i = 0; i < f2->n_kernels; i++){
-                if(f1->pooling_flag)
-                    transposed_convolutional_back_prop(f1->post_pooling, f2->kernels[i], f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,f2->biases[i],f2->channels,&f2->temp[i*f2->rows1*f2->cols1],f2->error2,f2->d_kernels[i], &f2->d_biases[i], f2->stride1_rows,f2->stride1_cols, f2->padding1_rows);                
+                if(f1->pooling_flag){
+                    float* pooltemp_prev = f1->post_pooling;
+                    if(f1->convolutional_flag == NO_CONVOLUTION && f1->stride2_cols == 1 && f1->stride2_rows == 1 && f1->padding2_rows == 0 && f1->padding2_cols == 0 && f1->pooling_rows == 1 && f1->pooling_cols == 1){
+                        pooltemp_prev = f1->pooltemp;
+                    }
+                    transposed_convolutional_back_prop(pooltemp_prev, f2->kernels[i], f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,f2->biases[i],f2->channels,&f2->temp[i*f2->rows1*f2->cols1],f2->error2,f2->d_kernels[i], &f2->d_biases[i], f2->stride1_rows,f2->stride1_cols, f2->padding1_rows);                
+                }
                 else if(f1->normalization_flag)
                     transposed_convolutional_back_prop(f1->post_normalization, f2->kernels[i], f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,f2->biases[i],f2->channels,&f2->temp[i*f2->rows1*f2->cols1],f2->error2,f2->d_kernels[i], &f2->d_biases[i], f2->stride1_rows,f2->stride1_cols, f2->padding1_rows);                
                 else if(f1->activation_flag)
@@ -5373,8 +5520,13 @@ float* bp_cl_cl(cl* f1, cl* f2, float* error){
         }
         else if(f2->training_mode == FREEZE_BIASES){
             for(i = 0; i < f2->n_kernels; i++){
-                if(f1->pooling_flag)
-                    transposed_convolutional_back_prop(f1->post_pooling, f2->kernels[i], f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,f2->biases[i],f2->channels,&f2->temp[i*f2->rows1*f2->cols1],f2->error2,f2->d_kernels[i], NULL, f2->stride1_rows,f2->stride1_cols, f2->padding1_rows);                
+                if(f1->pooling_flag){
+                    float* pooltemp_prev = f1->post_pooling;
+                    if(f1->convolutional_flag == NO_CONVOLUTION && f1->stride2_cols == 1 && f1->stride2_rows == 1 && f1->padding2_rows == 0 && f1->padding2_cols == 0 && f1->pooling_rows == 1 && f1->pooling_cols == 1){
+                        pooltemp_prev = f1->pooltemp;
+                    }
+                    transposed_convolutional_back_prop(pooltemp_prev, f2->kernels[i], f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,f2->biases[i],f2->channels,&f2->temp[i*f2->rows1*f2->cols1],f2->error2,f2->d_kernels[i], NULL, f2->stride1_rows,f2->stride1_cols, f2->padding1_rows);                
+                }
                 else if(f1->normalization_flag)
                     transposed_convolutional_back_prop(f1->post_normalization, f2->kernels[i], f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,f2->biases[i],f2->channels,&f2->temp[i*f2->rows1*f2->cols1],f2->error2,f2->d_kernels[i], NULL, f2->stride1_rows,f2->stride1_cols, f2->padding1_rows);                
                 else if(f1->activation_flag)
@@ -5386,9 +5538,12 @@ float* bp_cl_cl(cl* f1, cl* f2, float* error){
         
         else if(f2->training_mode == GRADIENT_DESCENT && f2->feed_forward_flag == EDGE_POPUP){
            if(f1->pooling_flag){
-               
-                transposed_convolutional_back_prop_edge_popup_ff_gd_bp(f1->post_pooling, f2->kernels, f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,f2->biases,f2->channels,f2->temp,f2->stride1_rows,f2->stride1_cols,f2->padding1_rows,f2->indices,f2->n_kernels,f2->n_kernels*f2->channels*f2->kernel_cols*f2->kernel_rows*f2->k_percentage,f2->d_biases,f2->d_kernels);
-                transposed_convolutional_back_prop_edge_popup_for_input(f1->post_pooling, f2->kernels, f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,0,f2->channels,f2->temp,f2->error2,NULL, NULL, f2->stride1_rows,f2->stride1_cols, f2->padding1_rows, f2->d_scores,f2->indices,f2->n_kernels,f2->n_kernels*f2->channels*f2->kernel_cols*f2->kernel_rows*f2->k_percentage);
+                float* pooltemp_prev = f1->post_pooling;
+                if(f1->convolutional_flag == NO_CONVOLUTION && f1->stride2_cols == 1 && f1->stride2_rows == 1 && f1->padding2_rows == 0 && f1->padding2_cols == 0 && f1->pooling_rows == 1 && f1->pooling_cols == 1){
+                    pooltemp_prev = f1->pooltemp;
+                }
+                transposed_convolutional_back_prop_edge_popup_ff_gd_bp(pooltemp_prev, f2->kernels, f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,f2->biases,f2->channels,f2->temp,f2->stride1_rows,f2->stride1_cols,f2->padding1_rows,f2->indices,f2->n_kernels,f2->n_kernels*f2->channels*f2->kernel_cols*f2->kernel_rows*f2->k_percentage,f2->d_biases,f2->d_kernels);
+                transposed_convolutional_back_prop_edge_popup_for_input(pooltemp_prev, f2->kernels, f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,0,f2->channels,f2->temp,f2->error2,NULL, NULL, f2->stride1_rows,f2->stride1_cols, f2->padding1_rows, f2->d_scores,f2->indices,f2->n_kernels,f2->n_kernels*f2->channels*f2->kernel_cols*f2->kernel_rows*f2->k_percentage);
             }
             
             else if(f1->normalization_flag){
@@ -5416,11 +5571,15 @@ float* bp_cl_cl(cl* f1, cl* f2, float* error){
         
         else if(f2->training_mode == EDGE_POPUP){
             if(f1->pooling_flag){
+                float* pooltemp_prev = f1->post_pooling;
+                if(f1->convolutional_flag == NO_CONVOLUTION && f1->stride2_cols == 1 && f1->stride2_rows == 1 && f1->padding2_rows == 0 && f1->padding2_cols == 0 && f1->pooling_rows == 1 && f1->pooling_cols == 1){
+                    pooltemp_prev = f1->pooltemp;
+                }
                 for(i = 0; i < f2->n_kernels; i++){
-                    transposed_convolutional_back_prop_edge_popup(f1->post_pooling, f2->kernels[i], f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,f2->biases[i],f2->channels,&f2->temp[i*f2->rows1*f2->cols1],f2->error2,NULL, NULL, f2->stride1_rows,f2->stride1_cols, f2->padding1_rows, &f2->d_scores[i*f2->channels*f2->kernel_rows*f2->kernel_cols]);
+                    transposed_convolutional_back_prop_edge_popup(pooltemp_prev, f2->kernels[i], f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,f2->biases[i],f2->channels,&f2->temp[i*f2->rows1*f2->cols1],f2->error2,NULL, NULL, f2->stride1_rows,f2->stride1_cols, f2->padding1_rows, &f2->d_scores[i*f2->channels*f2->kernel_rows*f2->kernel_cols]);
                 }
                 
-                transposed_convolutional_back_prop_edge_popup_for_input(f1->post_pooling, f2->kernels, f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,0,f2->channels,f2->temp,f2->error2,NULL, NULL, f2->stride1_rows,f2->stride1_cols, f2->padding1_rows, f2->d_scores,f2->indices,f2->n_kernels,f2->n_kernels*f2->channels*f2->kernel_cols*f2->kernel_rows*f2->k_percentage);
+                transposed_convolutional_back_prop_edge_popup_for_input(pooltemp_prev, f2->kernels, f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,0,f2->channels,f2->temp,f2->error2,NULL, NULL, f2->stride1_rows,f2->stride1_cols, f2->padding1_rows, f2->d_scores,f2->indices,f2->n_kernels,f2->n_kernels*f2->channels*f2->kernel_cols*f2->kernel_rows*f2->k_percentage);
             }
             
             else if(f1->normalization_flag){
@@ -5480,6 +5639,9 @@ float* bp_cl_cl(cl* f1, cl* f2, float* error){
 float* bp_cl_cl_without_learning_parameters(cl* f1, cl* f2,cl* f3, float* error){
     int i,j,k;
     float* temp = f2->temp;
+    if(f2->convolutional_flag == NO_CONVOLUTION && f2->stride2_cols == 1 && f2->stride2_rows == 1 && f2->padding2_rows == 0 && f2->padding2_cols == 0 && f2->pooling_rows == 1 && f2->pooling_cols == 1){
+        return error;
+    }
     /* computing backpropagation for f2*/
     if(f2->pooling_flag == MAX_POOLING){
         //printf("max pooling bp\n");
@@ -5499,8 +5661,13 @@ float* bp_cl_cl_without_learning_parameters(cl* f1, cl* f2,cl* f3, float* error)
         else{
             for(i = 0; i < f2->n_kernels; i++){
                 if(f3->used_kernels[i]){
-                    if(f1->pooling_flag)
-                        max_pooling_back_prop(&f1->post_pooling[i*f2->rows1*f2->cols1], &error[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows, &f2->temp[i*f2->rows1*f2->cols1]);
+                    if(f1->pooling_flag){
+                        float* pooltemp_prev = f1->post_pooling;
+                        if(f1->convolutional_flag == NO_CONVOLUTION && f1->stride2_cols == 1 && f1->stride2_rows == 1 && f1->padding2_rows == 0 && f1->padding2_cols == 0 && f1->pooling_rows == 1 && f1->pooling_cols == 1){
+                            pooltemp_prev = f1->pooltemp;
+                        }
+                        max_pooling_back_prop(&pooltemp_prev[i*f2->rows1*f2->cols1], &error[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows, &f2->temp[i*f2->rows1*f2->cols1]);
+                    }
                     else if(f1->normalization_flag)
                         max_pooling_back_prop(&f1->post_normalization[i*f2->rows1*f2->cols1], &error[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows, &f2->temp[i*f2->rows1*f2->cols1]);
                     else if(f1->activation_flag)
@@ -5517,7 +5684,7 @@ float* bp_cl_cl_without_learning_parameters(cl* f1, cl* f2,cl* f3, float* error)
         //printf("avarage pooling bp\n");
         for(i = 0; i < f2->n_kernels; i++){
             if(f3->used_kernels[i]){
-                AVERAGE_POOLING_back_prop(&f2->temp[i*f2->rows1*f2->cols1], &error[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
+                average_pooling_back_prop(&f2->temp[i*f2->rows1*f2->cols1], &error[i*f2->rows2*f2->cols2], f2->rows1, f2->cols1, f2->pooling_rows, f2->pooling_cols, f2->stride2_rows, f2->stride2_cols, f2->padding2_rows);
             }
         }
     }
@@ -5667,8 +5834,13 @@ float* bp_cl_cl_without_learning_parameters(cl* f1, cl* f2,cl* f3, float* error)
         
         if((f2->training_mode == GRADIENT_DESCENT && f2->feed_forward_flag == FULLY_FEED_FORWARD) || f2->training_mode == FREEZE_TRAINING){
             for(i = 0; i < f2->n_kernels; i++){
-                if(f1->pooling_flag)
-                    convolutional_back_prop(f1->post_pooling, f3->kernels[i], f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,f3->biases[i],f2->channels,&f2->temp[i*f2->rows1*f2->cols1],f2->error2,f2->d_kernels[i], &f2->d_biases[i], f2->stride1_rows,f2->stride1_cols, f2->padding1_rows);                
+                if(f1->pooling_flag){
+                    float* pooltemp_prev = f1->post_pooling;
+                    if(f1->convolutional_flag == NO_CONVOLUTION && f1->stride2_cols == 1 && f1->stride2_rows == 1 && f1->padding2_rows == 0 && f1->padding2_cols == 0 && f1->pooling_rows == 1 && f1->pooling_cols == 1){
+                        pooltemp_prev = f1->pooltemp;
+                    }
+                    convolutional_back_prop(pooltemp_prev, f3->kernels[i], f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,f3->biases[i],f2->channels,&f2->temp[i*f2->rows1*f2->cols1],f2->error2,f2->d_kernels[i], &f2->d_biases[i], f2->stride1_rows,f2->stride1_cols, f2->padding1_rows);                
+                }
                 else if(f1->normalization_flag)
                     convolutional_back_prop(f1->post_normalization, f3->kernels[i], f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,f3->biases[i],f2->channels,&f2->temp[i*f2->rows1*f2->cols1],f2->error2,f2->d_kernels[i], &f2->d_biases[i], f2->stride1_rows,f2->stride1_cols, f2->padding1_rows);                
                 else if(f1->activation_flag){
@@ -5680,8 +5852,13 @@ float* bp_cl_cl_without_learning_parameters(cl* f1, cl* f2,cl* f3, float* error)
         }
         else if(f2->training_mode == FREEZE_BIASES){
             for(i = 0; i < f2->n_kernels; i++){
-                if(f1->pooling_flag)
-                    convolutional_back_prop(f1->post_pooling, f3->kernels[i], f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,f3->biases[i],f2->channels,&f2->temp[i*f2->rows1*f2->cols1],f2->error2,f2->d_kernels[i], NULL, f2->stride1_rows,f2->stride1_cols, f2->padding1_rows);                
+                if(f1->pooling_flag){
+                    float* pooltemp_prev = f1->post_pooling;
+                    if(f1->convolutional_flag == NO_CONVOLUTION && f1->stride2_cols == 1 && f1->stride2_rows == 1 && f1->padding2_rows == 0 && f1->padding2_cols == 0 && f1->pooling_rows == 1 && f1->pooling_cols == 1){
+                        pooltemp_prev = f1->pooltemp;
+                    }
+                    convolutional_back_prop(pooltemp_prev, f3->kernels[i], f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,f3->biases[i],f2->channels,&f2->temp[i*f2->rows1*f2->cols1],f2->error2,f2->d_kernels[i], NULL, f2->stride1_rows,f2->stride1_cols, f2->padding1_rows);                
+                }
                 else if(f1->normalization_flag)
                     convolutional_back_prop(f1->post_normalization, f3->kernels[i], f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,f3->biases[i],f2->channels,&f2->temp[i*f2->rows1*f2->cols1],f2->error2,f2->d_kernels[i], NULL, f2->stride1_rows,f2->stride1_cols, f2->padding1_rows);                
                 else if(f1->activation_flag)
@@ -5693,9 +5870,12 @@ float* bp_cl_cl_without_learning_parameters(cl* f1, cl* f2,cl* f3, float* error)
         
         else if(f2->training_mode == GRADIENT_DESCENT && f2->feed_forward_flag == EDGE_POPUP){
            if(f1->pooling_flag){
-               
-                convolutional_back_prop_edge_popup_ff_gd_bp(f1->post_pooling, f3->kernels, f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,f3->biases,f2->channels,f2->temp,f2->stride1_rows,f2->stride1_cols,f2->padding1_rows,f3->indices,f2->n_kernels,f2->n_kernels*f2->channels*f2->kernel_cols*f2->kernel_rows*f2->k_percentage,f2->d_biases,f2->d_kernels);
-                convolutional_back_prop_edge_popup_for_input(f1->post_pooling, f3->kernels, f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,0,f2->channels,f2->temp,f2->error2,NULL, NULL, f2->stride1_rows,f2->stride1_cols, f2->padding1_rows, f2->d_scores,f3->indices,f2->n_kernels,f2->n_kernels*f2->channels*f2->kernel_cols*f2->kernel_rows*f2->k_percentage);
+                float* pooltemp_prev = f1->post_pooling;
+                if(f1->convolutional_flag == NO_CONVOLUTION && f1->stride2_cols == 1 && f1->stride2_rows == 1 && f1->padding2_rows == 0 && f1->padding2_cols == 0 && f1->pooling_rows == 1 && f1->pooling_cols == 1){
+                    pooltemp_prev = f1->pooltemp;
+                }
+                convolutional_back_prop_edge_popup_ff_gd_bp(pooltemp_prev, f3->kernels, f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,f3->biases,f2->channels,f2->temp,f2->stride1_rows,f2->stride1_cols,f2->padding1_rows,f3->indices,f2->n_kernels,f2->n_kernels*f2->channels*f2->kernel_cols*f2->kernel_rows*f2->k_percentage,f2->d_biases,f2->d_kernels);
+                convolutional_back_prop_edge_popup_for_input(pooltemp_prev, f3->kernels, f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,0,f2->channels,f2->temp,f2->error2,NULL, NULL, f2->stride1_rows,f2->stride1_cols, f2->padding1_rows, f2->d_scores,f3->indices,f2->n_kernels,f2->n_kernels*f2->channels*f2->kernel_cols*f2->kernel_rows*f2->k_percentage);
             }
             
             else if(f1->normalization_flag){
@@ -5719,12 +5899,16 @@ float* bp_cl_cl_without_learning_parameters(cl* f1, cl* f2,cl* f3, float* error)
         
         else if(f2->training_mode == EDGE_POPUP){
             if(f1->pooling_flag){
+                float* pooltemp_prev = f1->post_pooling;
+                if(f1->convolutional_flag == NO_CONVOLUTION && f1->stride2_cols == 1 && f1->stride2_rows == 1 && f1->padding2_rows == 0 && f1->padding2_cols == 0 && f1->pooling_rows == 1 && f1->pooling_cols == 1){
+                    pooltemp_prev = f1->pooltemp;
+                }
                 //printf("convolution bp after pooling\n");
                 for(i = 0; i < f2->n_kernels; i++){
-                    convolutional_back_prop_edge_popup(f1->post_pooling, f3->kernels[i], f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,f3->biases[i],f2->channels,&f2->temp[i*f2->rows1*f2->cols1],f2->error2,NULL, NULL, f2->stride1_rows,f2->stride1_cols, f2->padding1_rows, &f2->d_scores[i*f2->channels*f2->kernel_rows*f2->kernel_cols]);
+                    convolutional_back_prop_edge_popup(pooltemp_prev, f3->kernels[i], f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,f3->biases[i],f2->channels,&f2->temp[i*f2->rows1*f2->cols1],f2->error2,NULL, NULL, f2->stride1_rows,f2->stride1_cols, f2->padding1_rows, &f2->d_scores[i*f2->channels*f2->kernel_rows*f2->kernel_cols]);
                 }
                 
-                convolutional_back_prop_edge_popup_for_input(f1->post_pooling, f3->kernels, f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,0,f2->channels,f2->temp,f2->error2,NULL, NULL, f2->stride1_rows,f2->stride1_cols, f2->padding1_rows, f2->d_scores,f3->indices,f2->n_kernels,f2->n_kernels*f2->channels*f2->kernel_cols*f2->kernel_rows*f2->k_percentage);
+                convolutional_back_prop_edge_popup_for_input(pooltemp_prev, f3->kernels, f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,0,f2->channels,f2->temp,f2->error2,NULL, NULL, f2->stride1_rows,f2->stride1_cols, f2->padding1_rows, f2->d_scores,f3->indices,f2->n_kernels,f2->n_kernels*f2->channels*f2->kernel_cols*f2->kernel_rows*f2->k_percentage);
             }
             
             else if(f1->normalization_flag){
@@ -5901,8 +6085,13 @@ float* bp_cl_cl_without_learning_parameters(cl* f1, cl* f2,cl* f3, float* error)
         
         if((f2->training_mode == GRADIENT_DESCENT && f2->feed_forward_flag == FULLY_FEED_FORWARD) || f2->training_mode == FREEZE_TRAINING){
             for(i = 0; i < f2->n_kernels; i++){
-                if(f1->pooling_flag)
-                    transposed_convolutional_back_prop(f1->post_pooling, f3->kernels[i], f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,f3->biases[i],f2->channels,&f2->temp[i*f2->rows1*f2->cols1],f2->error2,f2->d_kernels[i], &f2->d_biases[i], f2->stride1_rows,f2->stride1_cols, f2->padding1_rows);                
+                if(f1->pooling_flag){
+                    float* pooltemp_prev = f1->post_pooling;
+                    if(f1->convolutional_flag == NO_CONVOLUTION && f1->stride2_cols == 1 && f1->stride2_rows == 1 && f1->padding2_rows == 0 && f1->padding2_cols == 0 && f1->pooling_rows == 1 && f1->pooling_cols == 1){
+                        pooltemp_prev = f1->pooltemp;
+                    }
+                    transposed_convolutional_back_prop(pooltemp_prev, f3->kernels[i], f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,f3->biases[i],f2->channels,&f2->temp[i*f2->rows1*f2->cols1],f2->error2,f2->d_kernels[i], &f2->d_biases[i], f2->stride1_rows,f2->stride1_cols, f2->padding1_rows);                
+                }
                 else if(f1->normalization_flag)
                     transposed_convolutional_back_prop(f1->post_normalization, f3->kernels[i], f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,f3->biases[i],f2->channels,&f2->temp[i*f2->rows1*f2->cols1],f2->error2,f2->d_kernels[i], &f2->d_biases[i], f2->stride1_rows,f2->stride1_cols, f2->padding1_rows);                
                 else if(f1->activation_flag)
@@ -5913,8 +6102,14 @@ float* bp_cl_cl_without_learning_parameters(cl* f1, cl* f2,cl* f3, float* error)
         }
         else if(f2->training_mode == FREEZE_BIASES){
             for(i = 0; i < f2->n_kernels; i++){
-                if(f1->pooling_flag)
-                    transposed_convolutional_back_prop(f1->post_pooling, f3->kernels[i], f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,f3->biases[i],f2->channels,&f2->temp[i*f2->rows1*f2->cols1],f2->error2,f2->d_kernels[i], NULL, f2->stride1_rows,f2->stride1_cols, f2->padding1_rows);                
+                if(f1->pooling_flag){
+                    float* pooltemp_prev = f1->post_pooling;
+                    if(f1->convolutional_flag == NO_CONVOLUTION && f1->stride2_cols == 1 && f1->stride2_rows == 1 && f1->padding2_rows == 0 && f1->padding2_cols == 0 && f1->pooling_rows == 1 && f1->pooling_cols == 1){
+                        pooltemp_prev = f1->pooltemp;
+                    }
+                    transposed_convolutional_back_prop(pooltemp_prev, f3->kernels[i], f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,f3->biases[i],f2->channels,&f2->temp[i*f2->rows1*f2->cols1],f2->error2,f2->d_kernels[i], NULL, f2->stride1_rows,f2->stride1_cols, f2->padding1_rows);                
+                
+                }
                 else if(f1->normalization_flag)
                     transposed_convolutional_back_prop(f1->post_normalization, f3->kernels[i], f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,f3->biases[i],f2->channels,&f2->temp[i*f2->rows1*f2->cols1],f2->error2,f2->d_kernels[i], NULL, f2->stride1_rows,f2->stride1_cols, f2->padding1_rows);                
                 else if(f1->activation_flag)
@@ -5926,9 +6121,12 @@ float* bp_cl_cl_without_learning_parameters(cl* f1, cl* f2,cl* f3, float* error)
         
         else if(f2->training_mode == GRADIENT_DESCENT && f2->feed_forward_flag == EDGE_POPUP){
            if(f1->pooling_flag){
-               
-                transposed_convolutional_back_prop_edge_popup_ff_gd_bp(f1->post_pooling, f3->kernels, f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,f3->biases,f2->channels,f2->temp,f2->stride1_rows,f2->stride1_cols,f2->padding1_rows,f3->indices,f2->n_kernels,f2->n_kernels*f2->channels*f2->kernel_cols*f2->kernel_rows*f2->k_percentage,f2->d_biases,f2->d_kernels);
-                transposed_convolutional_back_prop_edge_popup_for_input(f1->post_pooling, f3->kernels, f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,0,f2->channels,f2->temp,f2->error2,NULL, NULL, f2->stride1_rows,f2->stride1_cols, f2->padding1_rows, f2->d_scores,f3->indices,f2->n_kernels,f2->n_kernels*f2->channels*f2->kernel_cols*f2->kernel_rows*f2->k_percentage);
+                float* pooltemp_prev = f1->post_pooling;
+                if(f1->convolutional_flag == NO_CONVOLUTION && f1->stride2_cols == 1 && f1->stride2_rows == 1 && f1->padding2_rows == 0 && f1->padding2_cols == 0 && f1->pooling_rows == 1 && f1->pooling_cols == 1){
+                    pooltemp_prev = f1->pooltemp;
+                }
+                transposed_convolutional_back_prop_edge_popup_ff_gd_bp(pooltemp_prev, f3->kernels, f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,f3->biases,f2->channels,f2->temp,f2->stride1_rows,f2->stride1_cols,f2->padding1_rows,f3->indices,f2->n_kernels,f2->n_kernels*f2->channels*f2->kernel_cols*f2->kernel_rows*f2->k_percentage,f2->d_biases,f2->d_kernels);
+                transposed_convolutional_back_prop_edge_popup_for_input(pooltemp_prev, f3->kernels, f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,0,f2->channels,f2->temp,f2->error2,NULL, NULL, f2->stride1_rows,f2->stride1_cols, f2->padding1_rows, f2->d_scores,f3->indices,f2->n_kernels,f2->n_kernels*f2->channels*f2->kernel_cols*f2->kernel_rows*f2->k_percentage);
             }
             
             else if(f1->normalization_flag){
@@ -5956,11 +6154,15 @@ float* bp_cl_cl_without_learning_parameters(cl* f1, cl* f2,cl* f3, float* error)
         
         else if(f2->training_mode == EDGE_POPUP){
             if(f1->pooling_flag){
+                float* pooltemp_prev = f1->post_pooling;
+                if(f1->convolutional_flag == NO_CONVOLUTION && f1->stride2_cols == 1 && f1->stride2_rows == 1 && f1->padding2_rows == 0 && f1->padding2_cols == 0 && f1->pooling_rows == 1 && f1->pooling_cols == 1){
+                    pooltemp_prev = f1->pooltemp;
+                }
                 for(i = 0; i < f2->n_kernels; i++){
-                    transposed_convolutional_back_prop_edge_popup(f1->post_pooling, f3->kernels[i], f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,f3->biases[i],f2->channels,&f2->temp[i*f2->rows1*f2->cols1],f2->error2,NULL, NULL, f2->stride1_rows,f2->stride1_cols, f2->padding1_rows, &f2->d_scores[i*f2->channels*f2->kernel_rows*f2->kernel_cols]);
+                    transposed_convolutional_back_prop_edge_popup(pooltemp_prev, f3->kernels[i], f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,f3->biases[i],f2->channels,&f2->temp[i*f2->rows1*f2->cols1],f2->error2,NULL, NULL, f2->stride1_rows,f2->stride1_cols, f2->padding1_rows, &f2->d_scores[i*f2->channels*f2->kernel_rows*f2->kernel_cols]);
                 }
                 
-                transposed_convolutional_back_prop_edge_popup_for_input(f1->post_pooling, f3->kernels, f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,0,f2->channels,f2->temp,f2->error2,NULL, NULL, f2->stride1_rows,f2->stride1_cols, f2->padding1_rows, f2->d_scores,f3->indices,f2->n_kernels,f2->n_kernels*f2->channels*f2->kernel_cols*f2->kernel_rows*f2->k_percentage);
+                transposed_convolutional_back_prop_edge_popup_for_input(pooltemp_prev, f3->kernels, f2->input_rows,f2->input_cols,f2->kernel_rows,f2->kernel_cols,0,f2->channels,f2->temp,f2->error2,NULL, NULL, f2->stride1_rows,f2->stride1_cols, f2->padding1_rows, f2->d_scores,f3->indices,f2->n_kernels,f2->n_kernels*f2->channels*f2->kernel_cols*f2->kernel_rows*f2->k_percentage);
             }
             
             else if(f1->normalization_flag){
@@ -6137,22 +6339,26 @@ float* bp_cl_fcl(cl* f1, fcl* f2, float* error){
         }
     }
     
-    if(f2->feed_forward_flag == EDGE_POPUP){
+    if(f2->feed_forward_flag == EDGE_POPUP && f2->activation_flag == SIGMOID){
         dot_float_input(f2->temp,f2->active_output_neurons,f2->temp,f2->output);
     }
     
     /* computing the weight and bias derivatives for f2 applied to f1 output*/
         if(f1->pooling_flag){
+            float* pooltemp_prev = f1->post_pooling;
+            if(f1->convolutional_flag == NO_CONVOLUTION && f1->stride2_cols == 1 && f1->stride2_rows == 1 && f1->padding2_rows == 0 && f1->padding2_cols == 0 && f1->pooling_rows == 1 && f1->pooling_cols == 1){
+                pooltemp_prev = f1->pooltemp;
+            }
             if((f2->training_mode == GRADIENT_DESCENT && f2->feed_forward_flag == FULLY_FEED_FORWARD ) || f2->training_mode == FREEZE_TRAINING){
-                fully_connected_back_prop(f1->post_pooling, f2->temp, f2->weights,f2->error2, f2->d_weights,f2->d_biases, f2->input, f2->output,f2->training_mode);
+                fully_connected_back_prop(pooltemp_prev, f2->temp, f2->weights,f2->error2, f2->d_weights,f2->d_biases, f2->input, f2->output,f2->training_mode);
                 
             }
             else if(f2->training_mode == FREEZE_BIASES)
-                fully_connected_back_prop(f1->post_pooling, f2->temp, f2->weights,f2->error2, f2->d_weights,NULL, f2->input, f2->output,f2->training_mode);
+                fully_connected_back_prop(pooltemp_prev, f2->temp, f2->weights,f2->error2, f2->d_weights,NULL, f2->input, f2->output,f2->training_mode);
             else if(f2->training_mode == GRADIENT_DESCENT && f2->feed_forward_flag == EDGE_POPUP )
-                fully_connected_back_prop_edge_popup_ff_gd_bp(f1->post_pooling, f2->temp, f2->weights,f2->error2, f2->d_weights,f2->d_biases, f2->input, f2->output,f2->d_scores,f2->indices,f2->input*f2->output*f2->k_percentage);
+                fully_connected_back_prop_edge_popup_ff_gd_bp(pooltemp_prev, f2->temp, f2->weights,f2->error2, f2->d_weights,f2->d_biases, f2->input, f2->output,f2->d_scores,f2->indices,f2->input*f2->output*f2->k_percentage);
             else if(f2->training_mode == EDGE_POPUP)
-                fully_connected_back_prop_edge_popup(f1->post_pooling, f2->temp, f2->weights,f2->error2, f2->d_weights,f2->d_biases, f2->input, f2->output,f2->d_scores,f2->indices,f2->input*f2->output*f2->k_percentage);
+                fully_connected_back_prop_edge_popup(pooltemp_prev, f2->temp, f2->weights,f2->error2, f2->d_weights,f2->d_biases, f2->input, f2->output,f2->d_scores,f2->indices,f2->input*f2->output*f2->k_percentage);
         }
         else if(f1->normalization_flag){
             if((f2->training_mode == GRADIENT_DESCENT && f2->feed_forward_flag == FULLY_FEED_FORWARD ) || f2->training_mode == FREEZE_TRAINING)
@@ -6322,22 +6528,26 @@ float* bp_cl_fcl_without_learning_parameters(cl* f1, fcl* f2,fcl* f3, float* err
         }
     }
     
-    if(f2->feed_forward_flag == EDGE_POPUP){
+    if(f2->feed_forward_flag == EDGE_POPUP && f2->activation_flag == SIGMOID){
         dot_float_input(f2->temp,f3->active_output_neurons,f2->temp,f2->output);
     }
     
     /* computing the weight and bias derivatives for f2 applied to f1 output*/
         if(f1->pooling_flag){
+            float* pooltemp_prev = f1->post_pooling;
+            if(f1->convolutional_flag == NO_CONVOLUTION && f1->stride2_cols == 1 && f1->stride2_rows == 1 && f1->padding2_rows == 0 && f1->padding2_cols == 0 && f1->pooling_rows == 1 && f1->pooling_cols == 1){
+                pooltemp_prev = f1->pooltemp;
+            }
             if((f2->training_mode == GRADIENT_DESCENT && f2->feed_forward_flag == FULLY_FEED_FORWARD ) || f2->training_mode == FREEZE_TRAINING){
-                fully_connected_back_prop(f1->post_pooling, f2->temp, f3->weights,f2->error2, f2->d_weights,f2->d_biases, f2->input, f2->output,f2->training_mode);
+                fully_connected_back_prop(pooltemp_prev, f2->temp, f3->weights,f2->error2, f2->d_weights,f2->d_biases, f2->input, f2->output,f2->training_mode);
                 
             }
             else if(f2->training_mode == FREEZE_BIASES)
-                fully_connected_back_prop(f1->post_pooling, f2->temp, f3->weights,f2->error2, f2->d_weights,NULL, f2->input, f2->output,f2->training_mode);
+                fully_connected_back_prop(pooltemp_prev, f2->temp, f3->weights,f2->error2, f2->d_weights,NULL, f2->input, f2->output,f2->training_mode);
             else if(f2->training_mode == GRADIENT_DESCENT && f2->feed_forward_flag == EDGE_POPUP )
-                fully_connected_back_prop_edge_popup_ff_gd_bp(f1->post_pooling, f2->temp, f3->weights,f2->error2, f2->d_weights,f2->d_biases, f2->input, f2->output,f2->d_scores,f3->indices,f2->input*f2->output*f2->k_percentage);
+                fully_connected_back_prop_edge_popup_ff_gd_bp(pooltemp_prev, f2->temp, f3->weights,f2->error2, f2->d_weights,f2->d_biases, f2->input, f2->output,f2->d_scores,f3->indices,f2->input*f2->output*f2->k_percentage);
             else if(f2->training_mode == EDGE_POPUP)
-                fully_connected_back_prop_edge_popup(f1->post_pooling, f2->temp, f3->weights,f2->error2, f2->d_weights,f2->d_biases, f2->input, f2->output,f2->d_scores,f3->indices,f2->input*f2->output*f2->k_percentage);
+                fully_connected_back_prop_edge_popup(pooltemp_prev, f2->temp, f3->weights,f2->error2, f2->d_weights,f2->d_biases, f2->input, f2->output,f2->d_scores,f3->indices,f2->input*f2->output*f2->k_percentage);
         }
         else if(f1->normalization_flag){
             if((f2->training_mode == GRADIENT_DESCENT && f2->feed_forward_flag == FULLY_FEED_FORWARD ) || f2->training_mode == FREEZE_TRAINING)
@@ -6454,7 +6664,11 @@ void model_tensor_input_ff(model* m, int tensor_depth, int tensor_i, int tensor_
                     
                     if(k3-count == m->rls[z]->n_cl-1){
                         if(m->rls[z]->cls[k3-count]->pooling_flag){
-                            sum1D(m->rls[z]->input,m->rls[z]->cls[k3-count]->post_pooling,m->rls[z]->cl_output->pre_activation,m->rls[z]->cls[k3-count]->n_kernels*m->rls[z]->cls[k3-count]->rows2*m->rls[z]->cls[k3-count]->cols2);
+                            float* pooltemp_prev = m->rls[z]->cls[k3-count]->post_pooling;
+                            if(m->rls[z]->cls[k3-count]->convolutional_flag == NO_CONVOLUTION && m->rls[z]->cls[k3-count]->stride2_cols == 1 && m->rls[z]->cls[k3-count]->stride2_rows == 1 && m->rls[z]->cls[k3-count]->padding2_rows == 0 && m->rls[z]->cls[k3-count]->padding2_cols == 0 && m->rls[z]->cls[k3-count]->pooling_rows == 1 && m->rls[z]->cls[k3-count]->pooling_cols == 1){
+                                pooltemp_prev = m->rls[z]->cls[k3-count]->pooltemp;
+                            }
+                            sum1D(m->rls[z]->input,pooltemp_prev,m->rls[z]->cl_output->pre_activation,m->rls[z]->cls[k3-count]->n_kernels*m->rls[z]->cls[k3-count]->rows2*m->rls[z]->cls[k3-count]->cols2);
                             //printf("summing from previous pooling\n");
                         }
                         else if(m->rls[z]->cls[k3-count]->normalization_flag)
@@ -6605,7 +6819,11 @@ void model_tensor_input_ff(model* m, int tensor_depth, int tensor_i, int tensor_
                     else if(m->sla[i-1][0] == CLS){
                         if(k3-count == 0){
                             if(m->cls[k2-1]->pooling_flag){
-                                m->rls[z]->input = m->cls[k2-1]->post_pooling;
+                                float* pooltemp_prev = m->cls[k2-1]->post_pooling;
+                                if(m->cls[k2-1]->convolutional_flag == NO_CONVOLUTION && m->cls[k2-1]->stride2_cols == 1 && m->cls[k2-1]->stride2_rows == 1 && m->cls[k2-1]->padding2_rows == 0 && m->cls[k2-1]->padding2_cols == 0 && m->cls[k2-1]->pooling_rows == 1 && m->cls[k2-1]->pooling_cols == 1){
+                                    pooltemp_prev = m->cls[k2-1]->pooltemp;
+                                }
+                                m->rls[z]->input = pooltemp_prev;
                             }
                             else if(m->cls[k2-1]->normalization_flag){
                                 m->rls[z]->input = m->cls[k2-1]->post_normalization;
@@ -6647,7 +6865,11 @@ void model_tensor_input_ff(model* m, int tensor_depth, int tensor_i, int tensor_
                     
                     if(k3-count == m->rls[z]->n_cl-1){
                         if(m->rls[z]->cls[k3-count]->pooling_flag){
-                            sum1D(m->rls[z]->input,m->rls[z]->cls[k3-count]->post_pooling,m->rls[z]->cl_output->pre_activation,m->rls[z]->cls[k3-count]->n_kernels*m->rls[z]->cls[k3-count]->rows2*m->rls[z]->cls[k3-count]->cols2);
+                            float* pooltemp_prev = m->rls[z]->cls[k3-count]->post_pooling;
+                            if(m->rls[z]->cls[k3-count]->convolutional_flag == NO_CONVOLUTION && m->rls[z]->cls[k3-count]->stride2_cols == 1 && m->rls[z]->cls[k3-count]->stride2_rows == 1 && m->rls[z]->cls[k3-count]->padding2_rows == 0 && m->rls[z]->cls[k3-count]->padding2_cols == 0 && m->rls[z]->cls[k3-count]->pooling_rows == 1 && m->rls[z]->cls[k3-count]->pooling_cols == 1){
+                                pooltemp_prev = m->rls[z]->cls[k3-count]->pooltemp;
+                            }
+                            sum1D(m->rls[z]->input,pooltemp_prev,m->rls[z]->cl_output->pre_activation,m->rls[z]->cls[k3-count]->n_kernels*m->rls[z]->cls[k3-count]->rows2*m->rls[z]->cls[k3-count]->cols2);
                             //printf("summing from previous pooling\n");
                         }
                         else if(m->rls[z]->cls[k3-count]->normalization_flag)
@@ -6768,7 +6990,11 @@ void model_tensor_input_ff_without_learning_parameters(model* m, model* m2, int 
                     
                     if(k3-count == m->rls[z]->n_cl-1){
                         if(m->rls[z]->cls[k3-count]->pooling_flag){
-                            sum1D(m->rls[z]->input,m->rls[z]->cls[k3-count]->post_pooling,m->rls[z]->cl_output->pre_activation,m->rls[z]->cls[k3-count]->n_kernels*m->rls[z]->cls[k3-count]->rows2*m->rls[z]->cls[k3-count]->cols2);
+                            float* pooltemp_prev = m->rls[z]->cls[k3-count]->post_pooling;
+                            if(m->rls[z]->cls[k3-count]->convolutional_flag == NO_CONVOLUTION && m->rls[z]->cls[k3-count]->stride2_cols == 1 && m->rls[z]->cls[k3-count]->stride2_rows == 1 && m->rls[z]->cls[k3-count]->padding2_rows == 0 && m->rls[z]->cls[k3-count]->padding2_cols == 0 && m->rls[z]->cls[k3-count]->pooling_rows == 1 && m->rls[z]->cls[k3-count]->pooling_cols == 1){
+                                pooltemp_prev = m->rls[z]->cls[k3-count]->pooltemp;
+                            }
+                            sum1D(m->rls[z]->input,pooltemp_prev,m->rls[z]->cl_output->pre_activation,m->rls[z]->cls[k3-count]->n_kernels*m->rls[z]->cls[k3-count]->rows2*m->rls[z]->cls[k3-count]->cols2);
                             //printf("summing from previous pooling\n");
                         }
                         else if(m->rls[z]->cls[k3-count]->normalization_flag)
@@ -6919,7 +7145,11 @@ void model_tensor_input_ff_without_learning_parameters(model* m, model* m2, int 
                     else if(m->sla[i-1][0] == CLS){
                         if(k3-count == 0){
                             if(m->cls[k2-1]->pooling_flag){
-                                m->rls[z]->input = m->cls[k2-1]->post_pooling;
+                                float* pooltemp_prev = m->cls[k2-1]->post_pooling;
+                                if(m->cls[k2-1]->convolutional_flag == NO_CONVOLUTION && m->cls[k2-1]->stride2_cols == 1 && m->cls[k2-1]->stride2_rows == 1 && m->cls[k2-1]->padding2_rows == 0 && m->cls[k2-1]->padding2_cols == 0 && m->cls[k2-1]->pooling_rows == 1 && m->cls[k2-1]->pooling_cols == 1){
+                                    pooltemp_prev = m->cls[k2-1]->pooltemp;
+                                }
+                                m->rls[z]->input = pooltemp_prev;
                             }
                             else if(m->cls[k2-1]->normalization_flag){
                                 m->rls[z]->input = m->cls[k2-1]->post_normalization;
@@ -6961,7 +7191,11 @@ void model_tensor_input_ff_without_learning_parameters(model* m, model* m2, int 
                     
                     if(k3-count == m->rls[z]->n_cl-1){
                         if(m->rls[z]->cls[k3-count]->pooling_flag){
-                            sum1D(m->rls[z]->input,m->rls[z]->cls[k3-count]->post_pooling,m->rls[z]->cl_output->pre_activation,m->rls[z]->cls[k3-count]->n_kernels*m->rls[z]->cls[k3-count]->rows2*m->rls[z]->cls[k3-count]->cols2);
+                            float* pooltemp_prev = m->rls[z]->cls[k3-count]->post_pooling;
+                            if(m->rls[z]->cls[k3-count]->convolutional_flag == NO_CONVOLUTION && m->rls[z]->cls[k3-count]->stride2_cols == 1 && m->rls[z]->cls[k3-count]->stride2_rows == 1 && m->rls[z]->cls[k3-count]->padding2_rows == 0 && m->rls[z]->cls[k3-count]->padding2_cols == 0 && m->rls[z]->cls[k3-count]->pooling_rows == 1 && m->rls[z]->cls[k3-count]->pooling_cols == 1){
+                                pooltemp_prev = m->rls[z]->cls[k3-count]->pooltemp;
+                            }
+                            sum1D(m->rls[z]->input,pooltemp_prev,m->rls[z]->cl_output->pre_activation,m->rls[z]->cls[k3-count]->n_kernels*m->rls[z]->cls[k3-count]->rows2*m->rls[z]->cls[k3-count]->cols2);
                             //printf("summing from previous pooling\n");
                         }
                         else if(m->rls[z]->cls[k3-count]->normalization_flag)
@@ -8175,16 +8409,16 @@ void compute_model_error(model* m, float* output){
  * 
  * */
 float* ff_error_bp_model_once(model* m, int tensor_depth, int tensor_i, int tensor_j, float* input, float* output){
-    
     model_tensor_input_ff(m,tensor_depth,tensor_i,tensor_j,input);
     compute_model_error(m,output);
     if(m->error_alpha != NULL){
         int i;
         for(i = 0; i < m->output_dimension; i++){
             if(output[i] != (float)(0))
-            output[i]*=m->error_alpha[i];
+            m->error[i]*=m->error_alpha[i];
         }        
     }
+
     return model_tensor_input_bp(m,tensor_depth,tensor_i,tensor_j,input, m->error,m->output_dimension);
 }
 /* computing the feed forward, the error and the back propagation of a model given an input and output
@@ -8200,15 +8434,30 @@ float* ff_error_bp_model_once(model* m, int tensor_depth, int tensor_i, int tens
  * 
  * */
 float* ff_error_bp_model_once_opt(model* m,model* m2, int tensor_depth, int tensor_i, int tensor_j, float* input, float* output){
+    
     model_tensor_input_ff_without_learning_parameters(m,m2,tensor_depth,tensor_i,tensor_j,input);
     compute_model_error(m,output);
     if(m->error_alpha != NULL){
         int i;
         for(i = 0; i < m->output_dimension; i++){
             if(output[i] != (float)(0))
-            output[i]*=m->error_alpha[i];
+            m->error[i]*=m->error_alpha[i];
         }        
     }
+    /*
+    int i;
+    printf("output:\n");
+    for(i = 0; i < m->output_dimension; i++){
+        printf("%f ",output[i]);
+    }
+    printf("\n");
+    printf("input:\n");
+    for(i = 0; i < tensor_depth*tensor_i*tensor_j; i++){
+        printf("%f ",input[i]);
+    }
+    printf("\n");*/
+    //printf("input: \n");
+    //printf("%f\n",input[0]);
     return model_tensor_input_bp_without_learning_parameters(m,m2,tensor_depth,tensor_i,tensor_j,input, m->error,m->output_dimension);
 }
 
@@ -8339,6 +8588,8 @@ void sum_score_model(model* input1, model* input2, model* output){
  *                 @ model* output:= the output model
  * */
 void compare_score_model(model* input1, model* input2, model* output){
+    if(input1 == NULL || input2 == NULL || output == NULL)
+        return;
     int i;
     for(i = 0; i < input1->n_fcl; i++){
         compare_score_fcl(input1->fcls[i],input2->fcls[i],output->fcls[i]);
@@ -8362,6 +8613,8 @@ void compare_score_model(model* input1, model* input2, model* output){
  *                 @ model* output:= the output model
  * */
 void compare_score_model_with_vector(model* input1, float* input2, model* output){
+    if(input1 == NULL || input2 == NULL || output == NULL)
+        return;
     int i;
     uint64_t sum = 0;
     for(i = 0; i < input1->n_fcl; i++){
@@ -8430,6 +8683,8 @@ void avaraging_score_model(model* avarage, model** m, int n_model){
  *                 @ model* f:= the model
  * */
 void reset_score_model(model* f){
+    if(f == NULL)
+        return;
     int i;
     for(i = 0; i < f->n_fcl; i++){
         reset_score_fcl(f->fcls[i]);
@@ -8444,6 +8699,8 @@ void reset_score_model(model* f){
 
 /* look at reinitialize_scores_cl function in convolutional_layers.c formore details*/
 void reinitialize_weights_according_to_scores_model(model* m, float percentage, float goodness){
+    if(m == NULL || percentage > 1 || percentage < 0)
+        return;
     int i;
     for(i = 0; i < m->n_fcl; i++){
         reinitialize_weights_according_to_scores_fcl(m->fcls[i],percentage,goodness);
@@ -8546,8 +8803,17 @@ void make_the_model_only_for_ff(model* m){
 void set_model_beta(model* m, float beta1, float beta2){
     if(m == NULL)
         return;
+    if(beta1 > 1 || beta1 < 0 || beta2 > 1 || beta2 < 0)
+        return;
     m->beta1_adam = beta1;
     m->beta2_adam = beta2;
+}
+void set_model_beta_adamod(model* m, float beta){
+    if(m == NULL)
+        return;
+    if(beta > 1 || beta < 0)
+        return;
+    m->beta3_adamod = beta;
 }
 
 float get_beta1_from_model(model* m){
@@ -8559,6 +8825,11 @@ float get_beta2_from_model(model* m){
     if(m == NULL)
         return -1;
     return m->beta2_adam;
+}
+float get_beta3_from_model(model* m){
+    if(m == NULL)
+        return -1;
+    return m->beta3_adamod;
 }
 
 void set_ith_layer_training_mode_model(model* m, int ith, int training_flag){

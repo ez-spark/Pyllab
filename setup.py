@@ -2,6 +2,7 @@ from setuptools import Extension, setup, find_packages
 from Cython.Build import cythonize
 from setuptools.command.build_ext import build_ext
 from Cython.Distutils import build_ext
+import numpy
 import os
 import sysconfig
 
@@ -52,7 +53,7 @@ class Build(build_ext):
         filename = super().get_ext_filename('Pyllab')
         return get_ext_filename_without_platform_suffix(filename)
     '''
- 
+    
 setup(
     name="Pyllab",
     version="0.0.4",
@@ -67,7 +68,7 @@ setup(
     url="https://github.com/ez-spark/Pyllab",
     ext_modules = cythonize([Extension("pyllab",
                                        ["Pyllab/*.pyx"],
-                                       include_dirs=['./src/'],
+                                       include_dirs=['./src/', numpy.get_include()],
                                        libraries=["llab"],
                                        library_dirs = ['./'], 
                                        extra_link_args=["-DSOME_DEFINE_OPT", "-L . "],

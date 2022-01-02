@@ -32,6 +32,30 @@ cdef class cl:
     cdef bint _is_only_for_feedforward
     
     def __cinit__(self,int channels, int input_rows, int input_cols, int kernel_rows, int kernel_cols, int n_kernels, int stride1_rows, int stride1_cols, int padding1_rows, int padding1_cols, int stride2_rows, int stride2_cols, int padding2_rows, int padding2_cols, int pooling_rows, int pooling_cols, int normalization_flag, int activation_flag, int pooling_flag, int group_norm_channels, int convolutional_flag,int training_mode, int feed_forward_flag, int layer, bint does_have_learning_parameters = True, bint does_have_arrays = True, bint is_only_for_feedforward = False):
+        check_int(channels)
+        check_int(input_rows)
+        check_int(input_cols)
+        check_int(kernel_rows)
+        check_int(kernel_cols)
+        check_int(n_kernels)
+        check_int(stride1_rows)
+        check_int(stride2_rows)
+        check_int(stride1_cols)
+        check_int(stride2_cols)
+        check_int(padding1_rows)
+        check_int(padding1_cols)
+        check_int(padding2_rows)
+        check_int(padding2_cols)
+        check_int(pooling_rows)
+        check_int(pooling_cols)
+        check_int(normalization_flag)
+        check_int(activation_flag)
+        check_int(pooling_flag)
+        check_int(group_norm_channels)
+        check_int(convolutional_flag)
+        check_int(training_mode)
+        check_int(feed_forward_flag)
+        check_int(layer)
         self._channels = channels
         self._input_rows = input_rows
         self._input_cols = input_cols
@@ -107,10 +131,14 @@ cdef class cl:
                 Pyllab.reset_cl_without_learning_parameters(self._cl)
                 
     def clip(self, float threshold, float norm):
+        check_float(threshold)
+        check_float(norm)
         if self._does_have_arrays and self._does_have_learning_parameters and not self.is_only_for_feedforward:
             Pyllab.clip_cls(&self._cl, 1, threshold, norm)
     
     def adaptive_clip(self, float threshold, float epsilon):
+        check_float(threshold)
+        check_float(epsilon)
         if self._does_have_arrays and self._does_have_learning_parameters and not self.is_only_for_feedforward:
             Pyllab.adaptive_gradient_clipping_cl(self._cl, threshold, epsilon)
 

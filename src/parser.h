@@ -34,4 +34,10 @@ int multiple_instance_single_file_parser(float** input, float** output,char* fil
 model* parse_model_file(char* filename);
 float** get_inputs_from_multiple_instances_single_char_binary_file_with_single_softmax_output(char* filename,int input_dimension, int instances);
 float** get_outputs_from_multiple_instances_single_char_binary_file_with_single_softmax_output(char* filename,int input_dimension,int output_dimension, int instances);
+model* parse_model_without_learning_parameters_file(char* filename);
+model* parse_model_without_arrays_file(char* filename);
+model* parse_model_str(char* ksource, int size);
+model* parse_model_without_learning_parameters_str(char* ksource, int size);
+model* parse_model_without_arrays_str(char* ksource, int size);
+
 #endif

@@ -56,7 +56,7 @@ SOFTWARE.
  * */
  
 cl* convolutional(int channels, int input_rows, int input_cols, int kernel_rows, int kernel_cols, int n_kernels, int stride1_rows, int stride1_cols, int padding1_rows, int padding1_cols, int stride2_rows, int stride2_cols, int padding2_rows, int padding2_cols, int pooling_rows, int pooling_cols, int normalization_flag, int activation_flag, int pooling_flag, int group_norm_channels, int convolutional_flag,int training_mode, int feed_forward_flag, int layer){
-    if(group_norm_channels < 0 || group_norm_channels >= n_kernels || channels <= 0 || input_rows <= 0 || input_cols<=0 || kernel_rows<=0 || kernel_cols<=0 || n_kernels<=0 || stride1_rows<=0 || stride1_cols<=0 || (pooling_flag && (stride2_rows<=0 || stride2_cols<=0))){
+    if(group_norm_channels < 0 || group_norm_channels > n_kernels || channels <= 0 || input_rows <= 0 || input_cols<=0 || kernel_rows<=0 || kernel_cols<=0 || n_kernels<=0 || stride1_rows<=0 || stride1_cols<=0 || (pooling_flag && (stride2_rows<=0 || stride2_cols<=0))){
         fprintf(stderr,"Error: channles, input_rows, input_cols, kernel_rows, kernel_cols, n_kernels, stride2_rows stride2_cols, stride2_rows, stride2_cols params must be > 0\n");
         exit(1);
     }
@@ -138,7 +138,7 @@ cl* convolutional(int channels, int input_rows, int input_cols, int kernel_rows,
         exit(1);
     }
     
-    if(activation_flag != NO_ACTIVATION && activation_flag != SIGMOID && activation_flag != TANH && activation_flag != RELU && activation_flag != SOFTMAX && activation_flag != LEAKY_RELU && activation_flag != ELU){
+    if(activation_flag != NO_ACTIVATION && activation_flag != SIGMOID && activation_flag != TANH && activation_flag != RELU && activation_flag != LEAKY_RELU && activation_flag != ELU){
         fprintf(stderr,"Error, you must set the activation flag properly!\n");
         exit(1);
     } 
@@ -153,7 +153,15 @@ cl* convolutional(int channels, int input_rows, int input_cols, int kernel_rows,
         exit(1);
     }
     
+    if((feed_forward_flag == EDGE_POPUP || training_mode == EDGE_POPUP ) && normalization_flag == GROUP_NORMALIZATION){
+        fprintf(stderr,"Error: edge popup should not match with group normalization!\n");
+        exit(1);
+    }
     
+    if(activation_flag == SOFTMAX){
+        fprintf(stderr,"Error: softmax after a convolutional flag doesn't seem appropriate, remmber: convolutional layer extract features in 2d matrices try to add a fcl with softmax after this layer!\n");
+        exit(1);
+    }
     int i,j;
     cl* c = (cl*)malloc(sizeof(cl));
     c->layer = layer;
@@ -348,6 +356,12 @@ cl* convolutional(int channels, int input_rows, int input_cols, int kernel_rows,
         }
     }
     
+    if(convolutional_flag == NO_CONVOLUTION){
+        for(i = 0; i < n_kernels; i++){
+            c->used_kernels[i] = 1;
+        }
+    }
+    
     if(normalization_flag != GROUP_NORMALIZATION){
         c->group_norm = NULL;
         c->group_norm_channels = 0;
@@ -367,7 +381,7 @@ cl* convolutional(int channels, int input_rows, int input_cols, int kernel_rows,
 
 //just to know the size without allocating anything
 cl* convolutional_without_arrays(int channels, int input_rows, int input_cols, int kernel_rows, int kernel_cols, int n_kernels, int stride1_rows, int stride1_cols, int padding1_rows, int padding1_cols, int stride2_rows, int stride2_cols, int padding2_rows, int padding2_cols, int pooling_rows, int pooling_cols, int normalization_flag, int activation_flag, int pooling_flag, int group_norm_channels, int convolutional_flag,int training_mode, int feed_forward_flag, int layer){
-    if(group_norm_channels < 0 || group_norm_channels >= n_kernels || channels <= 0 || input_rows <= 0 || input_cols<=0 || kernel_rows<=0 || kernel_cols<=0 || n_kernels<=0 || stride1_rows<=0 || stride1_cols<=0 || (pooling_flag && (stride2_rows<=0 || stride2_cols<=0))){
+    if(group_norm_channels < 0 || group_norm_channels > n_kernels || channels <= 0 || input_rows <= 0 || input_cols<=0 || kernel_rows<=0 || kernel_cols<=0 || n_kernels<=0 || stride1_rows<=0 || stride1_cols<=0 || (pooling_flag && (stride2_rows<=0 || stride2_cols<=0))){
         fprintf(stderr,"Error: channles, input_rows, input_cols, kernel_rows, kernel_cols, n_kernels, stride2_rows stride2_cols, stride2_rows, stride2_cols params must be > 0\n");
         exit(1);
     }
@@ -449,7 +463,7 @@ cl* convolutional_without_arrays(int channels, int input_rows, int input_cols, i
         exit(1);
     }
     
-    if(activation_flag != NO_ACTIVATION && activation_flag != SIGMOID && activation_flag != TANH && activation_flag != RELU && activation_flag != SOFTMAX && activation_flag != LEAKY_RELU && activation_flag != ELU){
+    if(activation_flag != NO_ACTIVATION && activation_flag != SIGMOID && activation_flag != TANH && activation_flag != RELU && activation_flag != LEAKY_RELU && activation_flag != ELU){
         fprintf(stderr,"Error, you must set the activation flag properly!\n");
         exit(1);
     } 
@@ -464,6 +478,15 @@ cl* convolutional_without_arrays(int channels, int input_rows, int input_cols, i
         exit(1);
     }
     
+    if((feed_forward_flag == EDGE_POPUP || training_mode == EDGE_POPUP ) && normalization_flag == GROUP_NORMALIZATION){
+        fprintf(stderr,"Error: edge popup should not match with group normalization!\n");
+        exit(1);
+    }
+    
+    if(activation_flag == SOFTMAX){
+        fprintf(stderr,"Error: softmax after a convolutional flag doesn't seem appropriate, remmber: convolutional layer extract features in 2d matrices try to add a fcl with softmax after this layer!\n");
+        exit(1);
+    }
     
     
     int i,j;
@@ -595,7 +618,7 @@ cl* convolutional_without_arrays(int channels, int input_rows, int input_cols, i
  * */
  
 cl* convolutional_without_learning_parameters(int channels, int input_rows, int input_cols, int kernel_rows, int kernel_cols, int n_kernels, int stride1_rows, int stride1_cols, int padding1_rows, int padding1_cols, int stride2_rows, int stride2_cols, int padding2_rows, int padding2_cols, int pooling_rows, int pooling_cols, int normalization_flag, int activation_flag, int pooling_flag, int group_norm_channels, int convolutional_flag,int training_mode, int feed_forward_flag, int layer){
-    if(group_norm_channels < 0 || group_norm_channels >= n_kernels || channels <= 0 || input_rows <= 0 || input_cols<=0 || kernel_rows<=0 || kernel_cols<=0 || n_kernels<=0 || stride1_rows<=0 || stride1_cols<=0 || (pooling_flag && (stride2_rows<=0 || stride2_cols<=0))){
+    if(group_norm_channels < 0 || group_norm_channels > n_kernels || channels <= 0 || input_rows <= 0 || input_cols<=0 || kernel_rows<=0 || kernel_cols<=0 || n_kernels<=0 || stride1_rows<=0 || stride1_cols<=0 || (pooling_flag && (stride2_rows<=0 || stride2_cols<=0))){
         fprintf(stderr,"Error: channles, input_rows, input_cols, kernel_rows, kernel_cols, n_kernels, stride2_rows stride2_cols, stride2_rows, stride2_cols params must be > 0\n");
         exit(1);
     }
@@ -677,7 +700,7 @@ cl* convolutional_without_learning_parameters(int channels, int input_rows, int 
         exit(1);
     }
     
-    if(activation_flag != NO_ACTIVATION && activation_flag != SIGMOID && activation_flag != TANH && activation_flag != RELU && activation_flag != SOFTMAX && activation_flag != LEAKY_RELU && activation_flag != ELU){
+    if(activation_flag != NO_ACTIVATION && activation_flag != SIGMOID && activation_flag != TANH && activation_flag != RELU && activation_flag != LEAKY_RELU && activation_flag != ELU){
         fprintf(stderr,"Error, you must set the activation flag properly!\n");
         exit(1);
     } 
@@ -692,6 +715,15 @@ cl* convolutional_without_learning_parameters(int channels, int input_rows, int 
         exit(1);
     }
     
+    if((feed_forward_flag == EDGE_POPUP || training_mode == EDGE_POPUP ) && normalization_flag == GROUP_NORMALIZATION){
+        fprintf(stderr,"Error: edge popup should not match with group normalization!\n");
+        exit(1);
+    }
+    
+    if(activation_flag == SOFTMAX){
+        fprintf(stderr,"Error: softmax after a convolutional flag doesn't seem appropriate, remmber: convolutional layer extract features in 2d matrices try to add a fcl with softmax after this layer!\n");
+        exit(1);
+    }
     
     
     int i,j;
@@ -947,7 +979,7 @@ void free_convolutional(cl* c){
     for(i = 0; i < c->n_kernels; i++){
         if(exists_kernels_cl(c))
         free(c->kernels[i]);
-        if(exists_d_kernels_cl(c)){
+        if(c->d_kernels != NULL){
             free(c->d_kernels[i]);
             free(c->d1_kernels[i]);
             free(c->d2_kernels[i]);
@@ -973,7 +1005,6 @@ void free_convolutional(cl* c){
     free(c->temp);
     free(c->temp2);
     free(c->temp3);
-    free(c->pooltemp);
     free(c->error2);
     free(c->indices);
     free(c->scores);
@@ -1047,7 +1078,6 @@ void free_convolutional_without_learning_parameters(cl* c){
     free(c->temp);
     free(c->temp2);
     free(c->temp3);
-    free(c->pooltemp);
     free(c->error2);
     free(c->indices);
     free(c->scores);
@@ -1870,7 +1900,7 @@ cl* reset_cl(cl* f){
         set_vector_with_value(0,f->post_pooling,f->n_kernels*f->rows2*f->cols2);
     }
     
-    
+    if(exists_bp_handler_arrays(f))
     set_vector_with_value(0,f->error2,f->channels*f->input_rows*f->input_cols);
     
     
@@ -2440,18 +2470,22 @@ void slow_paste_cl(cl* f, cl* copy,float tau){
             if(exists_kernels_cl(f) && exists_kernels_cl(copy)){
                 for(j = 0; j < n_all_except_n_kernels_f; j++){
                     copy->kernels[i][j] = tau*f->kernels[i][j] + (1-tau)*copy->kernels[i][j];
-                    copy->d_kernels[i][j] = tau*f->d_kernels[i][j] + (1-tau)*copy->d_kernels[i][j];
-                    copy->d1_kernels[i][j] = tau*f->d1_kernels[i][j] + (1-tau)*copy->d1_kernels[i][j];
-                    copy->d2_kernels[i][j] = tau*f->d2_kernels[i][j] + (1-tau)*copy->d2_kernels[i][j];
-                    copy->d3_kernels[i][j] = tau*f->d3_kernels[i][j] + (1-tau)*copy->d3_kernels[i][j];
+                    if(exists_d_kernels_cl(f) && exists_d_kernels_cl(copy)){
+                        copy->d_kernels[i][j] = tau*f->d_kernels[i][j] + (1-tau)*copy->d_kernels[i][j];
+                        copy->d1_kernels[i][j] = tau*f->d1_kernels[i][j] + (1-tau)*copy->d1_kernels[i][j];
+                        copy->d2_kernels[i][j] = tau*f->d2_kernels[i][j] + (1-tau)*copy->d2_kernels[i][j];
+                        copy->d3_kernels[i][j] = tau*f->d3_kernels[i][j] + (1-tau)*copy->d3_kernels[i][j];
+                    }
                 }
             }
             if(exists_biases_cl(f) && exists_biases_cl(copy)){
                 copy->biases[i] = tau*f->biases[i] + (1-tau)*copy->biases[i];
-                copy->d_biases[i] = tau*f->d_biases[i] + (1-tau)*copy->d_biases[i];
-                copy->d1_biases[i] = tau*f->d1_biases[i] + (1-tau)*copy->d1_biases[i];
-                copy->d2_biases[i] = tau*f->d2_biases[i] + (1-tau)*copy->d2_biases[i];
-                copy->d3_biases[i] = tau*f->d3_biases[i] + (1-tau)*copy->d3_biases[i];
+                if(exists_d_biases_cl(f) && exists_biases_cl(copy)){
+                    copy->d_biases[i] = tau*f->d_biases[i] + (1-tau)*copy->d_biases[i];
+                    copy->d1_biases[i] = tau*f->d1_biases[i] + (1-tau)*copy->d1_biases[i];
+                    copy->d2_biases[i] = tau*f->d2_biases[i] + (1-tau)*copy->d2_biases[i];
+                    copy->d3_biases[i] = tau*f->d3_biases[i] + (1-tau)*copy->d3_biases[i];
+                }
             
             }
         }
@@ -2494,7 +2528,7 @@ void slow_paste_cl(cl* f, cl* copy,float tau){
  *                 @ cl* f:= the convolutional layer
  * */
 uint64_t get_array_size_params_cl(cl* f){
-    if(f == NULL || !exists_kernels_cl(f) || !exists_biases_cl(f) || !exists_d_kernels_cl(f) || !exists_d_biases_cl(f))
+    if(f == NULL || !exists_kernels_cl(f) || !exists_biases_cl(f))
         return 0;
     uint64_t sum = 0;
     int i;
@@ -2577,7 +2611,7 @@ void memcopy_vector_to_params_cl(cl* f, float* vector){
  *                 @ float* vector:= the vector where is copyed everything
  * */
 void memcopy_params_to_vector_cl(cl* f, float* vector){
-    if(f == NULL || vector == NULL || !exists_kernels_cl(f) || ! exists_biases_cl(f))
+    if(f == NULL || vector == NULL || !exists_kernels_cl(f) || !exists_biases_cl(f))
         return;
     int i;
     for(i = 0; i < f->n_kernels; i++){
@@ -2783,6 +2817,11 @@ void set_convolutional_unused_weights_to_zero(cl* c){
  *             @ cl* output:= the output convolutional layer
  * */
 void sum_score_cl(cl* input1, cl* input2, cl* output){
+    if(input1 == NULL || input2 == NULL || output == NULL || !exists_edge_popup_stuff_cl(input1) || !exists_edge_popup_stuff_cl(input2) || !exists_edge_popup_stuff_cl(output))
+        return;
+    int n = input1->n_kernels*input1->channels*input1->kernel_rows*input1->kernel_cols;
+    if(n != input2->n_kernels*input2->channels*input2->kernel_rows*input2->kernel_cols || n!= output->n_kernels*output->channels*output->kernel_rows*output->kernel_cols)
+        return;
     sum1D(input1->scores,input2->scores,output->scores,input1->n_kernels*input1->channels*input1->kernel_rows*input1->kernel_cols);
 }
 
@@ -2796,7 +2835,7 @@ void sum_score_cl(cl* input1, cl* input2, cl* output){
  *                 @ fcl* output:= the output fcl layer
  * */
 void compare_score_cl(cl* input1, cl* input2, cl* output){
-    if(input1 == NULL || input2 == NULL || output == NULL)
+    if(input1 == NULL || input2 == NULL || output == NULL|| !exists_edge_popup_stuff_cl(input1) || !exists_edge_popup_stuff_cl(input2) || !exists_edge_popup_stuff_cl(output))
         return;
     int i;
     int n = input1->n_kernels*input1->channels*input1->kernel_rows*input1->kernel_cols;
@@ -2820,7 +2859,7 @@ void compare_score_cl(cl* input1, cl* input2, cl* output){
  *                 @ fcl* output:= the output fcl layer
  * */
 void compare_score_cl_with_vector(cl* input1, float* input2, cl* output){
-    if(input1 == NULL || input2 == NULL || output == NULL)
+    if(input1 == NULL || input2 == NULL || output == NULL|| !exists_edge_popup_stuff_cl(input1) || !exists_edge_popup_stuff_cl(output))
         return;
     int i;
     int n = input1->n_kernels*input1->channels*input1->kernel_rows*input1->kernel_cols;
@@ -2954,6 +2993,9 @@ void set_low_score_cl(cl* f){
  *             @ cl* b:= the structure
  * 
  * */
+ 
+ 
+ 
 void make_the_cl_only_for_ff(cl* c){
     if(c == NULL)
         return;

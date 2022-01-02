@@ -14,6 +14,9 @@ cdef class rl:
     cdef bint _is_only_for_feedforward
     
     def __cinit__(self,int channels, int input_rows, int input_cols, int n_cl, list cls, bint does_have_learning_parameters = True, bint does_have_arrays = True, bint is_only_for_feedforward = False):
+        check_int(input_rows)
+        check_int(input_cols)
+        check_int(n_cl)
         self._channels = channels
         self._input_rows = input_rows
         self._input_cols = input_cols
@@ -52,10 +55,14 @@ cdef class rl:
             Pyllab.reset_rl_without_learning_parameters(self._rl)
                 
     def clip(self, float threshold, float norm):
+        check_float(threshold)
+        check_float(norm)
          if self._does_have_arrays and self._does_have_learning_parameters and not self.is_only_for_feedforward:
             Pyllab.clip_rls(&self._rl,1,threshold, norm)
     
     def adaptive_clip(self, float threshold, float epsilon):
+        check_float(threshold)
+        check_float(epsilon)
         if self._does_have_arrays and self._does_have_learning_parameters and not self.is_only_for_feedforward:
             Pyllab.adaptive_gradient_clipping_rl(self._rl,threshold, epsilon)
 

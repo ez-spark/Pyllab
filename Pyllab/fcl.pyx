@@ -18,6 +18,17 @@ cdef class fcl:
     cdef bint _is_only_for_feedforward
     
     def __cinit__(self,int input, int output, int layer, int dropout_flag, int activation_flag, float dropout_threshold, int n_groups, int normalization_flag, int training_mode, int feed_forward_flag, bint does_have_learning_parameters = True, bint does_have_arrays = True, bint is_only_for_feedforward = False):
+        check_int(input)
+        check_int(output)
+        check_int(layer)
+        check_int(dropout_flag)
+        check_int(activation_flag)
+        check_int(n_groups)
+        check_int(normalization_flag)
+        check_int(training_mode)
+        check_int(feed_forward_flag)
+        check_float(dropout_threshold)
+        
         self._input = input
         self._output = output
         self._layer = layer
@@ -77,10 +88,14 @@ cdef class fcl:
                 Pyllab.reset_fcl_without_learning_parameters(self._fcl)
                 
     def clip(self, float threshold, float norm):
+        check_float(threhsold)
+        check_float(norm)
         if self._does_have_arrays and self._does_have_learning_parameters and not self.is_only_for_feedforward:
             Pyllab.clip_fcls(&self._fcl,1, threshold, norm)
     
     def adaptive_clip(self, float threshold, float epsilon):
+        check_float(threhsold)
+        check_float(epsilon)
         if self._does_have_arrays and self._does_have_learning_parameters and not self.is_only_for_feedforward:
             Pyllab.adaptive_gradient_clipping_fcl(self._fcl, threshold, epsilon)
 

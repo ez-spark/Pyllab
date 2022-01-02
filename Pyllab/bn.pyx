@@ -10,7 +10,8 @@ cdef class bn:
     cdef bint _is_only_for_feedforward
     
     def __cinit__(self,int batch_size,int vector_input_dimension, bint does_have_learning_parameters = True, bint does_have_arrays = True, bint is_only_for_feedforward = False):
-        
+        check_int(batch_size)
+        check_int(vector_input_dimension)
         self._batch_size = batch_size
         self._vector_input_dimension = vector_input_dimension
         self._does_have_learning_parameters = does_have_learning_parameters
@@ -61,6 +62,8 @@ cdef class bn:
             Pyllab.reset_bn(<Pyllab.bn*>self._bn)
     
     def clip(self, float threshold, float norm):
+        check_float(threshold)
+        check_float(norm)
         if self._does_have_arrays and self._does_have_learning_parameters and not self.is_only_for_feedforward:
             Pyllab.clip_bns(&self._bn, 1, threshold, norm)
     

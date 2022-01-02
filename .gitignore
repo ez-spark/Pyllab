@@ -1,5 +1,11 @@
 build/
 dist/
+test/data/
+test/train
+test/neat
+test/memcheck
+test/*.bin
+wheelhouse/
 Pyllab-*/
 Pyllab/__init__.c
 *.so

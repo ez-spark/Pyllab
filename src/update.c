@@ -988,6 +988,7 @@ void update_model(model* m, float lr, float momentum, int mini_batch_size, int g
     if(m == NULL)
         return;
     
+    //printf("lr, momentum: %f %f\n",lr, momentum);
     lambda*=(float)mini_batch_size;
     
     if(regularization == L2_REGULARIZATION){
@@ -1229,7 +1230,6 @@ void update_transformer_decoder(transformer_decoder* t, float lr, float momentum
 void update_transformer_encoder(transformer_encoder* t, float lr, float momentum, int mini_batch_size, int gradient_descent_flag, float* b1, float* b2, int regularization, uint64_t total_number_weights, float lambda, unsigned long long int* time){
     
     int i;
-    
     update_model(t->m,lr,momentum,mini_batch_size,gradient_descent_flag,b1,b2,regularization,total_number_weights,lambda,time);
     update_model(t->linear_after_attention,lr,momentum,mini_batch_size,gradient_descent_flag,b1,b2,regularization,total_number_weights,lambda,time);
     for(i = 0; i < t->n_head; i++){
