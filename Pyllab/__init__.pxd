@@ -65,6 +65,12 @@ cdef extern from "../src/llab.h":
         pass
     ctypedef struct error_super_struct:
         pass
+    ctypedef struct dueling_categorical_dqn:
+        pass
+    ctypedef struct thread_args_dueling_categorical_dqn_train:
+        pass
+    ctypedef struct thread_args_dueling_categorical_dqn:
+        pass
     cdef enum:
         N_NORMALIZATION
     cdef enum:
@@ -379,7 +385,9 @@ cdef extern from "../src/clipping_gradient.h":
     void adaptive_gradient_clipping_encoder_transformer(transformer_encoder* e, float threshold, float epsilon)
     void adaptive_gradient_clipping_decoder_transformer(transformer_decoder* t, float threshold, float epsilon)
     void adaptive_gradient_clipping_transformer(transformer* t, float threshold, float epsilon)
-
+    void dueling_categorical_dqn_clipping_gradient(dueling_categorical_dqn* dqn, float threshold)
+    void adaptive_gradient_clipping_dueling_categorical_dqn(dueling_categorical_dqn* dqn, float threshold, float epsilon)
+    
 cdef extern from "../src/convolutional.h":
     void convolutional_feed_forward(float* input, float* kernel, int input_i, int input_j, int kernel_i, int kernel_j, float bias, int channels, float* output, int stride1, int stride2, int padding)
     void convolutional_back_prop(float* input, float* kernel, int input_i, int input_j, int kernel_i, int kernel_j, float bias, int channels, float* output_error,float* input_error, float* kernel_error, float* bias_error, int stride1, int stride2, int padding)
@@ -463,7 +471,72 @@ cdef extern from "../src/dictionary.h":
     bint check_int_array(int* array, mystruct** ms, int size, int index)
     void free_my_struct(mystruct** ms)
 
-
+cdef extern from "../src/dueling_categorical_dqn.h":
+    dueling_categorical_dqn* dueling_categorical_dqn_init(int input_size, int action_size, int n_atoms, float v_min, float v_max, model* shared_hidden_layers, model* v_hidden_layers, model* a_hidden_layers, model* v_linear_last_layer, model* a_linear_last_layer)
+    dueling_categorical_dqn* dueling_categorical_dqn_init_without_arrays(int input_size, int action_size, int n_atoms, float v_min, float v_max, model* shared_hidden_layers, model* v_hidden_layers, model* a_hidden_layers, model* v_linear_last_layer, model* a_linear_last_layer)
+    void free_dueling_categorical_dqn(dueling_categorical_dqn* dqn)
+    void free_dueling_categorical_dqn_without_learning_parameters(dueling_categorical_dqn* dqn)
+    void free_dueling_categorical_dqn_without_arrays(dueling_categorical_dqn* dqn)
+    void reset_dueling_categorical_dqn(dueling_categorical_dqn* dqn)
+    void reset_dueling_categorical_dqn_without_learning_parameters(dueling_categorical_dqn* dqn)
+    dueling_categorical_dqn* copy_dueling_categorical_dqn(dueling_categorical_dqn* dqn)
+    dueling_categorical_dqn* copy_dueling_categorical_dqn_without_learning_parameters(dueling_categorical_dqn* dqn)
+    void paste_dueling_categorical_dqn(dueling_categorical_dqn* dqn, dueling_categorical_dqn* copy)
+    void paste_dueling_categorical_dqn_without_learning_parameters(dueling_categorical_dqn* dqn, dueling_categorical_dqn* copy)
+    void slow_paste_dueling_categorical_dqn(dueling_categorical_dqn* dqn, dueling_categorical_dqn* copy, float tau)
+    uint64_t size_of_dueling_categorical_dqn(dueling_categorical_dqn* dqn)
+    uint64_t size_of_dueling_categorical_dqn_without_learning_parameters(dueling_categorical_dqn* dqn)
+    uint64_t count_weights_dueling_categorical_dqn(dueling_categorical_dqn* dqn)
+    uint64_t get_array_size_params_dueling_categorical_dqn(dueling_categorical_dqn* dqn)
+    uint64_t get_array_size_scores_dueling_categorical_dqn(dueling_categorical_dqn* dqn)
+    uint64_t get_array_size_weights_dueling_categorical_dqn(dueling_categorical_dqn* dqn)
+    void memcopy_vector_to_params_dueling_categorical_dqn(dueling_categorical_dqn* dqn, float* vector)
+    void memcopy_vector_to_scores_dueling_categorical_dqn(dueling_categorical_dqn* dqn, float* vector)
+    void memcopy_params_to_vector_dueling_categorical_dqn(dueling_categorical_dqn* dqn, float* vector)
+    void memcopy_weights_to_vector_dueling_categorical_dqn(dueling_categorical_dqn* dqn, float* vector)
+    void memcopy_vector_to_weights_dueling_categorical_dqn(dueling_categorical_dqn* dqn, float* vector)
+    void memcopy_scores_to_vector_dueling_categorical_dqn(dueling_categorical_dqn* dqn, float* vector)
+    void set_dueling_categorical_dqn_biases_to_zero(dueling_categorical_dqn* dqn)
+    void set_dueling_categorical_dqn_unused_weights_to_zero(dueling_categorical_dqn* dqn)
+    void sum_score_dueling_categorical_dqn(dueling_categorical_dqn* input1, dueling_categorical_dqn* input2, dueling_categorical_dqn* output)
+    void compare_score_dueling_categorical_dqn(dueling_categorical_dqn* input1, dueling_categorical_dqn* input2, dueling_categorical_dqn* output)
+    void compare_score_dueling_categorical_dqn_with_vector(dueling_categorical_dqn* input1, float* input2, dueling_categorical_dqn* output)
+    void dividing_score_dueling_categorical_dqn(dueling_categorical_dqn* input1, float value)
+    void reset_score_dueling_categorical_dqn(dueling_categorical_dqn* dqn)
+    void reinitialize_weights_according_to_scores_dueling_categorical_dqn(dueling_categorical_dqn* dqn, float percentage, float goodness)
+    void reinitialize_w_dueling_categorical_dqn(dueling_categorical_dqn* dqn)
+    dueling_categorical_dqn* reset_edge_popup_d_dueling_categorical_dqn(dueling_categorical_dqn* dqn)
+    void set_low_score_dueling_categorical_dqn(dueling_categorical_dqn* dqn)
+    void make_the_dueling_categorical_dqn_only_for_ff(dueling_categorical_dqn* dqn)
+    void compute_probability_distribution(float* input , int input_size, dueling_categorical_dqn* dqn)
+    float* bp_dueling_categorical_network(float* input, int input_size, float* error, dueling_categorical_dqn* dqn)
+    float* compute_q_functions(dueling_categorical_dqn* dqn)
+    void compute_probability_distribution_opt(float* input , int input_size, dueling_categorical_dqn* dqn, dueling_categorical_dqn* dqn_wlp)
+    float* bp_dueling_categorical_network_opt(float* input, int input_size, float* error, dueling_categorical_dqn* dqn, dueling_categorical_dqn* dqn_wlp)
+    float* get_loss_for_dueling_categorical_dqn(dueling_categorical_dqn* online_net, dueling_categorical_dqn* target_net, float* state_t, int action_t, float reward_t, float* state_t_1, float lambda_value, int state_sizes, int nonterminal_s_t_1)
+    float* get_loss_for_dueling_categorical_dqn_opt(dueling_categorical_dqn* online_net,dueling_categorical_dqn* online_net_wlp, dueling_categorical_dqn* target_net, dueling_categorical_dqn* target_net_wlp, float* state_t, int action_t, float reward_t, float* state_t_1, float lambda_value, int state_sizes, int nonterminal_s_t_1)
+    void save_dueling_categorical_dqn(dueling_categorical_dqn* dqn, int n)
+    dueling_categorical_dqn* load_dueling_categorical_dqn(char* file)
+    void save_dueling_categorical_dqn_given_directory(dueling_categorical_dqn* dqn, int n, char* directory)
+    void set_dueling_categorical_dqn_training_edge_popup(dueling_categorical_dqn* dqn, float k_percentage)
+    void set_dueling_categorical_dqn_training_gd(dueling_categorical_dqn* dqn)
+    void set_dueling_categorical_dqn_beta(dueling_categorical_dqn* dqn, float b1, float b2)
+    void set_dueling_categorical_dqn_beta_adamod(dueling_categorical_dqn*  dqn, float b)
+    float get_beta1_from_dueling_categorical_dqn(dueling_categorical_dqn* dqn)
+    float get_beta2_from_dueling_categorical_dqn(dueling_categorical_dqn* dqn)
+    float get_beta3_from_dueling_categorical_dqn(dueling_categorical_dqn* dqn)
+    void set_ith_layer_training_mode_dueling_categorical_dqn_shared(dueling_categorical_dqn* dqn, int ith, int training_flag)
+    void set_ith_layer_training_mode_dueling_categorical_dqn_v_hid(dueling_categorical_dqn* dqn, int ith, int training_flag)
+    void set_ith_layer_training_mode_dueling_categorical_dqn_v_lin(dueling_categorical_dqn* dqn, int ith, int training_flag)
+    void set_ith_layer_training_mode_dueling_categorical_dqn_a_hid(dueling_categorical_dqn* dqn, int ith, int training_flag)
+    void set_ith_layer_training_mode_dueling_categorical_dqn_a_lin(dueling_categorical_dqn* dqn, int ith, int training_flag)
+    void set_k_percentage_of_ith_layer_dueling_categorical_dqn_shared(dueling_categorical_dqn* dqn, int ith, float k_percentage)
+    void set_k_percentage_of_ith_layer_dueling_categorical_dqn_v_hid(dueling_categorical_dqn* dqn, int ith, float k_percentage)
+    void set_k_percentage_of_ith_layer_dueling_categorical_dqn_v_lin(dueling_categorical_dqn* dqn, int ith, float k_percentage)
+    void set_k_percentage_of_ith_layer_dueling_categorical_dqn_a_hid(dueling_categorical_dqn* dqn, int ith, float k_percentage)
+    void set_k_percentage_of_ith_layer_dueling_categorical_dqn_a_lin(dueling_categorical_dqn* dqn, int ith, float k_percentage)
+    int get_input_layer_size_dueling_categorical_dqn(dueling_categorical_dqn* dqn)
+    
 cdef extern from "../src/fully_connected.h":
     void fully_connected_feed_forward(float* input, float* output, float* weight,float* bias, int input_size, int output_size)
     void fully_connected_back_prop(float* input, float* output_error, float* weight,float* input_error, float* weight_error,float* bias_error, int input_size, int output_size, int training_flag)
@@ -639,8 +712,10 @@ cdef extern from "../src/math_functions.h":
     float dotProduct1D(float* input1, float* input2, int size)
     void additional_mul_value(float* input, float value, float* output, int dimension)
     void copy_clipped_vector(float* vector, float* output, float maximum, float minimum, int dimension)
-    void clip_vector(float* vector, float minimum, float maximum, int dimension)
-
+    void clip_vector(float* vector, float minimum, float maximum, int dimension)    
+    float mean(float* v, int size)
+    void sum_dueling_categorical_dqn_partial_derivatives(dueling_categorical_dqn* m1, dueling_categorical_dqn* m2, dueling_categorical_dqn* m3)
+    
 cdef extern from "../src/model.h":
     model* network(int layers, int n_rl, int n_cl, int n_fcl, rl** rls, cl** cls, fcl** fcls)
     void free_model(model* m)
@@ -733,6 +808,14 @@ cdef extern from "../src/model.h":
     void set_model_beta_adamod(model* m, float beta)
     float get_beta3_from_model(model* m)
     
+cdef extern from "../src/multi_core_dueling_categorical_dqn.h":
+    void* dueling_categorical_dqn_train_thread(void* _args)
+    void dueling_categorical_dqn_train(int threads, dueling_categorical_dqn* online_net,dueling_categorical_dqn* target_net, dueling_categorical_dqn** online_net_wlp, dueling_categorical_dqn** target_net_wlp, float** states_t, float* rewards_t, int* actions_t, float** states_t_1, int* nonterminals_t_1, float lambda_value, int state_sizes)
+    void* dueling_categorical_dqn_thread_sum(void* _args)
+    dueling_categorical_dqn* sum_dueling_categorical_dqn_partial_derivatives_multithread(dueling_categorical_dqn** batch_m, dueling_categorical_dqn* m, int n, int depth)
+    void dueling_categorical_reset_without_learning_parameters_reset(dueling_categorical_dqn** dqn, int threads)
+    void* dueling_categorical_dqn_reset_thread(void* _args)
+
 cdef extern from "../src/multi_core_model.h":
     void* model_thread_ff(void* _args)
     void* model_thread_bp(void* _args)
@@ -905,6 +988,12 @@ cdef extern from "../src/parser.h":
     model* parse_model_str(char* ksource, int size)
     model* parse_model_without_learning_parameters_str(char* ksource, int size)
     model* parse_model_without_arrays_str(char* ksource, int size)
+    dueling_categorical_dqn* parse_dueling_categorical_dqn_file(char* filename)
+    dueling_categorical_dqn* parse_dueling_categorical_dqn_str(char* str, int size)
+    dueling_categorical_dqn* parse_dueling_categorical_dqn_without_learning_parameters_str(char* str, int size)
+    dueling_categorical_dqn* parse_dueling_categorical_dqn_without_learning_parameters_file(char* filename)
+    dueling_categorical_dqn* parse_dueling_categorical_dqn_without_arrays_str(char* str, int size)
+    dueling_categorical_dqn* parse_dueling_categorical_dqn_without_arrays_file(char* filename)
 
 cdef extern from "../src/recurrent.h":
     void lstm_ff(float* x, float* h, float* c, float* cell_state, float* hidden_state, float** w, float** u, float** b, float** z, int input_size, int output_size)
@@ -1205,7 +1294,8 @@ cdef extern from "../src/update.h":
     void update_transformer_encoder(transformer_encoder* t, float lr, float momentum, int mini_batch_size, int gradient_descent_flag, float* b1, float* b2, int regularization, uint64_t total_number_weights, float lambda_value, unsigned long long int* time)
     void update_vae_model(vaemodel* vm, float lr, float momentum, int mini_batch_size, int gradient_descent_flag, float* b1, float* b2, int regularization, uint64_t total_number_weights, float lambda_value, unsigned long long int* t)
     void update_training_parameters(float* beta1, float* beta2, long long unsigned int* time_step, float start_beta1, float start_beta2)
-
+    void update_dueling_categorical_dqn(dueling_categorical_dqn* dqn, float lr, float momentum, int mini_batch_size, int gradient_descent_flag, float* b1, float* b2, int regularization, uint64_t total_number_weights, float lambda_value, unsigned long long int* t)
+    
 cdef extern from "../src/utils.h":
     char* get_full_path(char* directory, char* filename)
     void get_dropout_array(int size, float* mask, float* input, float* output) 
@@ -1254,6 +1344,7 @@ cdef extern from "../src/utils.h":
     int msleep(long msec)
     int* get_new_copy_int_array(int* array, int size)
     void set_int_vector_with_value(int value, int* v, int dimension)
+    int argmax(float* vector, int dimension)
 
 cdef extern from "../src/vae_model.h":
     vaemodel* variational_auto_encoder_model(model* encoder, model* decoder, int latent_size)

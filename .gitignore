@@ -1,8 +1,10 @@
 build/
 dist/
 test/data/
+test/videos/
 test/train
 test/neat
+test/dqn
 test/memcheck
 test/*.bin
 wheelhouse/

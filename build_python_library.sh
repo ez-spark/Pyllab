@@ -1,3 +1,3 @@
 CFLAGS="-I ./src/"  \
 LDFLAGS="-L . "     \
-python setup.py sdist bdist_wheel
+python3.8 setup.py sdist bdist_wheel

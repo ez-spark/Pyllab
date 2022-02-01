@@ -44,8 +44,6 @@ int main( int argc,char** argv){
         printf("\n");
     }*/
     model* m3 = parse_model_without_arrays_file(model_filename);
-    printf("size: %lud\n",size_of_model(m3));
-    printf("size: %lud\n",size_of_model_without_learning_parameters(m3));
     free_model_without_arrays(m3);
     set_model_error(m,FOCAL_LOSS,0,0,2,NULL,output_dimension);
     if(edge > 0)
