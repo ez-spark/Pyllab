@@ -19,10 +19,8 @@ class DQNAgent:
     
     def __init__(self, state_size, action_size, n_atoms, v_min, v_max, filename, batch_size, n_actions, mode = False):
         self.online_net = pyllab.duelingCategoricalDQN(filename = filename,input_size = state_size,action_size = action_size, n_atoms = n_atoms, v_min = v_min, v_max = v_max, mode = mode)
-        print(self.online_net.get_size())
-        exit(0)
         self.target_net = pyllab.copy_dueling_categorical_dqn(self.online_net)
-        self.online_net.make_multi_thread(batch_size) 
+        self.online_net.make_multi_thread(batch_size)
         self.target_net.make_multi_thread(batch_size)
         self.lr = 0.001
         self.gamma = 0.99
@@ -47,7 +45,10 @@ class DQNAgent:
         action = self.online_net.get_best_action(current_state,self.online_net.get_input_size())
         self.online_net.reset()
         return action
-
+    def compute_real_action(self,current_state):
+        action = self.online_net.get_best_action(current_state,self.online_net.get_input_size())
+        self.online_net.reset()
+        return action
     # when an episode is finished, we update the exploration probability using 
     # espilon greedy algorithm
     def update_exploration_probability(self):
@@ -82,13 +83,14 @@ class DQNAgent:
         for experience in batch_sample:
             states_t.append(experience["current_state"][0])
             states_t_1.append(experience["next_state"][0])
+
             actions.append(experience["action"])
-            rewards.append(experience["reward"])
             if experience["done"] == False:
                 nonterminals.append(1)
+                rewards.append(experience["reward"])
             #nonterminals.append(1)
             else:
-                #rewards.append(-10)
+                rewards.append(-10)
                 nonterminals.append(0)
         actions = np.array(actions)
         rewards = np.array(rewards)
@@ -110,27 +112,26 @@ class DQNAgent:
 pyllab.get_randomness()
 # We create our gym environment 
 #env = gym.make("CartPole-v1")
-env = gym.make('CubeCrashSparse-v0')
+env = gym.make("CartPole-v1")
 # We get the shape of a state and the actions space size
 state_size = env.observation_space.shape[0]
 action_size = env.action_space.n
 # Number of episodes to run
-n_episodes = 800
+n_episodes = 500
 # Max iterations per epiode
 max_iteration_ep = 1000
 n_atoms = 51
 v_min = -10.0
 v_max = 10.0
-filename = "./model/model_029.txt"
+filename = "./model/model_027.txt"
 batch_size = 32
 # We define our agent
 agent = DQNAgent(state_size, action_size, n_atoms, v_min, v_max, filename, batch_size, action_size)
 total_steps = 0
 
-l = []
 
-def make_video():
-    env_to_wrap = gym.make('CubeCrashSparse-v0')
+def make_video(ag):
+    env_to_wrap = gym.make("CartPole-v1")
     env = wrappers.Monitor(env_to_wrap, 'videos', force = True)
     rewards = 0
     steps = 0
@@ -138,13 +139,12 @@ def make_video():
     state = env.reset()
     state = np.array([state])
     while not done:
-        action = agent.compute_action(state)
+        action = ag.compute_real_action(state)
         state, reward, done, _ = env.step(action)
         state = np.array([state])            
         steps += 1
         rewards += reward
     print(rewards)
-    l.append(rewards)
     env.close()
     env_to_wrap.close()
 
@@ -179,6 +179,12 @@ for e in range(n_episodes):
         #print("train")
         agent.train()
     if e%100== 0 or e == n_episodes-1:
-        make_video()
-print(l)
+        agent.save(e,'./')
+        make_video(agent)
+        filename = str(e)+'.bin'
+        agent2 = DQNAgent(state_size, action_size, n_atoms, v_min, v_max, filename, batch_size, action_size, mode = True)
+        make_video(agent2)
+
+
+
 

@@ -1,7 +1,12 @@
 #include "../src/llab.h"
 
 int main(){
-    dueling_categorical_dqn* dqn = parse_dueling_categorical_dqn_file("./model/model_027.txt");
+    //dueling_categorical_dqn* dqn = parse_dueling_categorical_dqn_file("./model/model_027.txt");
+    dueling_categorical_dqn* dqn = NULL;
+    //save_dueling_categorical_dqn_given_directory(dqn,0,"./");
+    dueling_categorical_dqn* dqn2 = load_dueling_categorical_dqn("2.bin");
+    free_dueling_categorical_dqn(dqn);
+    dqn = dqn2;
     int batch_size = 2;
     float** states1 = (float**)malloc(sizeof(float*)*batch_size);
     float** states2 = (float**)malloc(sizeof(float*)*batch_size);
@@ -20,9 +25,8 @@ int main(){
         states1[i] = (float*)calloc(4,sizeof(float));
         states2[i] = (float*)calloc(4,sizeof(float));
     }
-    save_dueling_categorical_dqn_given_directory(dqn,0,"./");
-    dueling_categorical_dqn* dqn2 = load_dueling_categorical_dqn("0.bin");
-    free_dueling_categorical_dqn(dqn2);
+    
+    
     reset_dueling_categorical_dqn(dqn);
     dueling_categorical_dqn_train(batch_size,dqn,target,dqns,targets,states1,rewards,actions,states2,nonterminals,0.8,4);
     compute_q_functions(dqn);

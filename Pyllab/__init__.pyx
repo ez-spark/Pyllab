@@ -201,12 +201,10 @@ def get_dict_from_model_setup_file(filename):
                 temp[l[i].strip().split(';')[0]] = l[i+1].strip().split(';')[:-1]
                 for j in range(len(temp[l[i].strip().split(';')[0]])):
                     t = temp[l[i].strip().split(';')[0]][j]
-                    print(t)
                     if '.' in t:
                         temp[l[i].strip().split(';')[0]][j] = float(t)
                     else:
                         temp[l[i].strip().split(';')[0]][j] = int(t)
-                    print(temp)
                 data.append(temp)
         d['data'] = data
         return d
@@ -1420,7 +1418,6 @@ cdef class model:
             self._is_only_for_feedforward = is_only_for_feedforward
             self._is_from_char = True
             s = from_dict_to_str_model(d)
-            print(s)
             if s == None:
                 print("Dict passed is not good, sorry")
                 exit(1)
