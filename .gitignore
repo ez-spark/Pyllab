@@ -1,6 +1,7 @@
 build/
 dist/
 test/data/
+test/tmp/
 test/videos/
 test/train
 test/neat

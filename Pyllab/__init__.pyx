@@ -200,7 +200,13 @@ def get_dict_from_model_setup_file(filename):
                 temp = {}
                 temp[l[i].strip().split(';')[0]] = l[i+1].strip().split(';')[:-1]
                 for j in range(len(temp[l[i].strip().split(';')[0]])):
-                    temp[l[i].strip().split(';')[0]][j] = int(temp[l[i].strip().split(';')[0]][j])
+                    t = temp[l[i].strip().split(';')[0]][j]
+                    print(t)
+                    if '.' in t:
+                        temp[l[i].strip().split(';')[0]][j] = float(t)
+                    else:
+                        temp[l[i].strip().split(';')[0]][j] = int(t)
+                    print(temp)
                 data.append(temp)
         d['data'] = data
         return d
@@ -402,14 +408,16 @@ def dict_to_pass_to_model_is_good(d):
                             if type(d[i][k][ii]) != list or len(d[i][k][ii]) != 10:
                                 print("Error: either you value for a fully-connected is not a list, or its length is not 10!")
                                 return False
-                            for j in d[i][k][ii]:
-                                if type(j) != int:
+                            for j in range(0,len(d[i][k][ii])):
+                                if type(d[i][k][ii][j]) != int and j != 5:
                                     print("Error, some values in the list of the value of a fully-connected is not an int")
                                     return False
-                                    
-                                if j < 0 or j >= 2**31-1:
+                                elif type(d[i][k][ii][j]) != float and type(d[i][k][ii][j]) != int and j == 5:
+                                    print("Error, some value in the list of the value of a fully-connected is not a float neither a int")
+                                    return False
+                                if d[i][k][ii][j] < 0 or d[i][k][ii][j] >= 2**31-1:
                                     print("Error: no negative values, neither overflow are permitted!")
-                                    return False 
+                                    return False
                             if d[i][k][ii][2] in layers_list:
                                 print("layer already exists!")
                                 return False
@@ -421,7 +429,7 @@ def dict_to_pass_to_model_is_good(d):
                                 return False
                             for j in d[i][k][ii]:
                                 if type(j) != int:
-                                    print("Error, some values in the list of the value of a fully-connected is not an int")
+                                    print("Error, some values in the list of the value of a convolutional is not an int")
                                     return False
                                     
                                 if j < 0 or j >= 2**31-1:
@@ -438,7 +446,7 @@ def dict_to_pass_to_model_is_good(d):
                                 return False
                             for j in d[i][k][ii]:
                                 if type(j) != int:
-                                    print("Error, some values in the list of the value of a fully-connected is not an int")
+                                    print("Error, some values in the list of the value of a rconvolutional is not an int")
                                     return False
                                     
                                 if j < 0 or j >= 2**31-1:
@@ -1412,6 +1420,7 @@ cdef class model:
             self._is_only_for_feedforward = is_only_for_feedforward
             self._is_from_char = True
             s = from_dict_to_str_model(d)
+            print(s)
             if s == None:
                 print("Dict passed is not good, sorry")
                 exit(1)

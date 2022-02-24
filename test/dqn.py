@@ -19,6 +19,8 @@ class DQNAgent:
     
     def __init__(self, state_size, action_size, n_atoms, v_min, v_max, filename, batch_size, n_actions, mode = False):
         self.online_net = pyllab.duelingCategoricalDQN(filename = filename,input_size = state_size,action_size = action_size, n_atoms = n_atoms, v_min = v_min, v_max = v_max, mode = mode)
+        print(self.online_net.get_size())
+        exit(0)
         self.target_net = pyllab.copy_dueling_categorical_dqn(self.online_net)
         self.online_net.make_multi_thread(batch_size) 
         self.target_net.make_multi_thread(batch_size)
@@ -80,14 +82,13 @@ class DQNAgent:
         for experience in batch_sample:
             states_t.append(experience["current_state"][0])
             states_t_1.append(experience["next_state"][0])
-            
             actions.append(experience["action"])
+            rewards.append(experience["reward"])
             if experience["done"] == False:
                 nonterminals.append(1)
-                rewards.append(experience["reward"])
             #nonterminals.append(1)
             else:
-                rewards.append(-10)
+                #rewards.append(-10)
                 nonterminals.append(0)
         actions = np.array(actions)
         rewards = np.array(rewards)
@@ -108,7 +109,8 @@ class DQNAgent:
 
 pyllab.get_randomness()
 # We create our gym environment 
-env = gym.make("CartPole-v1")
+#env = gym.make("CartPole-v1")
+env = gym.make('CubeCrashSparse-v0')
 # We get the shape of a state and the actions space size
 state_size = env.observation_space.shape[0]
 action_size = env.action_space.n
@@ -119,7 +121,7 @@ max_iteration_ep = 1000
 n_atoms = 51
 v_min = -10.0
 v_max = 10.0
-filename = "./model/model_027.txt"
+filename = "./model/model_029.txt"
 batch_size = 32
 # We define our agent
 agent = DQNAgent(state_size, action_size, n_atoms, v_min, v_max, filename, batch_size, action_size)
@@ -128,7 +130,7 @@ total_steps = 0
 l = []
 
 def make_video():
-    env_to_wrap = gym.make('CartPole-v1')
+    env_to_wrap = gym.make('CubeCrashSparse-v0')
     env = wrappers.Monitor(env_to_wrap, 'videos', force = True)
     rewards = 0
     steps = 0
