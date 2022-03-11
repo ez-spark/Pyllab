@@ -228,3 +228,5 @@ valgrind ./memcheck ./model/model_023.txt 4
 rm *.bin
 valgrind ./memcheck ./model/model_023.txt 5
 rm *.bin
+valgrind ./rainbow
+rm *.bin

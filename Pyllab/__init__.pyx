@@ -225,7 +225,11 @@ def get_dict_from_model_setup_string(s):
                 temp = {}
                 temp[l[i].strip().split(';')[0]] = l[i+1].strip().split(';')[:-1]
                 for j in range(len(temp[l[i].strip().split(';')[0]])):
-                    temp[l[i].strip().split(';')[0]][j] = int(temp[l[i].strip().split(';')[0]][j])
+                    t = temp[l[i].strip().split(';')[0]][j]
+                    if '.' in t:
+                        temp[l[i].strip().split(';')[0]][j] = float(t)
+                    else:
+                        temp[l[i].strip().split(';')[0]][j] = int(t)
                 data.append(temp)
         d['data'] = data
         return d
@@ -354,7 +358,78 @@ def dict_to_pass_to_dueling_categorical_dqn_is_good(d):
                 return False
         return True
     except:
-        return False            
+        return False
+
+def check_if_convolution_overflows(l):
+    
+    try:
+        if len(l) < 24:
+            return True
+        input_rows = int(l[1])
+        input_cols = int(l[2])
+        kernel_rows = int(l[3])
+        kernel_cols = int(l[4])
+        n_kernels = int(l[5])
+        stride1_rows = int(l[6])
+        stride1_cols = int(l[7])
+        padding1_rows = int(l[8])
+        padding1_cols = int(l[9])
+        stride2_rows = int(l[10])
+        stride2_cols = int(l[11])
+        padding2_rows = int(l[12])
+        padding2_cols = int(l[13])
+        pooling_rows = int(l[14])
+        pooling_cols = int(l[15])
+        normalization_flag = int(l[16])
+        activation_flag = int(l[17])
+        pooling_flag = int(l[18])
+        group_norm_channels = int(l[19])
+        convolutional_flag = int(l[20])
+        rows1 = ((input_rows-kernel_rows)/stride1_rows +1 + 2*padding1_rows)
+        rows2 = ((rows1 - pooling_rows)/stride2_rows + 1 + 2*padding2_rows)
+        cols1 = ((input_cols-kernel_cols)/stride1_cols +1 + 2*padding1_cols)
+        cols2 = ((cols1 - pooling_cols)/stride2_cols + 1 + 2*padding2_cols)
+        if convolutional_flag == CONVOLUTION or convolutional_flag == NO_CONVOLUTION:
+            if rows1*n_kernels < 0 or rows1*n_kernels >= 2**31-1:
+                return True
+        
+        elif convolutional_flag == TRANSPOSED_CONVOLUTION:
+            rows1 = ((input_rows-1)*stride1_rows +kernel_rows - 2*padding1_rows)
+            if rows1*n_kernels < 0 or rows1*n_kernels >= 2**31-1:
+                return True
+        
+        
+        if convolutional_flag == CONVOLUTION or convolutional_flag == TRANSPOSED_CONVOLUTION:
+            if rows2*n_kernels < 0 or rows2*n_kernels >= 2**31-1:
+                return True
+            
+        else:
+            rows2 = ((input_rows-pooling_rows)/stride2_rows +1 + 2*padding2_rows)
+            if rows2*n_kernels < 0 or rows2*n_kernels >= 2**31-1:
+                return True
+        
+        if convolutional_flag == CONVOLUTION or convolutional_flag == NO_CONVOLUTION:
+            if cols1*n_kernels < 0 or cols1*n_kernels >= 2**31-1:
+                return True
+        
+        
+        elif convolutional_flag == TRANSPOSED_CONVOLUTION:
+            cols1 = ((input_cols-1)*stride1_cols +kernel_cols - 2*padding1_cols)
+            if cols1*n_kernels < 0 or cols1*n_kernels >= 2**31-1:
+                return True
+        
+        if convolutional_flag == CONVOLUTION or convolutional_flag == TRANSPOSED_CONVOLUTION:
+            if cols2*n_kernels < 0 or cols2*n_kernels >= 2**31-1:
+                return True
+        else:
+            cols2 = ((input_cols-pooling_cols)/stride2_cols +1 + 2*padding2_cols)
+            if cols2*n_kernels < 0 or cols2*n_kernels >= 2**31-1:
+                return True
+        return False
+    except:
+        return True
+    
+    
 def dict_to_pass_to_model_is_good(d):
     # we wrap the dict to avoid overflow or negatives values
     try:
@@ -419,6 +494,9 @@ def dict_to_pass_to_model_is_good(d):
                             if d[i][k][ii][2] in layers_list:
                                 print("layer already exists!")
                                 return False
+                            if d[i][k][ii][0]*d[i][k][ii][1] >= 2**31-1 or d[i][k][ii][0]*d[i][k][ii][1] < 0:
+                                print("Error, some value in the list of the value of a fully-connected is not a float neither a int")
+                                return False
                             f_c+=1
                             layers_list.append(d[i][k][ii][2])
                         elif ii == 'convolutional':
@@ -429,10 +507,12 @@ def dict_to_pass_to_model_is_good(d):
                                 if type(j) != int:
                                     print("Error, some values in the list of the value of a convolutional is not an int")
                                     return False
-                                    
                                 if j < 0 or j >= 2**31-1:
                                     print("Error: no negative values, neither overflow are permitted!")
                                     return False
+                            if check_if_convolution_overflows(d[i][k][ii]):
+                                print("Error, some values in the list of the value of a convolutional is not an int")
+                                return False
                             if d[i][k][ii][23] in layers_list:
                                 print("layer already exists!")
                                 return False
@@ -450,6 +530,9 @@ def dict_to_pass_to_model_is_good(d):
                                 if j < 0 or j >= 2**31-1:
                                     print("Error: no negative values, neither overflow are permitted!")
                                     return False
+                            if check_if_convolution_overflows(d[i][k][ii]):
+                                print("Error, some values in the list of the value of a rconvolutional is not an int")
+                                return False
                             if d[i][k][ii][23] in layers_list:
                                 print("layer already exists!")
                                 return False
@@ -2184,7 +2267,7 @@ cdef class duelingCategoricalDQN:
                 Pyllab.free_dueling_categorical_dqn_without_learning_parameters(self._dqns[i])
             free(self._dqns)
     def get_input_size(self):
-        size = self.input_size
+        size = Pyllab.get_input_layer_size_dueling_categorical_dqn(self._dqn)
         return size
     def make_multi_thread(self, int threads):
         if self._does_have_arrays and self._does_have_learning_parameters:
@@ -2986,3 +3069,197 @@ cdef class genome:
         free(output)
         return nd_output
 
+cdef class rainbow:
+    cdef Pyllab.rainbow* _r
+    cdef duelingCategoricalDQN online_net
+    cdef duelingCategoricalDQN target_net
+    
+    cdef float max_epsilon
+    cdef float min_epsilon
+    cdef float epsilon_decay
+    cdef float epsilon
+    cdef float alpha_priorization
+    cdef float beta_priorization
+    cdef float lambda_value
+    cdef float tau_copying
+    cdef float momentum
+    cdef float gamma
+    cdef float beta1
+    cdef float beta2
+    cdef float beta3
+    cdef float k_percentage
+    cdef float clipping_gradient_value
+    cdef float adaptive_clipping_gradient_value
+    cdef float diversity_driven_threshold
+    cdef float lr
+    cdef float lr_minimum
+    cdef float lr_maximum
+    cdef float initial_lr
+    cdef float lr_decay
+    cdef float beta_priorization_increase
+    cdef float diversity_driven_decay
+    cdef float diversity_driven_minimum
+    cdef float diversity_driven_maximum
+    cdef uint64_t lr_epoch_threshold
+    cdef int lr_decay_flag
+    cdef int feed_forward_flag
+    cdef int training_mode
+    cdef int adaptive_clipping_flag
+    cdef int batch_size
+    cdef int threads
+    cdef int gd_flag
+    cdef int uniform_sampling
+    cdef uint64_t max_buffer_size
+    cdef uint64_t n_step_rewards
+    cdef uint64_t stop_epsilon_greedy
+    cdef uint64_t epochs_to_copy_target
+    cdef uint64_t diversity_driven_q_functions
+    
+    def __cinit__(self,duelingCategoricalDQN online_net, duelingCategoricalDQN target_net, float beta_priorization_increase = 0.05, float max_epsilon = 1, float min_epsilon = 0.001,
+                  float diversity_driven_decay = 0, float diversity_driven_minimum = 0.001, float diversity_driven_maximum = 1, float epsilon_decay = 0.05,float epsilon = 1, float alpha_priorization = 0.4,
+                  float beta_priorization = 0.4, float lambda_value = 0.99, float tau_copying = 0.8, float momentum = 0.9, float gamma = 0.99, float beta1 = BETA1_ADAM, float beta2 = BETA2_ADAM, float beta3 = BETA3_ADAMOD,
+                  float k_percentage = 1, float clipping_gradient_value = 1, float adaptive_clipping_gradient_value = 0.01, float diversity_driven_threshold = 0.05, float lr = 0.001, float lr_minimum = 0.0001, float lr_maximum = 0.1,
+                  float lr_decay = 0.0001, int lr_epoch_threshold = 100, int lr_decay_flag = LR_NO_DECAY, int feed_forward_flag = FULLY_FEED_FORWARD, int training_mode = GRADIENT_DESCENT, int adaptive_clipping_flag = 1,
+                  int batch_size = 32,int threads = 32, int gd_flag = ADAM, int max_buffer_size = 10000, int n_step_rewards = 3, int stop_epsilon_greedy = 100, int epochs_to_copy_target = 10,
+                  int uniform_sampling = 1, int diversity_driven_q_functions = 100):
+        cdef int th = threads
+        if(th < 2):
+            return
+        try:
+            if(target_net.threads != th):
+                return
+            
+            if(online_net.threads != th):
+                return
+        except:
+            return
+        
+        check_float(diversity_driven_minimum)
+        check_float(diversity_driven_maximum)
+        check_float(diversity_driven_decay)
+        check_float(beta_priorization_increase)
+        check_float(max_epsilon)    
+        check_float(min_epsilon)    
+        check_float(epsilon_decay)    
+        check_float(epsilon)    
+        check_float(alpha_priorization)    
+        check_float(beta_priorization)    
+        check_float(lambda_value)    
+        check_float(tau_copying)    
+        check_float(momentum)    
+        check_float(gamma)    
+        check_float(beta1)    
+        check_float(beta2)    
+        check_float(beta3)    
+        check_float(k_percentage)    
+        check_float(clipping_gradient_value)    
+        check_float(adaptive_clipping_gradient_value)    
+        check_float(diversity_driven_threshold)    
+        check_float(lr)    
+        check_float(lr_minimum)    
+        check_float(lr_maximum)    
+        check_float(lr_decay)
+        check_int(lr_epoch_threshold)    
+        check_int(lr_decay_flag)    
+        check_int(feed_forward_flag)    
+        check_int(training_mode)    
+        check_int(batch_size)    
+        check_int(threads)    
+        check_int(uniform_sampling)    
+        check_int(gd_flag)    
+        check_int(max_buffer_size)    
+        check_int(n_step_rewards)    
+        check_int(stop_epsilon_greedy)    
+        check_int(adaptive_clipping_flag)    
+        check_int(epochs_to_copy_target)    
+        check_int(diversity_driven_q_functions)    
+        
+        self.online_net = online_net
+        self.target_net = target_net
+        self.max_epsilon = max_epsilon
+        self.min_epsilon = min_epsilon
+        self.epsilon_decay = epsilon_decay
+        self.epsilon = epsilon
+        self.alpha_priorization = alpha_priorization
+        self.beta_priorization = beta_priorization
+        self.lambda_value = lambda_value
+        self.tau_copying = tau_copying
+        self.momentum = momentum
+        self.gamma = gamma
+        self.beta1 = beta1
+        self.beta2 = beta2
+        self.beta3 = beta3
+        self.k_percentage = k_percentage
+        self.clipping_gradient_value = clipping_gradient_value
+        self.adaptive_clipping_gradient_value = adaptive_clipping_gradient_value
+        self.diversity_driven_threshold = diversity_driven_threshold
+        self.lr = lr
+        self.lr_minimum = lr_minimum
+        self.lr_maximum = lr_maximum
+        self.initial_lr = lr
+        self.lr_decay = lr_decay
+        self.lr_epoch_threshold = lr_epoch_threshold
+        self.lr_decay_flag = lr_decay_flag
+        self.feed_forward_flag = feed_forward_flag
+        self.training_mode = training_mode
+        self.adaptive_clipping_flag = adaptive_clipping_flag
+        self.batch_size = batch_size
+        self.threads = th
+        self.gd_flag = gd_flag
+        self.max_buffer_size = max_buffer_size
+        self.n_step_rewards = n_step_rewards
+        self.stop_epsilon_greedy = stop_epsilon_greedy
+        self.epochs_to_copy_target = epochs_to_copy_target
+        self.diversity_driven_q_functions = diversity_driven_q_functions
+        self.diversity_driven_decay = diversity_driven_decay
+        self.diversity_driven_maximum = diversity_driven_maximum
+        self.diversity_driven_minimum = diversity_driven_minimum
+        self.beta_priorization_increase = beta_priorization_increase
+        self.uniform_sampling = uniform_sampling
+        
+        self._r = Pyllab.init_rainbow(self.uniform_sampling, self.gd_flag,self.lr_decay_flag,self.feed_forward_flag,self.training_mode,1,self.adaptive_clipping_flag,self.batch_size,self.threads, 
+                      self.diversity_driven_q_functions,self.epochs_to_copy_target,self.max_buffer_size,self.n_step_rewards,self.stop_epsilon_greedy,0,self.lr_epoch_threshold,
+                      self.max_epsilon,self.min_epsilon,self.epsilon_decay,self.epsilon,self.alpha_priorization,self.beta_priorization,self.lambda_value,self.gamma,self.tau_copying,self.beta1,self.beta2,
+                      self.beta3,self.k_percentage,self.clipping_gradient_value,self.adaptive_clipping_gradient_value,self.lr,self.lr_minimum,self.lr_maximum,self.lr_decay,self.momentum,
+                      self.diversity_driven_threshold,self.diversity_driven_decay,self.diversity_driven_minimum,self.diversity_driven_maximum,self.beta_priorization_increase, self.online_net._dqn, self.target_net._dqn, self.online_net._dqns, self.target_net._dqns)
+        
+        if self._r is NULL:
+            raise MemoryError()
+    
+    def __dealloc__(self):
+        Pyllab.free_rainbow(self._r)
+    
+    
+    def get_action(self, inputs):
+        check_size(inputs,self.online_net.get_input_size())
+        cdef float[:] i = vector_is_valid(inputs)
+        cdef float* dynamic_array = <float*> malloc(self.online_net.get_input_size() * sizeof(float))
+        cdef int j
+        for j in range(self.online_net.get_input_size()):
+            dynamic_array[j] = i[j]
+        cdef int action = Pyllab.get_action_rainbow(self._r,<float*>&dynamic_array[0], self.online_net.get_input_size(), 1)
+        return action
+    
+    def add_experience(self,state_t,state_t_1,int action, float reward, bint done):
+        check_size(state_t,self.online_net.get_input_size())
+        check_size(state_t_1,self.online_net.get_input_size())
+        check_int(action)
+        check_float(reward)
+        #if action >= self.online_net.action_size:
+        #    return
+        cdef float[:] i = vector_is_valid(state_t)
+        cdef float[:] k = vector_is_valid(state_t_1)
+        cdef float* dynamic_array_t = <float*> malloc(self.online_net.get_input_size() * sizeof(float))
+        cdef float* dynamic_array_t_1 = <float*> malloc(self.online_net.get_input_size() * sizeof(float))
+        cdef int j
+        for j in range(self.online_net.get_input_size()):
+            dynamic_array_t[j] = i[j]
+            dynamic_array_t_1[j] = k[j]
+        cdef int nonterminal = 1
+        if done:
+            nonterminal = 0
+        Pyllab.add_experience(<Pyllab.rainbow*>self._r, <float*>&dynamic_array_t[0], <float*>&dynamic_array_t_1[0], action,reward, nonterminal)
+        if done:
+            self.train()
+    def train(self):
+        Pyllab.train_rainbow(<Pyllab.rainbow*>self._r, 1)

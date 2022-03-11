@@ -4,10 +4,12 @@ test/data/
 test/tmp/
 test/videos/
 test/train
+test/rainbow
 test/neat
 test/dqn
 test/memcheck
 test/*.bin
+test/*.png
 wheelhouse/
 Pyllab-*/
 Pyllab/__init__.c

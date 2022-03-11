@@ -1,10 +1,10 @@
 #include "../src/llab.h"
 
 int main(){
-    //dueling_categorical_dqn* dqn = parse_dueling_categorical_dqn_file("./model/model_027.txt");
+    dueling_categorical_dqn* dqn = parse_dueling_categorical_dqn_file("./model/model_027.txt");
     dueling_categorical_dqn* dqn = NULL;
-    //save_dueling_categorical_dqn_given_directory(dqn,0,"./");
-    dueling_categorical_dqn* dqn2 = load_dueling_categorical_dqn("2.bin");
+    save_dueling_categorical_dqn_given_directory(dqn,0,"./");
+    //dueling_categorical_dqn* dqn2 = load_dueling_categorical_dqn("2.bin");
     free_dueling_categorical_dqn(dqn);
     dqn = dqn2;
     int batch_size = 2;

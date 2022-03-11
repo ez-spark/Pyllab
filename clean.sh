@@ -5,7 +5,9 @@ rm -rf build
 rm -rf ./test/data
 rm -rf ./test/videos
 rm ./test/*.bin
+rm ./test/*.png
 rm ./test/train
+rm ./test/rainbow
 rm ./test/neat
 rm ./test/dqn
 rm ./test/memcheck

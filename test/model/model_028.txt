@@ -1,7 +1,7 @@
 shared_hidden_layers;
 fully-connected;fully-connected;fully-connected;fully-connected;
 fully-connected;
-4;200;0;0;5;0;0;0;2;2;
+2;200;0;0;5;0;0;0;2;2;
 fully-connected;
 200;200;1;0;5;0;0;0;2;2;
 fully-connected;
@@ -23,4 +23,4 @@ fully-connected;
 a_linear_last_layer;
 fully-connected;
 fully-connected;
-200;102;0;0;0;0;0;0;2;2;
+200;153;0;0;0;0;0;0;2;2;
