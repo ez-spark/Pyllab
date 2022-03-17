@@ -137,6 +137,9 @@ LR_CONSTANT_DECAY = Pyllab.LR_CONSTANT_DECAY
 LR_TIME_BASED_DECAY = Pyllab.LR_TIME_BASED_DECAY
 LR_STEP_DECAY = Pyllab.LR_STEP_DECAY
 LR_ANNEALING_DECAY = Pyllab.LR_ANNEALING_DECAY
+REWARD_SAMPLING = Pyllab.REWARD_SAMPLING
+UNIFORM_SAMPLING = Pyllab.UNIFORM_SAMPLING
+RANKED_SAMPLING = Pyllab.RANKED_SAMPLING
 
 cdef extern from "Python.h":
     char* PyUnicode_AsUTF8(object unicode)
@@ -3108,7 +3111,7 @@ cdef class rainbow:
     cdef int batch_size
     cdef int threads
     cdef int gd_flag
-    cdef int uniform_sampling
+    cdef int sampling_flag
     cdef uint64_t max_buffer_size
     cdef uint64_t n_step_rewards
     cdef uint64_t stop_epsilon_greedy
@@ -3117,11 +3120,11 @@ cdef class rainbow:
     
     def __cinit__(self,duelingCategoricalDQN online_net, duelingCategoricalDQN target_net, float beta_priorization_increase = 0.05, float max_epsilon = 1, float min_epsilon = 0.001,
                   float diversity_driven_decay = 0, float diversity_driven_minimum = 0.001, float diversity_driven_maximum = 1, float epsilon_decay = 0.05,float epsilon = 1, float alpha_priorization = 0.4,
-                  float beta_priorization = 0.4, float lambda_value = 0.99, float tau_copying = 0.8, float momentum = 0.9, float gamma = 0.99, float beta1 = BETA1_ADAM, float beta2 = BETA2_ADAM, float beta3 = BETA3_ADAMOD,
+                  float beta_priorization = 0.4, float tau_copying = 0.8, float momentum = 0.9, float gamma = 0.99, float beta1 = BETA1_ADAM, float beta2 = BETA2_ADAM, float beta3 = BETA3_ADAMOD,
                   float k_percentage = 1, float clipping_gradient_value = 1, float adaptive_clipping_gradient_value = 0.01, float diversity_driven_threshold = 0.05, float lr = 0.001, float lr_minimum = 0.0001, float lr_maximum = 0.1,
                   float lr_decay = 0.0001, int lr_epoch_threshold = 100, int lr_decay_flag = LR_NO_DECAY, int feed_forward_flag = FULLY_FEED_FORWARD, int training_mode = GRADIENT_DESCENT, int adaptive_clipping_flag = 1,
                   int batch_size = 32,int threads = 32, int gd_flag = ADAM, int max_buffer_size = 10000, int n_step_rewards = 3, int stop_epsilon_greedy = 100, int epochs_to_copy_target = 10,
-                  int uniform_sampling = 1, int diversity_driven_q_functions = 100):
+                  int sampling_flag = REWARD_SAMPLING, int diversity_driven_q_functions = 100):
         cdef int th = threads
         if(th < 2):
             return
@@ -3143,8 +3146,7 @@ cdef class rainbow:
         check_float(epsilon_decay)    
         check_float(epsilon)    
         check_float(alpha_priorization)    
-        check_float(beta_priorization)    
-        check_float(lambda_value)    
+        check_float(beta_priorization)  
         check_float(tau_copying)    
         check_float(momentum)    
         check_float(gamma)    
@@ -3165,7 +3167,7 @@ cdef class rainbow:
         check_int(training_mode)    
         check_int(batch_size)    
         check_int(threads)    
-        check_int(uniform_sampling)    
+        check_int(sampling_flag)    
         check_int(gd_flag)    
         check_int(max_buffer_size)    
         check_int(n_step_rewards)    
@@ -3182,7 +3184,7 @@ cdef class rainbow:
         self.epsilon = epsilon
         self.alpha_priorization = alpha_priorization
         self.beta_priorization = beta_priorization
-        self.lambda_value = lambda_value
+        self.lambda_value = gamma
         self.tau_copying = tau_copying
         self.momentum = momentum
         self.gamma = gamma
@@ -3215,9 +3217,9 @@ cdef class rainbow:
         self.diversity_driven_maximum = diversity_driven_maximum
         self.diversity_driven_minimum = diversity_driven_minimum
         self.beta_priorization_increase = beta_priorization_increase
-        self.uniform_sampling = uniform_sampling
+        self.sampling_flag = sampling_flag
         
-        self._r = Pyllab.init_rainbow(self.uniform_sampling, self.gd_flag,self.lr_decay_flag,self.feed_forward_flag,self.training_mode,1,self.adaptive_clipping_flag,self.batch_size,self.threads, 
+        self._r = Pyllab.init_rainbow(self.sampling_flag, self.gd_flag,self.lr_decay_flag,self.feed_forward_flag,self.training_mode,1,self.adaptive_clipping_flag,self.batch_size,self.threads, 
                       self.diversity_driven_q_functions,self.epochs_to_copy_target,self.max_buffer_size,self.n_step_rewards,self.stop_epsilon_greedy,0,self.lr_epoch_threshold,
                       self.max_epsilon,self.min_epsilon,self.epsilon_decay,self.epsilon,self.alpha_priorization,self.beta_priorization,self.lambda_value,self.gamma,self.tau_copying,self.beta1,self.beta2,
                       self.beta3,self.k_percentage,self.clipping_gradient_value,self.adaptive_clipping_gradient_value,self.lr,self.lr_minimum,self.lr_maximum,self.lr_decay,self.momentum,

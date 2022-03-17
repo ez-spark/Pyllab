@@ -329,6 +329,12 @@ cdef extern from "../src/llab.h":
         LR_STEP_DECAY
     cdef enum:
         LR_ANNEALING_DECAY
+    cdef enum:
+        UNIFORM_SAMPLING
+    cdef enum:
+        RANKED_SAMPLING
+    cdef enum:
+        REWARD_SAMPLING
      
 cdef extern from "../src/attention.h":
     void self_attention_ff(float* query, float* key, float* value, float* score_matrix,float* score_matrix_softmax,float* output, int dimension, int attention_flag, int k_embedding_dimension, int v_embedding_dimension)
@@ -1152,7 +1158,7 @@ cdef extern from "../src/positional_encoding.h":
     float* sin_cos_positional_encoding_vector(int embedding_dimension, int sequence_length)
 
 cdef extern from "../src/rainbow.h":
-    rainbow* init_rainbow(int uniform_sampling, int gd_flag, int lr_decay_flag, int feed_forward_flag, int training_mode, int clipping_flag, int adaptive_clipping_flag, int batch_size,int threads, 
+    rainbow* init_rainbow(int sampling_flag, int gd_flag, int lr_decay_flag, int feed_forward_flag, int training_mode, int clipping_flag, int adaptive_clipping_flag, int batch_size,int threads, 
                       uint64_t diversity_driven_q_functions, uint64_t epochs_to_copy_target, uint64_t max_buffer_size, uint64_t n_step_rewards, uint64_t stop_epsilon_greedy, uint64_t past_errors, uint64_t lr_epoch_threshold,
                       float max_epsilon, float min_epsilon, float epsilon_decay, float epsilon, float alpha_priorization, float beta_priorization, float lambda_value,float gamma, float tau_copying, float beta1, float beta2,
                       float beta3, float k_percentage, float clipping_gradient_value, float adaptive_clipping_gradient_value, float lr, float lr_minimum, float lr_maximum, float lr_decay, float momentum,

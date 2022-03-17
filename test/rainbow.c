@@ -47,7 +47,7 @@ int main(){
     float lr_decay = 0.0001;
     float momentum = 0.9;
     float ddl_threshold = 1;
-    rainbow* r = init_rainbow(gd_flag,lr_decay_flag,feed_forward_flag,training_mode,clipping_flag,adaptive_clipping_flag,
+    rainbow* r = init_rainbow(REWARD_SAMPLING,gd_flag,lr_decay_flag,feed_forward_flag,training_mode,clipping_flag,adaptive_clipping_flag,
                               mini_batch_size,threads,diversity_driven_q_functions,epochs_to_copy_target,max_buffer_size,n_step_rewards,
                               stop_epsilon_greedy,past_errors,lr_epoch_threshold,max_epsilon,min_epsilon,epsilon_decay,epsilon,alpha_priorization,
                               beta_priorization,lambda,gamma,tau,beta1,beta2,beta3,k_percentage,clipping_gradient_value,
@@ -65,6 +65,9 @@ int main(){
             state2[j] = r2();
         }
         for(j = 0; j < get_output_dimension_from_model(online_net->a_linear_last_layer); j++){
+            if(r2() < 0.5)
+            q[j] = -r2();
+            else
             q[j] = r2();
         }
         
@@ -75,7 +78,10 @@ int main(){
     for(i = 0; i <max_buffer_size*3; i++){
         float* state = (float*)calloc(get_input_layer_size_dueling_categorical_dqn(online_net),sizeof(float));
         float* state2 = (float*)calloc(get_input_layer_size_dueling_categorical_dqn(online_net),sizeof(float));
+        
         float reward = r2();
+        if(r2() < 0.5)
+            reward = -reward;
         int action = rand()%2;
         int nonterminal = 1;
         int terminal = 0;

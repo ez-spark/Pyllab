@@ -24,7 +24,7 @@ class DQNAgent:
         self.online_net.make_multi_thread(batch_size)
         self.target_net.make_multi_thread(batch_size)
         if rain:
-            self.rainbow = pyllab.rainbow(online_net = self.online_net,target_net = self.target_net, threads = batch_size, batch_size = batch_size, stop_epsilon_greedy =10, alpha_priorization = 0.4, diversity_driven_q_functions = batch_size)
+            self.rainbow = pyllab.rainbow(online_net = self.online_net,target_net = self.target_net, sampling_flag = pyllab.REWARD_SAMPLING, threads = batch_size, batch_size = batch_size, stop_epsilon_greedy =0,adaptive_clipping_flag = 0, alpha_priorization = 0.4, diversity_driven_q_functions = batch_size)
     # The agent computes the action to perform given a state 
     def compute_action(self, current_state):
         return self.rainbow.get_action(current_state)
@@ -113,9 +113,6 @@ for e in range(n_episodes):
     
     if e%100== 0 or e == n_episodes-1:
         l.append(make_video(agent))
-        #filename = str(e)+'.bin'
-        #agent2 = DQNAgent(state_size, action_size, n_atoms, v_min, v_max, filename, batch_size, action_size, mode = True, rain = False)
-        #make_video(agent2)
 
 l2 = []
 for i in range(len(l)):
