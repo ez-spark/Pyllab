@@ -11,6 +11,7 @@ rm ./test/rainbow
 rm ./test/neat
 rm ./test/dqn
 rm ./test/memcheck
+rm ./test/wrong_model_memchecker
 rm ./Pyllab/__init__.c
 rm libllab.so
 rm libllab.dll

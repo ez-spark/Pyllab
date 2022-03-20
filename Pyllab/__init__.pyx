@@ -350,6 +350,7 @@ def get_dict_from_dueling_categorical_dqn_setup_file(filename):
         return None
 
 def dict_to_pass_to_dueling_categorical_dqn_is_good(d):
+    cdef Pyllab.dueling_categorical_dqn* m
     try:
         l = list(d.keys())
         if len(l) != 5:
@@ -359,6 +360,12 @@ def dict_to_pass_to_dueling_categorical_dqn_is_good(d):
         for i in d:
             if not dict_to_pass_to_model_is_good(d[i]):
                 return False
+        s = from_dict_to_str_dueling_categorical_dqn(d)
+        ss = <char*>PyUnicode_AsUTF8(s)
+        m = Pyllab.parse_dueling_categorical_dqn_without_arrays_str(ss,len(s))
+        if m is NULL:
+            return False
+        Pyllab.free_dueling_categorical_dqn_without_arrays(<Pyllab.dueling_categorical_dqn*>m)
         return True
     except:
         return False
@@ -435,6 +442,9 @@ def check_if_convolution_overflows(l):
     
 def dict_to_pass_to_model_is_good(d):
     # we wrap the dict to avoid overflow or negatives values
+    cdef Pyllab.model* m
+    cdef int ret
+    cdef int input_size
     try:
         keys = list(d.keys())
         n_layers = 0
@@ -559,6 +569,17 @@ def dict_to_pass_to_model_is_good(d):
                 print("not recognized identifier")
                 return False
         if r_c != rconvolutional or f_c != fcl or c_c != convolutional:
+            return False
+        
+        s = from_dict_to_str_model(d)
+        ss = <char*>PyUnicode_AsUTF8(s)
+        m = Pyllab.parse_model_without_arrays_str(ss,len(s))
+        if m is NULL:
+            return False
+        input_size = Pyllab.get_input_layer_size(<Pyllab.model*> m)
+        ret = Pyllab.model_tensor_input_ff_without_arrays(m, input_size, 1, 1, NULL)
+        Pyllab.free_model_without_arrays(<Pyllab.model*> m)
+        if ret == 0:
             return False
         return True
     except:
@@ -3242,7 +3263,7 @@ cdef class rainbow:
         cdef int action = Pyllab.get_action_rainbow(self._r,<float*>&dynamic_array[0], self.online_net.get_input_size(), 1)
         return action
     
-    def add_experience(self,state_t,state_t_1,int action, float reward, bint done):
+    def add_experience(self,state_t,state_t_1,int action, float reward, bint done, bint train_flag = False):
         check_size(state_t,self.online_net.get_input_size())
         check_size(state_t_1,self.online_net.get_input_size())
         check_int(action)
@@ -3261,7 +3282,7 @@ cdef class rainbow:
         if done:
             nonterminal = 0
         Pyllab.add_experience(<Pyllab.rainbow*>self._r, <float*>&dynamic_array_t[0], <float*>&dynamic_array_t_1[0], action,reward, nonterminal)
-        if done:
+        if done or train_flag:
             self.train()
     def train(self):
         Pyllab.train_rainbow(<Pyllab.rainbow*>self._r, 1)

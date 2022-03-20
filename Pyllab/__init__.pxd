@@ -815,6 +815,8 @@ cdef extern from "../src/model.h":
     void set_k_percentage_of_ith_layer_model(model* m, int ith, float k_percentage)
     void set_model_beta_adamod(model* m, float beta)
     float get_beta3_from_model(model* m)
+    int model_tensor_input_ff_without_arrays(model* m, int tensor_depth, int tensor_i, int tensor_j, float* input)
+    int get_input_layer_size(model* m)
     
 cdef extern from "../src/multi_core_dueling_categorical_dqn.h":
     void* dueling_categorical_dqn_train_thread(void* _args)
