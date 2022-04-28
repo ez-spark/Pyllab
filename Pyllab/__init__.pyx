@@ -360,7 +360,7 @@ def dict_to_pass_to_dueling_categorical_dqn_is_good(d):
         for i in d:
             if not dict_to_pass_to_model_is_good(d[i]):
                 return False
-        s = from_dict_to_str_dueling_categorical_dqn(d)
+        s = from_dict_to_str_dueling_categorical_dqn_without_check(d)
         ss = <char*>PyUnicode_AsUTF8(s)
         m = Pyllab.parse_dueling_categorical_dqn_without_arrays_str(ss,len(s))
         if m is NULL:
@@ -571,7 +571,7 @@ def dict_to_pass_to_model_is_good(d):
         if r_c != rconvolutional or f_c != fcl or c_c != convolutional:
             return False
         
-        s = from_dict_to_str_model(d)
+        s = from_dict_to_str_model_without_check(d)
         ss = <char*>PyUnicode_AsUTF8(s)
         m = Pyllab.parse_model_without_arrays_str(ss,len(s))
         if m is NULL:
@@ -600,10 +600,52 @@ def from_dict_to_str_model(dict d):
                 s+=str(k)+';'
             s+='\n'
     return s
+    
+def from_dict_to_str_model_without_check(dict d):
+    s = ''
+    first_line = d['layers']
+    for i in first_line:
+        s+=i+';'
+    s+='\n'
+    for i in d['data']:
+        for j in i.keys():
+            s+=j+';\n'
+            for k in i[j]:
+                s+=str(k)+';'
+            s+='\n'
+    return s
 
 def from_dict_to_str_dueling_categorical_dqn(dict d):
     if not dict_to_pass_to_dueling_categorical_dqn_is_good(d):
         return None
+    s = 'shared_hidden_layers;\n'
+    d_model = from_dict_to_str_model(d['shared_hidden_layers'])
+    if d_model == None:
+        return None
+    s+=d_model
+    s += 'v_hidden_layers;\n'
+    d_model=from_dict_to_str_model(d['v_hidden_layers'])
+    if d_model == None:
+        return None
+    s+=d_model
+    s += 'v_linear_last_layer;\n'
+    d_model=from_dict_to_str_model(d['v_linear_last_layer'])
+    if d_model == None:
+        return None
+    s+=d_model
+    s += 'a_hidden_layers;\n'
+    d_model=from_dict_to_str_model(d['a_hidden_layers'])
+    if d_model == None:
+        return None
+    s+=d_model
+    s += 'a_linear_last_layer;\n'
+    d_model=from_dict_to_str_model(d['a_linear_last_layer'])
+    if d_model == None:
+        return None
+    s+=d_model
+    return s
+
+def from_dict_to_str_dueling_categorical_dqn_without_check(dict d):
     s = 'shared_hidden_layers;\n'
     d_model = from_dict_to_str_model(d['shared_hidden_layers'])
     if d_model == None:
@@ -684,6 +726,706 @@ def check_float(float i):
         print("Error, wrong input to pass")
         exit(1)
 
+def neat_training_is_good(d):
+    if type(d) != dict:
+        return False
+    if len(list(d.keys())) != 21:
+        return False
+    if 'keep_parents' not in d:
+        return False
+    else:
+        try:
+            keep_parents = int(d['keep_parents'])
+            check_int(keep_parents)
+            if keep_parents != 0 and keep_parents != 1:
+                return False
+        except:
+            return False
+    
+    if 'species_threshold' not in d:
+        return False
+    else:
+        try:
+            species_threshold = int(d['species_threshold'])
+            check_int(species_threshold)
+            if species_threshold < 1:
+                return False
+        except:
+            return False
+    
+    if 'initial_population' not in d:
+        return False
+    else:
+        try:
+            initial_population = int(d['initial_population'])
+            check_int(initial_population)
+            if initial_population < 1:
+                return False
+        except:
+            return False
+    
+    if 'generations' not in d:
+        return False
+    else:
+        try:
+            generations = int(d['generations'])
+            check_int(generations)
+            if generations < 1:
+                return False
+        except:
+            return False
+    
+    if 'percentage_survivors_per_specie' not in d:
+        return False
+    else:
+        try:
+            percentage_survivors_per_specie = float(d['percentage_survivors_per_specie'])
+            check_float(percentage_survivors_per_specie)
+            if percentage_survivors_per_specie < 0 or percentage_survivors_per_specie > 1:
+                return False
+        except:
+            return False
+    
+    if 'connection_mutation_rate' not in d:
+        return False
+    else:
+        try:
+            connection_mutation_rate = float(d['connection_mutation_rate'])
+            check_float(connection_mutation_rate)
+            if connection_mutation_rate < 0 or connection_mutation_rate > 1:
+                return False
+        except:
+            return False
+    
+    if 'new_connection_assignment_rate' not in d:
+        return False
+    else:
+        try:
+            new_connection_assignment_rate = float(d['new_connection_assignment_rate'])
+            check_float(new_connection_assignment_rate)
+            if new_connection_assignment_rate < 0 or new_connection_assignment_rate > 1:
+                return False
+        except:
+            return False
+    
+    
+    if 'add_connection_big_specie_rate' not in d:
+        return False
+    else:
+        try:
+            add_connection_big_specie_rate = float(d['add_connection_big_specie_rate'])
+            check_float(add_connection_big_specie_rate)
+            if add_connection_big_specie_rate < 0 or add_connection_big_specie_rate > 1:
+                return False
+        except:
+            return False
+    
+    if 'add_connection_small_specie_rate' not in d:
+        return False
+    else:
+        try:
+            add_connection_small_specie_rate = float(d['add_connection_small_specie_rate'])
+            check_float(add_connection_small_specie_rate)
+            if add_connection_small_specie_rate < 0 or add_connection_small_specie_rate > 1:
+                return False
+        except:
+            return False
+    
+    if 'add_node_specie_rate' not in d:
+        return False
+    else:
+        try:
+            add_node_specie_rate = float(d['add_node_specie_rate'])
+            check_float(add_node_specie_rate)
+            if add_node_specie_rate < 0 or add_node_specie_rate > 1:
+                return False
+        except:
+            return False
+    
+    
+    if 'activate_connection_rate' not in d:
+        return False
+    else:
+        try:
+            activate_connection_rate = float(d['activate_connection_rate'])
+            check_float(activate_connection_rate)
+            if activate_connection_rate < 0 or activate_connection_rate > 1:
+                return False
+        except:
+            return False
+    
+    if 'remove_connection_rate' not in d:
+        return False
+    else:
+        try:
+            remove_connection_rate = float(d['remove_connection_rate'])
+            check_float(remove_connection_rate)
+            if remove_connection_rate < 0 or remove_connection_rate > 1:
+                return False
+        except:
+            return False
+    
+    if 'crossover_rate' not in d:
+        return False
+    else:
+        try:
+            crossover_rate = float(d['crossover_rate'])
+            check_float(crossover_rate)
+            if crossover_rate < 0 or crossover_rate > 1:
+                return False
+        except:
+            return False
+    
+    if 'age_significance' not in d:
+        return False
+    else:
+        try:
+            age_significance = float(d['age_significance'])
+            check_float(age_significance)
+            if age_significance < 0 or age_significance > 1:
+                return False
+        except:
+            return False
+    
+    if 'children' not in d:
+        return False
+    else:
+        try:
+            children = int(d['children'])
+            check_int(children)
+            if children < 1:
+                return False
+        except:
+            return False
+    
+    if 'saving' not in d:
+        return False
+    else:
+        try:
+            saving = int(d['saving'])
+            check_int(saving)
+            if saving < 1:
+                return False
+        except:
+            return False
+    
+    if 'limiting_species' not in d:
+        return False
+    else:
+        try:
+            limiting_species = int(d['limiting_species'])
+            check_int(limiting_species)
+            if limiting_species < 1:
+                return False
+        except:
+            return False
+    
+    if 'limiting_threshold' not in d:
+        return False
+    else:
+        try:
+            limiting_threshold = int(d['limiting_threshold'])
+            check_int(limiting_threshold)
+            if limiting_threshold < 1:
+                return False
+        except:
+            return False
+    
+    if 'max_population' not in d:
+        return False
+    else:
+        try:
+            max_population = int(d['max_population'])
+            check_int(max_population)
+            if max_population < 1:
+                return False
+        except:
+            return False
+    
+    if 'same_fitness_limit' not in d:
+        return False
+    else:
+        try:
+            same_fitness_limit = int(d['same_fitness_limit'])
+            check_int(same_fitness_limit)
+            if same_fitness_limit < 1:
+                return False
+        except:
+            return False
+    
+    if 'exchange' not in d:
+        return False
+    else:
+        try:
+            exchange = d['exchange']
+            episode = exchange[0]
+            if episode != 'episode' and episode != 'step':
+                return False
+            if str(exchange[1]) != 'end':
+                step = int(exchange[1])
+                check_int(step)
+                if step < 1:
+                    return False
+        except:
+            return False
+    
+    return True
+
+def rainbow_training_is_good(d):
+    if type(d) != dict:
+        return False
+    if len(list(d.keys())) != 41:
+        return False
+    if 'beta_priorization_increase' not in d:
+        return False
+    else:
+        try:
+            beta_priorization_increase = float(d['beta_priorization_increase'])
+            if beta_priorization_increase < -1 or beta_priorization_increase > 1:
+                return False
+        except:
+            return False
+    if 'max_epsilon' not in d:
+        return False
+    else:
+        try:
+            max_epsilon = float(d['max_epsilon'])
+            if max_epsilon > 1 or max_epsilon < 0:
+                return False
+        except:
+            return False
+            
+    if 'min_epsilon' not in d:
+        return False
+    else:
+        try:
+            min_epsilon = float(d['min_epsilon'])
+            if min_epsilon > 1 or min_epsilon < 0 or min_epsilon > max_epsilon:
+                return False
+        except:
+            return False
+            
+    if 'diversity_driven_decay' not in d:
+        return False
+    else:
+        try:
+            diversity_driven_decay = float(d['diversity_driven_decay'])
+            if diversity_driven_decay > 1 or diversity_driven_decay < 0:
+                return False
+        except:
+            return False
+            
+    if 'diversity_driven_minimum' not in d:
+        return False
+    else:
+        try:
+            diversity_driven_minimum = float(d['diversity_driven_minimum'])
+            if diversity_driven_minimum > 1 or diversity_driven_minimum < 0:
+                return False
+        except:
+            return False
+            
+    if 'diversity_driven_maximum' not in d:
+        return False
+    else:
+        try:
+            diversity_driven_maximum = float(d['diversity_driven_maximum'])
+            if diversity_driven_maximum > 1 or diversity_driven_maximum < 0 or diversity_driven_maximum < diversity_driven_minimum:
+                return False
+        except:
+            return False
+    
+    if 'epsilon_decay' not in d:
+        return False
+    else:
+        try:
+            epsilon_decay = float(d['epsilon_decay'])
+            if epsilon_decay > 1 or epsilon_decay < 0 :
+                return False
+        except:
+            return False
+            
+    if 'epsilon' not in d:
+        return False
+    else:
+        try:
+            epsilon = float(d['epsilon'])
+            if epsilon > 1 or epsilon < 0 :
+                return False
+        except:
+            return False
+            
+    if 'alpha_priorization' not in d:
+        return False
+    else:
+        try:
+            alpha_priorization = float(d['alpha_priorization'])
+            if alpha_priorization > 1 or alpha_priorization < 0 :
+                return False
+        except:
+            return False
+    
+    if 'beta_priorization' not in d:
+        return False
+    else:
+        try:
+            beta_priorization = float(d['beta_priorization'])
+            if beta_priorization > 1 or beta_priorization < 0 :
+                return False
+        except:
+            return False
+    
+    if 'tau_copying' not in d:
+        return False
+    else:
+        try:
+            tau_copying = float(d['tau_copying'])
+            if tau_copying > 1 or tau_copying < 0 :
+                return False
+        except:
+            return False
+    
+    if 'momentum' not in d:
+        return False
+    else:
+        try:
+            momentum = float(d['momentum'])
+            if momentum > 1 or momentum < 0 :
+                return False
+        except:
+            return False
+    
+    if 'gamma' not in d:
+        return False
+    else:
+        try:
+            gamma = float(d['gamma'])
+            if gamma > 1 or gamma < 0 :
+                return False
+        except:
+            return False
+            
+    if 'beta1' not in d:
+        return False
+    else:
+        try:
+            beta1 = float(d['beta1'])
+            if beta1 > 1 or beta1 < 0 :
+                return False
+        except:
+            return False
+    
+    if 'beta2' not in d:
+        return False
+    else:
+        try:
+            beta2 = float(d['beta2'])
+            if beta2 > 1 or beta2 < 0 :
+                return False
+        except:
+            return False
+    
+    if 'beta3' not in d:
+        return False
+    else:
+        try:
+            beta3 = float(d['beta3'])
+            if beta3 > 1 or beta3 < 0 :
+                return False
+        except:
+            return False
+    
+    if 'k_percentage' not in d:
+        return False
+    else:
+        try:
+            k_percentage = float(d['k_percentage'])
+            if k_percentage > 0.8 or k_percentage < 0.3 :
+                return False
+        except:
+            return False
+            
+    if 'clipping_gradient_value' not in d:
+        return False
+    else:
+        try:
+            clipping_gradient_value = float(d['clipping_gradient_value'])
+            check_float(clipping_gradient_value)
+            if clipping_gradient_value < 0:
+                return False
+        except:
+            return False
+    
+    
+    if 'adaptive_clipping_gradient_value' not in d:
+        return False
+    else:
+        try:
+            adaptive_clipping_gradient_value = float(d['adaptive_clipping_gradient_value'])
+            check_float(adaptive_clipping_gradient_value)
+            if adaptive_clipping_gradient_value < 0:
+                return False
+        except:
+            return False
+    
+    if 'diversity_driven_threshold' not in d:
+        return False
+    else:
+        try:
+            diversity_driven_threshold = float(d['diversity_driven_threshold'])
+            check_float(diversity_driven_threshold)
+            if diversity_driven_threshold < 0:
+                return False
+        except:
+            return False
+    
+    if 'lr' not in d:
+        return False
+    else:
+        try:
+            lr = float(d['lr'])
+            if lr < 0 or lr > 1:
+                return False
+        except:
+            return False
+    
+    if 'lr_minimum' not in d:
+        return False
+    else:
+        try:
+            lr_minimum = float(d['lr_minimum'])
+            if lr_minimum < 0 or lr_minimum > 1:
+                return False
+        except:
+            return False
+            
+    if 'lr_maximum' not in d:
+        return False
+    else:
+        try:
+            lr_maximum = float(d['lr_maximum'])
+            if lr_maximum < 0 or lr_maximum > 1 or lr_maximum < lr_minimum:
+                return False
+        except:
+            return False
+    
+    if 'lr_decay' not in d:
+        return False
+    else:
+        try:
+            lr_decay = float(d['lr_decay'])
+            if lr_decay < 0 or lr_decay > 1:
+                return False
+        except:
+            return False
+            
+    if 'lr_epoch_threshold' not in d:
+        return False
+    else:
+        try:
+            lr_epoch_threshold = int(d['lr_epoch_threshold'])
+            check_int(lr_epoch_threshold)
+            if lr_epoch_threshold < 1:
+                return False
+        except:
+            return False
+    
+
+    if 'lr_decay_flag' not in d:
+        return False
+    else:
+        try:
+            lr_decay_flag = int(d['lr_decay_flag'])
+            check_int(lr_decay_flag)
+            if lr_decay_flag != LR_ANNEALING_DECAY and lr_decay_flag != LR_CONSTANT_DECAY and lr_decay_flag != LR_NO_DECAY and lr_decay_flag != LR_STEP_DECAY and lr_decay_flag != LR_TIME_BASED_DECAY:
+                return False
+        except:
+            return False
+    
+    if 'feed_forward_flag' not in d:
+        return False
+    else:
+        try:
+            feed_forward_flag = int(d['feed_forward_flag'])
+            check_int(feed_forward_flag)
+            if feed_forward_flag != FULLY_FEED_FORWARD and feed_forward_flag != EDGE_POPUP:
+                return False
+        except:
+            return False
+    
+    
+    if 'training_mode' not in d:
+        return False
+    else:
+        try:
+            training_mode = int(d['training_mode'])
+            check_int(training_mode)
+            if training_mode != GRADIENT_DESCENT and training_mode != EDGE_POPUP:
+                return False
+        except:
+            return False
+    
+    if 'adaptive_clipping_flag' not in d:
+        return False
+    else:
+        try:
+            adaptive_clipping_flag = int(d['adaptive_clipping_flag'])
+            check_int(adaptive_clipping_flag)
+            if adaptive_clipping_flag != 0 and adaptive_clipping_flag != 1:
+                return False
+        except:
+            return False
+    
+    if 'batch_size' not in d:
+        return False
+    else:
+        try:
+            batch_size = int(d['batch_size'])
+            check_int(batch_size)
+            if batch_size < 1:
+                return False
+        except:
+            return False
+    
+    if 'threads' not in d:
+        return False
+    else:
+        try:
+            threads = int(d['threads'])
+            check_int(threads)
+            if threads < 1 or threads > batch_size:
+                return False
+        except:
+            return False
+            
+    if 'gd_flag' not in d:
+        return False
+    else:
+        try:
+            gd_flag = int(d['gd_flag'])
+            check_int(gd_flag)
+            if gd_flag != NESTEROV and gd_flag != ADAM and gd_flag != RADAM and gd_flag != ADAMOD and gd_flag != DIFF_GRAD:
+                return False
+        except:
+            return False
+            
+    if 'max_buffer_size' not in d:
+        return False
+    else:
+        try:
+            max_buffer_size = int(d['max_buffer_size'])
+            check_int(max_buffer_size)
+            if max_buffer_size < 0 or max_buffer_size < batch_size:
+                return False
+        except:
+            return False
+    
+    if 'n_step_rewards' not in d:
+        return False
+    else:
+        try:
+            n_step_rewards = int(d['n_step_rewards'])
+            check_int(n_step_rewards)
+            if n_step_rewards < 1:
+                return False
+        except:
+            return False
+    
+    if 'stop_epsilon_greedy' not in d:
+        return False
+    else:
+        try:
+            stop_epsilon_greedy = int(d['stop_epsilon_greedy'])
+            check_int(stop_epsilon_greedy)
+            if stop_epsilon_greedy < 0:
+                return False
+        except:
+            return False
+    
+    if 'epochs_to_copy_target' not in d:
+        return False
+    else:
+        try:
+            epochs_to_copy_target = int(d['epochs_to_copy_target'])
+            check_int(epochs_to_copy_target)
+            if epochs_to_copy_target < 1:
+                return False
+        except:
+            return False
+    
+    if 'sampling_reward' not in d:
+        return False
+    else:
+        try:
+            sampling_reward = int(d['sampling_reward'])
+            check_int(sampling_reward)
+            if sampling_reward != RANKED_SAMPLING and sampling_reward != REWARD_SAMPLING and sampling_reward != UNIFORM_SAMPLING:
+                return False
+        except:
+            return False
+    
+    
+    if 'diversity_driven_q_functions' not in d:
+        return False
+    else:
+        try:
+            diversity_driven_q_functions = int(d['diversity_driven_q_functions'])
+            check_int(diversity_driven_q_functions)
+            if diversity_driven_q_functions < batch_size or diversity_driven_q_functions > max_buffer_size:
+                return False
+        except:
+            return False
+    
+    if 'update_exploration_probability' not in d:
+        return False
+    else:
+        try:
+            update_exploration_probability = d['update_exploration_probability']
+            episode = update_exploration_probability[0]
+            if episode != 'episode' and episode != 'step':
+                return False
+            if str(update_exploration_probability[1]) != 'end':
+                step = int(update_exploration_probability[1])
+                check_int(step)
+                if step < 1:
+                    return False
+        except:
+            return False
+    
+    if 'train' not in d:
+        return False
+    else:
+        try:
+            train = d['train']
+            episode = train[0]
+            if episode != 'episode' and episode != 'step':
+                return False
+            if str(train[1]) != 'end':
+                step = int(train[1])
+                check_int(step)
+                if step < 1:
+                    return False
+        except:
+            return False
+    return True
+    
+    if 'exchange' not in d:
+        return False
+    else:
+        try:
+            exchange = d['exchange']
+            episode = exchange[0]
+            if episode != 'episode' and episode != 'step':
+                return False
+            if str(exchange[1]) != 'end':
+                step = int(exchange[1])
+                check_int(step)
+                if step < 1:
+                    return False
+        except:
+            return False
+    return True
+    
 
 cdef class bn:
     cdef Pyllab.bn* _bn 
@@ -708,13 +1450,13 @@ cdef class bn:
             else:
                 self._bn = Pyllab.batch_normalization_without_learning_parameters(batch_size,vector_input_dimension)
 
-            if self._bn is NULL:
-                raise MemoryError()
-            if is_only_for_feedforward:
-                Pyllab.make_the_bn_only_for_ff(<Pyllab.bn*>self._bn)
         else:
             self._bn = Pyllab.batch_normalization_without_arrays(batch_size,vector_input_dimension)
-    
+        
+        if self._bn is NULL:
+                raise MemoryError()
+        if is_only_for_feedforward and does_have_arrays:
+            Pyllab.make_the_bn_only_for_ff(<Pyllab.bn*>self._bn)
         
     def __dealloc__(self):
         if self._bn is not NULL and self._does_have_arrays and not self._is_only_for_feedforward:
@@ -755,27 +1497,28 @@ cdef class bn:
 
 
 def paste_bn(bn b1, bn b2):
-    if b1._does_have_arrays and b1._does_have_learning_parameters and b2._does_have_arrays and b2._does_have_learning_parameters:
+    if b1._does_have_arrays and b1._does_have_learning_parameters and b2._does_have_arrays and b2._does_have_learning_parameters and not b1._is_only_for_feedforward and not b2._is_only_for_feedforward:
+       
         Pyllab.paste_bn(b1._bn,b2._bn)
     
 def paste_bn_without_learning_parameters(bn b1, bn b2):
-    if b1._does_have_arrays and b2._does_have_arrays:
+    if b1._does_have_arrays and b2._does_have_arrays and not b1._is_only_for_feedforward and not b2._is_only_for_feedforward:
         Pyllab.paste_bn_without_learning_parameters(b1._bn,b2._bn)
 
 def slow_paste_bn(bn b1, bn b2, float tau):
-    if b1._does_have_arrays and b1._does_have_learning_parameters and b2._does_have_arrays and b2._does_have_learning_parameters:
+    if b1._does_have_arrays and b1._does_have_learning_parameters and b2._does_have_arrays and b2._does_have_learning_parameters and not b1._is_only_for_feedforward and not b2._is_only_for_feedforward:
+       
         Pyllab.slow_paste_bn(b1._bn, b2._bn,tau)
 
 def copy_bn(bn b):
-    cdef bn bb = bn(b._batch_size, b._vector_input_dimension)
+    cdef bn bb = bn(b._batch_size, b._vector_input_dimension,does_have_learning_parameters = b._does_have_learning_parameters, does_have_arrays = b._does_have_arrays,is_only_for_feedforward = b._is_only_for_feedforward)
     paste_bn(b,bb)
     return bb
 
 def copy_bn_without_learning_parameters(bn b):
-    cdef bn bb = bn(b._batch_size, b._vector_input_dimension,False)
+    cdef bn bb = bn(b._batch_size, b._vector_input_dimension,does_have_learning_parameters = False, does_have_arrays = b._does_have_arrays,is_only_for_feedforward = b._is_only_for_feedforward)
     paste_bn_without_learning_parameters(b,bb)
     return bb
-
 
 cdef class cl:
     cdef Pyllab.cl* _cl
@@ -884,7 +1627,7 @@ cdef class cl:
             Pyllab.free_convolutional_without_arrays(self._cl)
     
     def save(self,number_of_file):
-        if self._does_have_arrays and self._does_have_learning_parameters:
+        if self._does_have_arrays and self._does_have_learning_parameters and not self._is_only_for_feedforward:
             Pyllab.save_cl(self._cl, number_of_file)
         
     def get_size(self):
@@ -896,7 +1639,7 @@ cdef class cl:
         return 0
     
     def make_it_only_for_ff(self):
-        if not self._is_only_for_feedforward:
+        if not self._is_only_for_feedforward and self._does_have_arrays and self._does_have_learning_parameters:
             self._is_only_for_feedforward = True
             Pyllab.make_the_cl_only_for_ff(self._cl)
     
@@ -1031,10 +1774,10 @@ def compare_score_cl(cl c1, cl c2, cl c_output):
         Pyllab.compare_score_cl(c1._cl, c2._cl,c_output._cl)
     
 def compare_score_cl_with_vector(cl c1, vector, cl c_output):
+    check_size(vector,c1.get_array_size_scores())
     cdef float[:] v = vector_is_valid(vector)
     if c1._does_have_arrays and c1._does_have_learning_parameters and c_output._does_have_arrays and c_output._does_have_learning_parameters:
         Pyllab.compare_score_cl_with_vector(c1._cl, <float*>&v[0],c_output._cl)
-
 
 cdef class fcl:
     cdef Pyllab.fcl* _fcl
@@ -1247,6 +1990,7 @@ def compare_score_fcl(fcl f1, fcl f2, fcl f_output):
         Pyllab.compare_score_fcl(f1._fcl, f2._fcl,f_output._fcl)
     
 def compare_score_fcl_with_vector(fcl f1, vector, fcl f_output):
+    check_size(vector,f1.get_array_size_scores())
     cdef float[:] v = vector_is_valid(vector)
     if f1._does_have_arrays and f1._does_have_learning_parameters and f_output._does_have_arrays and f_output._does_have_learning_parameters:
         Pyllab.compare_score_fcl_with_vector(f1._fcl, <float*>&v[0],f_output._fcl)
@@ -1350,6 +2094,7 @@ cdef class rl:
             Pyllab.set_low_score_rl(self._rl)
     def make_it_only_for_ff(self):
         if not self.is_only_for_feedforward:
+            self._is_only_for_feedforward = True
             for i in range(0,self._n_cl):
                 self._cls[i].make_it_only_for_ff()
          
@@ -1365,7 +2110,7 @@ def copy_rl(rl r):
     l = []
     for i in range(0,len(r._cls)):
         l.append(copy_cl(r._cls[i]))
-    cdef rl rr = rl(r._channels,r._input_rows,r._input_cols,r._n_cl,l)
+    cdef rl rr = rl(r._channels,r._input_rows,r._input_cols,r._n_cl,l, does_have_learning_parameters = r._does_have_learning_parameters, does_have_arrays = r._does_have_arrays, is_only_for_feedforward = r._is_only_for_feedforward)
     paste_rl(r,rr)
     return rr
 
@@ -1373,14 +2118,15 @@ def copy_rl_without_learning_parameters(rl r):
     l = []
     for i in range(0,len(r._cls)):
         l.append(copy_cl(r._cls[i]))
-    cdef rl rr = rl(r._channels,r._input_rows,r._input_cols,r._n_cl,l)
+    cdef rl rr = rl(r._channels,r._input_rows,r._input_cols,r._n_cl,l, does_have_learning_parameters = False, does_have_arrays = r._does_have_arrays, is_only_for_feedforward = r._is_only_for_feedforward)
     paste_rl_without_learning_parameters(r,rr)
     return rr
 
 def slow_paste_rl(rl r1, rl r2, float tau):
     if len(r1._cls) != len(r2._cls):
         return
-    Pyllab.slow_paste_rl(r1._rl,r2._rl,tau)
+    if r1.does_have_arrays and r1.does_have_learning_parameters and r2.does_have_arrays and r2.does_have_learning_parameters and not r1._is_only_for_feedforward and not r2._is_only_for_feedforward:
+        Pyllab.slow_paste_rl(r1._rl,r2._rl,tau)
 
 def copy_vector_to_params_rl(rl r, vector):
     check_size(vector,r.get_array_size_params())
@@ -1443,11 +2189,11 @@ def compare_score_rl(rl r1, rl r2, rl r_output):
         Pyllab.compare_score_rl(r1._rl, r2._rl,r_output._rl)
     
 def compare_score_rl_with_vector(rl r1, vector, rl r_output):
+    check_size(vector,r1.get_array_size_scores())
     cdef float[:] v
     if r1._does_have_arrays and r1._does_have_learning_parameters and r_output._does_have_arrays and r_output._does_have_learning_parameters:
         v = vector_is_valid(vector)
         Pyllab.compare_score_rl_with_vector(r1._rl, <float*>&v[0],r_output._rl)  
-
 
 cdef class model:
     cdef Pyllab.model* _model
@@ -1485,40 +2231,46 @@ cdef class model:
         self.threads = 1
         self._models = NULL
         cdef char* ss
+        # filename != none and mod = true, a txt configuration file is loaded
+        # filename != none and mod = false a binary model file is loaded
+        # if filename == none and d != none d is a dictionary got from a configuration file
+        # if filename = none and dict = none but mod = true nothing is allocated only the flags are init
         if filename != None:
             self._does_have_arrays = does_have_arrays
             self._does_have_learning_parameters = does_have_learning_parameters
             self._is_only_for_feedforward = is_only_for_feedforward
             self._is_from_char = True
-            
+            ss = <char*>PyUnicode_AsUTF8(filename)
             
             if mod == False:
                 if not dict_to_pass_to_model_is_good(get_dict_from_model_setup_file(filename)):
                     print("Error: your setup file is not correct")
                     exit(1)
+                
                 if not self._does_have_arrays:
-                    ss = <char*>PyUnicode_AsUTF8(filename)
                     self._model = Pyllab.parse_model_without_arrays_file(ss)
                     
                 elif not self._does_have_learning_parameters:
-                    ss = <char*>PyUnicode_AsUTF8(filename)
                     self._model = Pyllab.parse_model_without_learning_parameters_file(ss)
                     
                 else:
-                    ss = <char*>PyUnicode_AsUTF8(filename) 
                     self._model = Pyllab.parse_model_file(ss)
                     
             else:
                 if not does_have_arrays or not does_have_learning_parameters:
                     print("Error: leave the default parameters for the flags!")
                     exit(1)
-                ss = <char*>PyUnicode_AsUTF8(filename)
                 self._model = Pyllab.load_model(ss)
                 
                 
             if self._model is NULL:
                 raise MemoryError()
-        
+            
+            
+            if self._is_only_for_feedforward:
+                self._is_only_for_feedforward = False
+                self.make_it_only_for_ff()
+            
         elif d != None:
             self._does_have_arrays = does_have_arrays
             self._does_have_learning_parameters = does_have_learning_parameters
@@ -1528,16 +2280,20 @@ cdef class model:
             if s == None:
                 print("Dict passed is not good, sorry")
                 exit(1)
+            
+            ss = <char*>PyUnicode_AsUTF8(s)
             if not self._does_have_arrays:
-                ss = <char*>PyUnicode_AsUTF8(s)
                 self._model = Pyllab.parse_model_without_arrays_str(ss,len(s))
                 
             elif not self._does_have_learning_parameters:
-                ss = <char*>PyUnicode_AsUTF8(s)
                 self._model = Pyllab.parse_model_without_learning_parameters_str(ss,len(s))
             else:
-                ss = <char*>PyUnicode_AsUTF8(s)
                 self._model = Pyllab.parse_model_str(ss,len(s))
+            if self._model is NULL:
+                raise MemoryError()
+            if self._is_only_for_feedforward:
+                self._is_only_for_feedforward = False
+                self.make_it_only_for_ff()
             
                 
         elif mod == True:
@@ -1599,7 +2355,7 @@ cdef class model:
         
     def __dealloc__(self):
         
-        if self._model is not NULL:
+        if not (self._model is NULL):
             if self._does_have_arrays:
                 if self._does_have_learning_parameters:
                     Pyllab.free_model(self._model)
@@ -1613,7 +2369,8 @@ cdef class model:
             free(self._models)
     
     def make_multi_thread(self, int threads):
-        if self._does_have_arrays and self._does_have_learning_parameters:
+        check_int(threads)
+        if not self._models is NULL and self._does_have_arrays and self._does_have_learning_parameters:
             if threads < 1:
                 print("Error: the number of threads must be >= 1")
                 exit(1)
@@ -1633,7 +2390,7 @@ cdef class model:
             exit(1)
         
     def make_single_thread(self):
-        if self._is_multithread:
+        if self._is_multithread and not (self._model is NULL):
             for i in range(self.threads):
                 Pyllab.free_model_without_learning_parameters(self._models[i])
             free(self._models)
@@ -1642,11 +2399,11 @@ cdef class model:
     
     
     def save(self,number_of_file):
-        if self._does_have_arrays and self._does_have_learning_parameters:
+        if not (self._model is NULL) and self._does_have_arrays and self._does_have_learning_parameters:
             Pyllab.save_model(self._model, number_of_file)
     
     def get_size(self):
-        if self._does_have_arrays:
+        if not (self._model is NULL) and self._does_have_arrays:
             if self._does_have_learning_parameters:
                 return Pyllab.size_of_model(self._model)
             else:
@@ -1654,7 +2411,7 @@ cdef class model:
         return 0
     
     def make_it_only_for_ff(self):
-        if self._does_have_arrays:
+        if not (self._model is NULL) and self._does_have_arrays:
             if not self._is_from_char and not self._is_only_for_feedforward:
                 for i in range(0,self._n_fcl):
                     self.fcls[i].make_it_only_for_ff()
@@ -1668,61 +2425,72 @@ cdef class model:
                 self._is_only_for_feedforward = True
             
     def reset(self):
-        if not self._is_from_char:
-            for i in range(0,self._n_fcl):
-                self.fcls[i].reset()
-            for i in range(0,self._n_cl):
-                self.cls[i].reset()
-            for i in range(0,self._n_rl):
-                self.rls[i].reset()
-        else:
-            if self._does_have_arrays:
-                if self._does_have_learning_parameters:
-                    Pyllab.reset_model(self._model)
+        if not (self._model is NULL):
+            if not self._is_from_char:
+                for i in range(0,self._n_fcl):
+                    self.fcls[i].reset()
+                for i in range(0,self._n_cl):
+                    self.cls[i].reset()
+                for i in range(0,self._n_rl):
+                    self.rls[i].reset()
             else:
-                Pyllab.reset_model_without_learning_parameters(self._model)
-        if self._is_multithread:
-            for i in range(self.threads):
-                Pyllab.reset_model_without_learning_parameters(self._models[i])
+                if self._does_have_arrays:
+                    if self._does_have_learning_parameters:
+                        Pyllab.reset_model(self._model)
+                else:
+                    Pyllab.reset_model_without_learning_parameters(self._model)
+            if self._is_multithread:
+                for i in range(self.threads):
+                    Pyllab.reset_model_without_learning_parameters(self._models[i])
     def clip(self, float threshold):
         check_float(threshold)
-        if self._does_have_arrays and self._does_have_learning_parameters and not self._is_only_for_feedforward:
+        if not (self._model is NULL) and self._does_have_arrays and self._does_have_learning_parameters and not self._is_only_for_feedforward:
             Pyllab.clipping_gradient(self._model, threshold)
     
     def adaptive_clip(self, float threshold, float epsilon):
         check_float(threshold)
         check_float(epsilon)
-        if self._does_have_arrays and self._does_have_learning_parameters and not self._is_only_for_feedforward:
+        if not (self._model is NULL) and self._does_have_arrays and self._does_have_learning_parameters and not self._is_only_for_feedforward:
             Pyllab.adaptive_gradient_clipping_model(self._model,threshold,epsilon)
 
     def get_array_size_params(self):
-        return Pyllab.get_array_size_params_model(self._model)
+        if not (self._model is NULL):
+            return Pyllab.get_array_size_params_model(self._model)
     
     def get_array_size_weights(self):
-        return Pyllab.get_array_size_weights_model(self._model)
+        if not (self._model is NULL):
+            return Pyllab.get_array_size_weights_model(self._model)
         
     def get_array_size_scores(self):
-        return Pyllab.get_array_size_scores_model(self._model)
+        if not (self._model is NULL):
+            return Pyllab.get_array_size_scores_model(self._model)
     
     def set_biases_to_zero(self):
-        if self._does_have_arrays and self._does_have_learning_parameters:
-            Pyllab.set_model_biases_to_zero(self._model)
+        if not (self._model is NULL):
+            if self._does_have_arrays and self._does_have_learning_parameters:
+                Pyllab.set_model_biases_to_zero(self._model)
     
     def set_unused_weights_to_zero(self):
-        if self._does_have_arrays and self._does_have_learning_parameters:
-            Pyllab.set_model_unused_weights_to_zero(self._model)    
+        if not (self._model is NULL):
+            if self._does_have_arrays and self._does_have_learning_parameters:
+                Pyllab.set_model_unused_weights_to_zero(self._model)    
         
     def reset_scores(self):
-        if self._does_have_arrays and self._does_have_learning_parameters:
-            Pyllab.reset_score_model(self._model)
+        if not (self._model is NULL):
+            if self._does_have_arrays and self._does_have_learning_parameters:
+                Pyllab.reset_score_model(self._model)
     def set_low_scores(self):
-        if self._does_have_arrays and self._does_have_learning_parameters:
-            Pyllab.set_low_score_model(self._model)
+        if not (self._model is NULL):
+            if self._does_have_arrays and self._does_have_learning_parameters:
+                Pyllab.set_low_score_model(self._model)
     
     def get_number_of_weights(self):
-        return Pyllab.count_weights(self._model)
+        if not (self._model is NULL):
+            return Pyllab.count_weights(self._model)
     
     def set_model_error(self, int error_flag, int output_dimension, float threshold1 = 0, float threshold2 = 0, float gamma = 0, alpha = None):
+        if self._model is NULL:
+            return
         check_int(error_flag)
         check_int(output_dimension)
         check_float(threshold1)
@@ -1744,6 +2512,8 @@ cdef class model:
         
     
     def feed_forward(self, int tensor_depth, int tensor_i, int tensor_j, inputs):
+        if self._model is NULL:
+            return
         check_int(tensor_depth)
         check_int(tensor_i)
         check_int(tensor_j)
@@ -1755,6 +2525,8 @@ cdef class model:
             Pyllab.model_tensor_input_ff(self._model,tensor_depth,tensor_i,tensor_j,<float*>&i[0])
     
     def back_propagation(self, int tensor_depth, int tensor_i, int tensor_j, inputs, error, int error_dimension):
+        if self._model is NULL:
+            return
         cdef float[:] i
         cdef float[:] e
         cdef float* ret
@@ -1771,9 +2543,11 @@ cdef class model:
             i = vector_is_valid(inputs)
             e = vector_is_valid(error)
             ret = Pyllab.model_tensor_input_bp(self._model,tensor_depth,tensor_i,tensor_j,<float*>&i[0],<float*>&e[0],error_dimension)
-            return from_float_to_ndarray(ret,tensor_depth*tensor_i*tensor_j)
+            return <float[:tensor_depth*tensor_i*tensor_j]> ret
         
     def ff_error_bp(self, int tensor_depth, int tensor_i, int tensor_j, inputs, outputs):
+        if self._model is NULL:
+            return
         check_int(tensor_depth)
         check_int(tensor_i)
         check_int(tensor_j)
@@ -1787,10 +2561,12 @@ cdef class model:
             i = vector_is_valid(inputs)
             o = vector_is_valid(outputs)
             ret = Pyllab.ff_error_bp_model_once(self._model,tensor_depth,tensor_i,tensor_j,<float*>&i[0],<float*>&o[0])
-            return from_float_to_ndarray(ret,tensor_depth*tensor_i*tensor_j)
+            return <float[:tensor_depth*tensor_i*tensor_j]> ret
         
     
     def set_training_edge_popup(self, float k_percentage):
+        if self._model is NULL:
+            return
         check_float(k_percentage)
         if k_percentage > 1 or k_percentage <= 0:
             print("Error: the k percentage must be in (0,1]")
@@ -1801,59 +2577,85 @@ cdef class model:
                 Pyllab.set_model_training_edge_popup(self._models[i],k_percentage)
     
     def reinitialize_weights_according_to_scores(self, float percentage, float goodness):
+        if self._model is NULL:
+            return
         check_float(percentage)
         check_float(goodness)
         if self._does_have_arrays and self._does_have_learning_parameters:
             Pyllab.reinitialize_weights_according_to_scores_model(self._model,percentage,goodness)
     
     def set_training_gd(self):
+        if self._model is NULL:
+            return
         Pyllab.set_model_training_gd(self._model)
         if self._is_multithread:
             for i in range(self.threads):
                 Pyllab.set_model_training_gd(self._models[i])
     
     def reset_edge_popup_d_params(self):
+        if self._model is NULL:
+            return
         if self._does_have_arrays and self._does_have_learning_parameters:
             Pyllab.reset_edge_popup_d_model(self._model)
     
     def output_layer(self):
+        if self._model is NULL:
+            return
         if self._does_have_arrays:
             return from_float_to_ndarray(Pyllab.get_output_layer_from_model(self._model),Pyllab.get_output_dimension_from_model(self._model))
     
     def get_output_dimension_from_model(self):
+        if self._model is NULL:
+            return
         n = Pyllab.get_output_dimension_from_model(self._model)
         return n
         
     def set_beta1(self, float beta):
+        if self._model is NULL:
+            return
         check_float(beta)
         Pyllab.set_model_beta(self._model, beta, self.get_beta2())
     
     def set_beta2(self, float beta):
+        if self._model is NULL:
+            return
         check_float(beta)
         Pyllab.set_model_beta(self._model, self.get_beta1(), beta)
         
     def set_beta3(self, float beta):
+        if self._model is NULL:
+            return
         check_float(beta)
         Pyllab.set_model_beta_adamod(self._model, beta)
     
     def get_beta1(self):
+        if self._model is NULL:
+            return
         b = Pyllab.get_beta1_from_model(self._model)
         return b
     
     def get_beta2(self):
+        if self._model is NULL:
+            return
         b = Pyllab.get_beta2_from_model(self._model)
         return b
         
     def get_beta3(self):
+        if self._model is NULL:
+            return
         b = Pyllab.get_beta3_from_model(self._model)
         return b
     
     def set_ith_layer_training_mode(self, int ith, int training_flag):
+        if self._model is NULL:
+            return
         check_int(ith)
         check_int(training_flag)
         Pyllab.set_ith_layer_training_mode_model(self._model,ith,training_flag)
     
     def set_k_percentage_of_ith_layer(self,int ith, float k):
+        if self._model is NULL:
+            return
         check_int(ith)
         check_float(k)
         if k > 1 or k <= 0:
@@ -1862,6 +2664,8 @@ cdef class model:
         Pyllab.set_k_percentage_of_ith_layer_model(self._model, ith, k)
 
     def feed_forward_opt_multi_thread(self, int tensor_depth, int tensor_i, int tensor_j, inputs):
+        if self._model is NULL:
+            return
         if not self._is_multithread:
             return
         check_int(tensor_depth)
@@ -1888,16 +2692,19 @@ cdef class model:
         free(i)
     
     def back_propagation_opt_multi_thread(self, int tensor_depth, int tensor_i, int tensor_j, inputs, error, int error_dimension, ret_err = False):
+        if self._model is NULL:
+            return None
+        if not self._is_multithread:
+            return None
         check_int(tensor_depth)
         check_int(tensor_i)
         check_int(tensor_j)
         check_int(error_dimension)
+        check_int(tensor_j*tensor_i*tensor_depth)
         if error_dimension != self.get_output_dimension_from_model():
             print("Error: the error dimension doesn't match the output dimension of the model")
             exit(1)
-        check_int(tensor_j*tensor_i*tensor_depth)
-        if not self._is_multithread:
-            return
+        
         if(get_first_dimension_size(inputs) != get_first_dimension_size(error)):
             print("Error: your input size does not match the error size in batch dimension")
             exit(1)
@@ -1946,16 +2753,20 @@ cdef class model:
         return None
     
     def ff_error_bp_opt_multi_thread(self,int tensor_depth, int tensor_i, int tensor_j, inputs, output, int error_dimension, ret_err = False):
+        if self._model is NULL:
+            return None
+        if not self._is_multithread:
+            return None
         check_int(tensor_depth)
         check_int(tensor_i)
         check_int(tensor_j)
         check_int(error_dimension)
+        check_int(tensor_j*tensor_i*tensor_depth)
         if error_dimension != self.get_output_dimension_from_model():
             print("Error: the error dimension doesn't match the output dimension of the model")
             exit(1)
-        check_int(tensor_j*tensor_i*tensor_depth)
-        if not self._is_multithread:
-            return
+        
+        
         error = output
         value_i = None
         value_e = None
@@ -2006,6 +2817,8 @@ cdef class model:
     
     
     def output_layer_of_ith(self, int index):
+        if self._model is NULL:
+            return None
         check_int(index)
         if self._is_multithread:
             if index < self.threads:
@@ -2013,10 +2826,14 @@ cdef class model:
         return None
     
     def sum_models_partial_derivatives(self):
+        if self._model is NULL:
+            return None
         if self._is_multithread:
             Pyllab.sum_models_partial_derivatives_multithread(self._models, self._model, self.threads, 0)
         
     def set_ith_layer_training_mode_models(self, int ith, int training_flag):
+        if self._model is NULL:
+            return None
         check_int(training_flag)
         check_int(ith)
         if self._is_multithread:
@@ -2024,6 +2841,8 @@ cdef class model:
                 Pyllab.set_ith_layer_training_mode_model(self._models[i],ith,training_flag)
     
     def set_k_percentage_of_ith_layer_models(self,int ith, float k):
+        if self._model is NULL:
+            return None
         check_float(k)
         check_int(ith)
         if self._is_multithread:
@@ -2034,14 +2853,20 @@ cdef class model:
             
        
 def paste_model(model m1, model m2):
+    if m1._model is NULL or m2._model is NULL:
+        return
     if m1._does_have_arrays and m1._does_have_learning_parameters and m2._does_have_arrays and m2._does_have_learning_parameters and not m1._is_only_for_feedforward and not m2._is_only_for_feedforward:
         Pyllab.paste_model(m1._model,m2._model)
     
 def paste_model_without_learning_parameters(model m1, model m2):
+    if m1._model is NULL or m2._model is NULL:
+        return
     if m1._does_have_arrays and m2._does_have_arrays and not m1._is_only_for_feedforward and not m2._is_only_for_feedforward:
         Pyllab.paste_model_without_learning_parameters(m1._model,m2._model)
 
 def copy_model(model m):
+    if m._model is NULL:
+        return
     cdef Pyllab.model* copy
     if m._does_have_learning_parameters and m._does_have_arrays and not m._is_only_for_feedforward:
         if not m._is_from_char:
@@ -2060,10 +2885,11 @@ def copy_model(model m):
         copy = Pyllab.copy_model(m._model)
         mod = model(mod = True)
         mod._model = copy
-        mod._is_from_char = True
         return mod
     
 def copy_model_without_learning_parameters(model m):
+    if m._model is NULL:
+        return
     cdef Pyllab.model* copy 
     if not m._does_have_learning_parameters and m._does_have_arrays and not m._is_only_for_feedforward:
         if not m._is_from_char:
@@ -2082,21 +2908,26 @@ def copy_model_without_learning_parameters(model m):
         copy = Pyllab.copy_model_without_learning_parameters(m._model)
         mod = model(mod = True)
         mod._model = copy
-        mod._is_from_char = True
         mod._does_have_learning_parameters = False
         return mod
 
 def slow_paste_model(model m1, model m2, float tau):
+    if m1._model is NULL or m2._model is NULL:
+        return
     if m1._does_have_arrays and m1._does_have_learning_parameters and m2._does_have_arrays and m2._does_have_learning_parameters and not m1._is_only_for_feedforward and not m2._is_only_for_feedforward:
         Pyllab.slow_paste_model(m1._model, m2._model,tau)
 
 def copy_vector_to_params_model(model m, vector):
+    if m._model is NULL:
+        return
     check_size(vector,m.get_array_size_params())
     cdef float[:] v = vector_is_valid(vector)
     if m._does_have_arrays and m._does_have_learning_parameters:
         Pyllab.memcopy_vector_to_params_model(m._model,<float*>&v[0])
 
 def copy_params_to_vector_model(model m):
+    if m._model is NULL:
+        return
     vector = np.arange(m.get_array_size_params(),dtype=np.float32)
     cdef float[:] v = vector
     if m._does_have_arrays and m._does_have_learning_parameters:
@@ -2105,12 +2936,16 @@ def copy_params_to_vector_model(model m):
     return None
 
 def copy_vector_to_weights_model(model m, vector):
+    if m._model is NULL:
+        return
     check_size(vector,m.get_array_size_weights())
     cdef float[:]v = vector_is_valid(vector)
     if m._does_have_arrays and m._does_have_learning_parameters:
         Pyllab.memcopy_vector_to_weights_model(m._model,<float*>&v[0])
 
 def copy_weights_to_vector_model(model m):
+    if m._model is NULL:
+        return
     vector = np.arange(m.get_array_size_weights(),dtype=np.float32)
     cdef float[:] v = vector
     if m._does_have_arrays and m._does_have_learning_parameters:
@@ -2119,12 +2954,16 @@ def copy_weights_to_vector_model(model m):
     return None
 
 def copy_vector_to_scores_model(model m, vector):
+    if m._model is NULL:
+        return
     check_size(vector,m.get_array_size_scores())
     cdef float[:] v = vector_is_valid(vector)
     if m._does_have_arrays and m._does_have_learning_parameters:
         Pyllab.memcopy_vector_to_scores_model(m._model,<float*>&v[0])
 
 def copy_scores_to_vector_model(model m):
+    if m._model is NULL:
+        return
     vector = np.arange(m.get_array_size_scores(),dtype=np.float32)
     cdef float[:] v = vector
     if m._does_have_arrays and m._does_have_learning_parameters:
@@ -2133,12 +2972,16 @@ def copy_scores_to_vector_model(model m):
     return None
 
 def copy_vector_to_derivative_params_model(model m, vector):
+    if m._model is NULL:
+        return
     check_size(vector,m.get_array_size_params())
     cdef float[:] v = vector_is_valid(vector)
     if m._does_have_arrays and m._does_have_learning_parameters:
         Pyllab.memcopy_vector_to_derivative_params_model(m._model,<float*>&v[0])
 
 def copy_derivative_params_to_vector_model(model m):
+    if m._model is NULL:
+        return
     vector = np.arange(m.get_array_size_params(),dtype=np.float32)
     cdef float[:] v = vector
     if m._does_have_arrays and m._does_have_learning_parameters:
@@ -2147,13 +2990,21 @@ def copy_derivative_params_to_vector_model(model m):
     return None
 
 def compare_score_model(model m1, model m2, model m_output):
+    if m1._model is NULL or m2._model is NULL or m_output._model is NULL:
+        return
     Pyllab.compare_score_model(m1._model, m2._model,m_output._model)
     
 def compare_score_model_with_vector(model m1, vector, model m_output):
+    if m1._model is NULL or m_output._model is NULL:
+        return    
+    check_size(vector,m1.get_array_size_scores())
+    check_size(vector,m_output.get_array_size_scores())
     cdef float[:] v = vector_is_valid(vector)
     Pyllab.compare_score_model_with_vector(m1._model, <float*>&v[0],m_output._model)
     
 def sum_score_model(model m1,model m2, model m_output):
+    if m1._model is NULL or m2._model is NULL or m_output._model is NULL:
+        return    
     Pyllab.sum_score_model(m1._model,m2._model,m_output._model)
 
 cdef class duelingCategoricalDQN:
@@ -2200,6 +3051,10 @@ cdef class duelingCategoricalDQN:
         self._dqn = NULL
         self.reset_value = 1
         cdef char* ss
+        # filename != none and mode = false, a txt configuration file is loaded
+        # filename != none and mode = True a binary model file is loaded
+        # if filename == none and d != none d is a dictionary got from a configuration file
+        # if filename = none and dict = none but mod = true nothing is allocated only the flags are init
         if filename != None:
             self._does_have_arrays = does_have_arrays
             self._does_have_learning_parameters = does_have_learning_parameters
@@ -2252,6 +3107,8 @@ cdef class duelingCategoricalDQN:
             else:
                 ss = <char*>PyUnicode_AsUTF8(s)
                 self._dqn = Pyllab.parse_dueling_categorical_dqn_str(ss, len(s))
+            if self._dqn is NULL:
+                raise MemoryError()
             
                 
         elif mode == True:
@@ -2290,10 +3147,16 @@ cdef class duelingCategoricalDQN:
             for i in range(self.threads):
                 Pyllab.free_dueling_categorical_dqn_without_learning_parameters(self._dqns[i])
             free(self._dqns)
+            
     def get_input_size(self):
+        if self._dqn is NULL:
+            return
         size = Pyllab.get_input_layer_size_dueling_categorical_dqn(self._dqn)
         return size
+    
     def make_multi_thread(self, int threads):
+        if self._dqn is NULL:
+            return
         if self._does_have_arrays and self._does_have_learning_parameters:
             if threads <= 1:
                 print("Error: the number of threads must be >= 1")
@@ -2314,6 +3177,8 @@ cdef class duelingCategoricalDQN:
             exit(1)
         
     def make_single_thread(self):
+        if self._dqn is NULL:
+            return
         if self._is_multithread:
             for i in range(self.threads):
                 Pyllab.free_dueling_categorical_dqn_without_learning_parameters(self._dqns[i])
@@ -2323,6 +3188,8 @@ cdef class duelingCategoricalDQN:
     
     
     def save(self,int number_of_file, str directory):
+        if self._dqn is NULL:
+            return
         check_int(number_of_file)
         cdef char* ss
         if self._does_have_arrays and self._does_have_learning_parameters:
@@ -2330,6 +3197,8 @@ cdef class duelingCategoricalDQN:
             Pyllab.save_dueling_categorical_dqn_given_directory(self._dqn, number_of_file,ss)
     
     def get_size(self):
+        if self._dqn is NULL:
+            return
         if self._does_have_arrays:
             if self._does_have_learning_parameters:
                 return Pyllab.size_of_dueling_categorical_dqn(self._dqn)
@@ -2338,6 +3207,8 @@ cdef class duelingCategoricalDQN:
         return 0
     
     def make_it_only_for_ff(self):
+        if self._dqn is NULL:
+            return
         if self._does_have_arrays:
             if not self._is_from_char and not self._is_only_for_feedforward:
                 self.shared.make_it_only_for_ff()
@@ -2351,6 +3222,8 @@ cdef class duelingCategoricalDQN:
                 self._is_only_for_feedforward = True
             
     def reset(self):
+        if self._dqn is NULL:
+            return
         if self._does_have_arrays:
             if self._does_have_learning_parameters:
                 Pyllab.reset_dueling_categorical_dqn(self._dqn)
@@ -2360,6 +3233,8 @@ cdef class duelingCategoricalDQN:
             self.reset_value = 0
             Pyllab.dueling_categorical_reset_without_learning_parameters_reset(self._dqns, self.threads)
     def reset_all(self):
+        if self._dqn is NULL:
+            return
         if self._does_have_arrays:
             if self._does_have_learning_parameters:
                 Pyllab.reset_dueling_categorical_dqn(self._dqn)
@@ -2369,11 +3244,15 @@ cdef class duelingCategoricalDQN:
             self.reset_value = 0
             Pyllab.dueling_categorical_reset_without_learning_parameters_reset(self._dqns, self.threads)
     def clip(self, float threshold):
+        if self._dqn is NULL:
+            return
         check_float(threshold)
         if self._does_have_arrays and self._does_have_learning_parameters and not self._is_only_for_feedforward:
             Pyllab.dueling_categorical_dqn_clipping_gradient(self._dqn, threshold)
     
     def adaptive_clip(self, float threshold, float epsilon):
+        if self._dqn is NULL:
+            return
         check_float(threshold)
         check_float(epsilon)
         if self._does_have_arrays and self._does_have_learning_parameters and not self._is_only_for_feedforward:
@@ -2383,30 +3262,46 @@ cdef class duelingCategoricalDQN:
         return Pyllab.get_array_size_params_dueling_categorical_dqn(self._dqn)
     
     def get_array_size_weights(self):
+        if self._dqn is NULL:
+            return
         return Pyllab.get_array_size_weights_dueling_categorical_dqn(self._dqn)
         
     def get_array_size_scores(self):
+        if self._dqn is NULL:
+            return
         return Pyllab.get_array_size_scores_dueling_categorical_dqn(self._dqn)
     
     def set_biases_to_zero(self):
+        if self._dqn is NULL:
+            return
         if self._does_have_arrays and self._does_have_learning_parameters:
             Pyllab.set_dueling_categorical_dqn_biases_to_zero(self._dqn)
     
     def set_unused_weights_to_zero(self):
+        if self._dqn is NULL:
+            return
         if self._does_have_arrays and self._does_have_learning_parameters:
             Pyllab.set_dueling_categorical_dqn_unused_weights_to_zero(self._dqn)    
         
     def reset_scores(self):
+        if self._dqn is NULL:
+            return
         if self._does_have_arrays and self._does_have_learning_parameters:
             Pyllab.reset_score_dueling_categorical_dqn(self._dqn)
     def set_low_scores(self):
+        if self._dqn is NULL:
+            return
         if self._does_have_arrays and self._does_have_learning_parameters:
             Pyllab.set_low_score_dueling_categorical_dqn(self._dqn)
     
     def get_number_of_weights(self):
+        if self._dqn is NULL:
+            return
         return Pyllab.count_weights_dueling_categorical_dqn(self._dqn)
     
     def compute_probability_distribution(self, inputs , int input_size):
+        if self._dqn is NULL:
+            return
         check_int(input_size)
         cdef float[:] i
         if self._does_have_arrays and self._does_have_learning_parameters:
@@ -2415,11 +3310,15 @@ cdef class duelingCategoricalDQN:
             Pyllab.compute_probability_distribution(<float*>&i[0], input_size, self._dqn)
     
     def compute_q_function(self, inputs, int input_size):
+        if self._dqn is NULL:
+            return
         self.compute_probability_distribution(inputs,input_size)
         if self._does_have_arrays and self._does_have_learning_parameters:
             return from_float_to_ndarray(Pyllab.compute_q_functions(self._dqn),self.action_size)
         return None
     def get_best_action(self,inputs,int input_size):
+        if self._dqn is NULL:
+            return
         arr = self.compute_q_function(inputs,input_size)
         try:
             m = arr[0]
@@ -2433,6 +3332,8 @@ cdef class duelingCategoricalDQN:
             return None
     
     def set_training_edge_popup(self, float k_percentage):
+        if self._dqn is NULL:
+            return
         check_float(k_percentage)
         if k_percentage > 1 or k_percentage <= 0:
             print("Error: the k percentage must be in (0,1]")
@@ -2443,67 +3344,95 @@ cdef class duelingCategoricalDQN:
                 Pyllab.set_dueling_categorical_dqn_training_edge_popup(self._dqns[i],k_percentage)
     
     def reinitialize_weights_according_to_scores(self, float percentage, float goodness):
+        if self._dqn is NULL:
+            return
         check_float(percentage)
         check_float(goodness)
         if self._does_have_arrays and self._does_have_learning_parameters:
             Pyllab.reinitialize_weights_according_to_scores_dueling_categorical_dqn(self._dqn,percentage,goodness)
     
     def set_training_gd(self):
+        if self._dqn is NULL:
+            return
         Pyllab.set_dueling_categorical_dqn_training_gd(self._dqn)
         if self._is_multithread:
             for i in range(self.threads):
                 Pyllab.set_dueling_categorical_dqn_training_gd(self._dqns[i])
         
     def set_beta1(self, float beta):
+        if self._dqn is NULL:
+            return
         check_float(beta)
         Pyllab.set_dueling_categorical_dqn_beta(self._dqn, beta, self.get_beta2())
     
     def set_beta2(self, float beta):
+        if self._dqn is NULL:
+            return
         check_float(beta)
         Pyllab.set_dueling_categorical_dqn_beta(self._dqn, self.get_beta1(), beta)
         
     def set_beta3(self, float beta):
+        if self._dqn is NULL:
+            return
         check_float(beta)
         Pyllab.set_dueling_categorical_dqn_beta_adamod(self._dqn, beta)
     
     def get_beta1(self):
+        if self._dqn is NULL:
+            return
         b = Pyllab.get_beta1_from_dueling_categorical_dqn(self._dqn)
         return b
     
     def get_beta2(self):
+        if self._dqn is NULL:
+            return
         b = Pyllab.get_beta2_from_dueling_categorical_dqn(self._dqn)
         return b
         
     def get_beta3(self):
+        if self._dqn is NULL:
+            return
         b = Pyllab.get_beta3_from_dueling_categorical_dqn(self._dqn)
         return b
     
     def set_ith_layer_training_mode_shared(self, int ith, int training_flag):
+        if self._dqn is NULL:
+            return
         check_int(ith)
         check_int(training_flag)
         Pyllab.set_ith_layer_training_mode_dueling_categorical_dqn_shared(self._dqn,ith,training_flag)
     
     def set_ith_layer_training_mode_v_hid(self, int ith, int training_flag):
+        if self._dqn is NULL:
+            return
         check_int(ith)
         check_int(training_flag)
         Pyllab.set_ith_layer_training_mode_dueling_categorical_dqn_v_hid(self._dqn,ith,training_flag)
     
     def set_ith_layer_training_mode_v_lin(self, int ith, int training_flag):
+        if self._dqn is NULL:
+            return
         check_int(ith)
         check_int(training_flag)
         Pyllab.set_ith_layer_training_mode_dueling_categorical_dqn_v_lin(self._dqn,ith,training_flag)
         
     def set_ith_layer_training_mode_a_hid(self, int ith, int training_flag):
+        if self._dqn is NULL:
+            return
         check_int(ith)
         check_int(training_flag)
         Pyllab.set_ith_layer_training_mode_dueling_categorical_dqn_a_hid(self._dqn,ith,training_flag)
     
     def set_ith_layer_training_mode_a_lin(self, int ith, int training_flag):
+        if self._dqn is NULL:
+            return
         check_int(ith)
         check_int(training_flag)
         Pyllab.set_ith_layer_training_mode_dueling_categorical_dqn_a_lin(self._dqn,ith,training_flag)
     
     def set_k_percentage_of_ith_layer_shared(self,int ith, float k):
+        if self._dqn is NULL:
+            return
         check_int(ith)
         check_float(k)
         if k > 1 or k <= 0:
@@ -2512,6 +3441,8 @@ cdef class duelingCategoricalDQN:
         Pyllab.set_k_percentage_of_ith_layer_dueling_categorical_dqn_shared(self._dqn, ith, k)
 
     def set_k_percentage_of_ith_layer_v_hid(self,int ith, float k):
+        if self._dqn is NULL:
+            return
         check_int(ith)
         check_float(k)
         if k > 1 or k <= 0:
@@ -2520,6 +3451,8 @@ cdef class duelingCategoricalDQN:
         Pyllab.set_k_percentage_of_ith_layer_dueling_categorical_dqn_v_hid(self._dqn, ith, k)
 
     def set_k_percentage_of_ith_layer_v_lin(self,int ith, float k):
+        if self._dqn is NULL:
+            return
         check_int(ith)
         check_float(k)
         if k > 1 or k <= 0:
@@ -2528,6 +3461,8 @@ cdef class duelingCategoricalDQN:
         Pyllab.set_k_percentage_of_ith_layer_dueling_categorical_dqn_v_lin(self._dqn, ith, k)
 
     def set_k_percentage_of_ith_layer_a_hid(self,int ith, float k):
+        if self._dqn is NULL:
+            return
         check_int(ith)
         check_float(k)
         if k > 1 or k <= 0:
@@ -2536,6 +3471,8 @@ cdef class duelingCategoricalDQN:
         Pyllab.set_k_percentage_of_ith_layer_dueling_categorical_dqn_a_hid(self._dqn, ith, k)
 
     def set_k_percentage_of_ith_layer_a_lin(self,int ith, float k):
+        if self._dqn is NULL:
+            return
         check_int(ith)
         check_float(k)
         if k > 1 or k <= 0:
@@ -2546,12 +3483,14 @@ cdef class duelingCategoricalDQN:
     
 
     def train(self, states_t, states_t_1, rewards_t, actions_t, nonterminals_t_1, duelingCategoricalDQN dqn, float lambda_value):
+        if self._dqn is NULL:
+            return
         check_float(lambda_value)
         if dqn.threads != self.threads:
             return
         if not self._is_multithread:
             return
-        if(get_first_dimension_size(states_t) != get_first_dimension_size(states_t_1)):
+        if(get_first_dimension_size(states_t) != get_first_dimension_size(states_t_1) != self.get_input_size()):
             print("Error: the state dimensions doesn't match")
             exit(1)
         actions = vector_is_valid_int(actions_t)
@@ -2620,18 +3559,26 @@ cdef class duelingCategoricalDQN:
     
     
     def sum_dueling_categorical_dqn_partial_derivatives(self):
+        if self._dqn is NULL:
+            return
         if self._is_multithread:
             Pyllab.sum_dueling_categorical_dqn_partial_derivatives_multithread(self._dqns, self._dqn, self.threads, 0)
             
 def paste_dueling_categorical_dqn(duelingCategoricalDQN dqn1, duelingCategoricalDQN dqn2):
+    if dqn1._dqn is NULL or dqn2._dqn is NULL:
+        return
     if dqn1._does_have_arrays and dqn1._does_have_learning_parameters and dqn2._does_have_arrays and dqn2._does_have_learning_parameters and not dqn1._is_only_for_feedforward and not dqn2._is_only_for_feedforward:
         Pyllab.paste_dueling_categorical_dqn(dqn1._dqn,dqn2._dqn)
     
 def paste_dueling_categorical_dqn_without_learning_parameters(duelingCategoricalDQN dqn1, duelingCategoricalDQN dqn2):
+    if dqn1._dqn is NULL or dqn2._dqn is NULL:
+        return
     if dqn1._does_have_arrays and dqn2._does_have_arrays and not dqn1._is_only_for_feedforward and not dqn2._is_only_for_feedforward:
         Pyllab.paste_dueling_categorical_dqn_without_learning_parameters(dqn1._dqn,dqn2._dqn)
 
 def copy_dueling_categorical_dqn(duelingCategoricalDQN dqn):
+    if dqn._dqn is NULL:
+        return
     cdef Pyllab.dueling_categorical_dqn* copy
     if dqn._does_have_learning_parameters and dqn._does_have_arrays and not dqn._is_only_for_feedforward:
         if not dqn._is_from_char:
@@ -2647,6 +3594,8 @@ def copy_dueling_categorical_dqn(duelingCategoricalDQN dqn):
         return mod
     
 def copy_dueling_categorical_dqn_without_learning_parameters(duelingCategoricalDQN dqn):
+    if dqn._dqn is NULL:
+        return
     cdef Pyllab.dueling_categorical_dqn* copy 
     if dqn._does_have_learning_parameters and dqn._does_have_arrays and not dqn._is_only_for_feedforward:
         if not dqn._is_from_char:
@@ -2663,16 +3612,23 @@ def copy_dueling_categorical_dqn_without_learning_parameters(duelingCategoricalD
     
 
 def slow_paste_dueling_categorical_dqn(duelingCategoricalDQN dqn1, duelingCategoricalDQN dqn2, float tau):
+    check_float(tau)
+    if dqn1._dqn is NULL or dqn2._dqn is NULL:
+        return
     if dqn1._does_have_arrays and dqn1._does_have_learning_parameters and dqn2._does_have_arrays and dqn2._does_have_learning_parameters and not dqn1._is_only_for_feedforward and not dqn2._is_only_for_feedforward:
         Pyllab.slow_paste_dueling_categorical_dqn(dqn1._dqn, dqn2._dqn,tau)
 
 def copy_vector_to_params_dueling_categorical_dqn(duelingCategoricalDQN dqn, vector):
+    if dqn._dqn is NULL:
+        return
     check_size(vector,dqn.get_array_size_params())
     cdef float[:] v = vector_is_valid(vector)
     if dqn._does_have_arrays and dqn._does_have_learning_parameters:
         Pyllab.memcopy_vector_to_params_dueling_categorical_dqn(dqn._dqn,<float*>&v[0])
 
 def copy_params_to_vector_dueling_categorical_dqn(duelingCategoricalDQN dqn):
+    if dqn._dqn is NULL:
+        return
     vector = np.arange(dqn.get_array_size_params(),dtype=np.float32)
     cdef float[:] v = vector
     if dqn._does_have_arrays and dqn._does_have_learning_parameters:
@@ -2681,12 +3637,16 @@ def copy_params_to_vector_dueling_categorical_dqn(duelingCategoricalDQN dqn):
     return None
 
 def copy_vector_to_weights_dueling_categorical_dqn(duelingCategoricalDQN dqn, vector):
+    if dqn._dqn is NULL:
+        return
     check_size(vector,dqn.get_array_size_weights())
     cdef float[:]v = vector_is_valid(vector)
     if dqn._does_have_arrays and dqn._does_have_learning_parameters:
         Pyllab.memcopy_vector_to_weights_dueling_categorical_dqn(dqn._dqn,<float*>&v[0])
 
 def copy_weights_to_vector_dueling_categorical_dqn(duelingCategoricalDQN dqn):
+    if dqn._dqn is NULL:
+        return
     vector = np.arange(dqn.get_array_size_weights(),dtype=np.float32)
     cdef float[:] v = vector
     if dqn._does_have_arrays and dqn._does_have_learning_parameters:
@@ -2695,12 +3655,16 @@ def copy_weights_to_vector_dueling_categorical_dqn(duelingCategoricalDQN dqn):
     return None
 
 def copy_vector_to_scores_dueling_categorical_dqn(duelingCategoricalDQN dqn, vector):
+    if dqn._dqn is NULL:
+        return
     check_size(vector,dqn.get_array_size_scores())
     cdef float[:] v = vector_is_valid(vector)
     if dqn._does_have_arrays and dqn._does_have_learning_parameters:
         Pyllab.memcopy_vector_to_scores_dueling_categorical_dqn(dqn._dqn,<float*>&v[0])
 
 def copy_scores_to_vector_dueling_categorical_dqn(duelingCategoricalDQN dqn):
+    if dqn._dqn is NULL:
+        return
     vector = np.arange(dqn.get_array_size_scores(),dtype=np.float32)
     cdef float[:] v = vector
     if dqn._does_have_arrays and dqn._does_have_learning_parameters:
@@ -2709,13 +3673,21 @@ def copy_scores_to_vector_dueling_categorical_dqn(duelingCategoricalDQN dqn):
     return None
     
 def compare_score_dueling_categorical_dqn(duelingCategoricalDQN dqn1, duelingCategoricalDQN dqn2, duelingCategoricalDQN dqn_output):
+    if dqn1._dqn is NULL or dqn2._dqn is NULL or dqn_output._dqn is NULL:
+        return
     Pyllab.compare_score_dueling_categorical_dqn(dqn1._dqn,dqn2._dqn,dqn_output._dqn)
     
 def compare_score_dueling_categorical_dqn_with_vector(duelingCategoricalDQN dqn1, vector, duelingCategoricalDQN dqn_output):
+    if dqn1._dqn is NULL or dqn_output._dqn is NULL:
+        return
+    check_size(vector,dqn1.get_array_size_scores())
+    check_size(vector,dqn_output.get_array_size_scores())
     cdef float[:] v = vector_is_valid(vector)
     Pyllab.compare_score_dueling_categorical_dqn_with_vector(dqn1._dqn, <float*>&v[0],dqn_output._dqn)
     
 def sum_score_dueling_categorical_dqn(duelingCategoricalDQN dqn1, duelingCategoricalDQN dqn2, duelingCategoricalDQN dqn_output):
+    if dqn1._dqn is NULL or dqn2._dqn is NULL or dqn_output._dqn is NULL:
+        return
     Pyllab.sum_score_dueling_categorical_dqn(dqn1._dqn,dqn2._dqn,dqn_output._dqn)
              
 cdef class training:
@@ -2846,16 +3818,19 @@ cdef class training:
         self.timestep_threshold = timestep_threshold
         self.decay = decay
     def update_model(self, model m):
+        if m._model is NULL:
+            return
         Pyllab.update_model(m._model, self.lr, self.momentum,self.batch_size,self.gradient_descent_flag,&self.current_beta1,&self.current_beta2,self.regularization, self.total_number_weights,self.lambda_value,&self.t)
     
     def update_dqn_categorical_dqn(self, duelingCategoricalDQN dqn):
+        if dqn._dqn is NULL:
+            return
         Pyllab.update_dueling_categorical_dqn(dqn._dqn, self.lr, self.momentum,self.batch_size,self.gradient_descent_flag,&self.current_beta1,&self.current_beta2,self.regularization, self.total_number_weights,self.lambda_value,&self.t)
     
     def update_parameters(self):
         Pyllab.update_training_parameters(&self.current_beta1, &self.current_beta2, &self.t, self.start_beta1, self.start_beta2)
         if self.lr_decay_flag != Pyllab.LR_NO_DECAY:
             Pyllab.update_lr(&self.lr, self.lr_minimum, self.lr_maximum,self.start_lr, self.decay, <int>self.t, self.timestep_threshold, self.lr_decay_flag)
-
 
 cdef class neat:
     cdef Pyllab.neat* _neat
@@ -2936,7 +3911,7 @@ cdef class neat:
         cdef char* s
         
         if inputs == 0 or outputs == 0:
-            print("Error: either you pass inputs and outputs > 0 or a neat as char charachters!")
+            print("Error: either you pass inputs and outputs > 0 or a neat as char characters!")
             exit(1)
         
         if neat_as_byte != None:
@@ -3140,12 +4115,12 @@ cdef class rainbow:
     cdef uint64_t diversity_driven_q_functions
     
     def __cinit__(self,duelingCategoricalDQN online_net, duelingCategoricalDQN target_net, float beta_priorization_increase = 0.05, float max_epsilon = 1, float min_epsilon = 0.001,
-                  float diversity_driven_decay = 0, float diversity_driven_minimum = 0.001, float diversity_driven_maximum = 1, float epsilon_decay = 0.05,float epsilon = 1, float alpha_priorization = 0.4,
+                  float diversity_driven_decay = 0, float diversity_driven_minimum = 0.001, float diversity_driven_maximum = 1, float epsilon_decay = 0.005,float epsilon = 1, float alpha_priorization = 0.4,
                   float beta_priorization = 0.4, float tau_copying = 0.8, float momentum = 0.9, float gamma = 0.99, float beta1 = BETA1_ADAM, float beta2 = BETA2_ADAM, float beta3 = BETA3_ADAMOD,
                   float k_percentage = 1, float clipping_gradient_value = 1, float adaptive_clipping_gradient_value = 0.01, float diversity_driven_threshold = 0.05, float lr = 0.001, float lr_minimum = 0.0001, float lr_maximum = 0.1,
-                  float lr_decay = 0.0001, int lr_epoch_threshold = 100, int lr_decay_flag = LR_NO_DECAY, int feed_forward_flag = FULLY_FEED_FORWARD, int training_mode = GRADIENT_DESCENT, int adaptive_clipping_flag = 1,
-                  int batch_size = 32,int threads = 32, int gd_flag = ADAM, int max_buffer_size = 10000, int n_step_rewards = 3, int stop_epsilon_greedy = 100, int epochs_to_copy_target = 10,
-                  int sampling_flag = REWARD_SAMPLING, int diversity_driven_q_functions = 100):
+                  float lr_decay = 0.0001, int lr_epoch_threshold = 500, int lr_decay_flag = LR_NO_DECAY, int feed_forward_flag = FULLY_FEED_FORWARD, int training_mode = GRADIENT_DESCENT, int adaptive_clipping_flag = 0,
+                  int batch_size = 128,int threads = 128, int gd_flag = ADAM, int max_buffer_size = 10000, int n_step_rewards = 2, int stop_epsilon_greedy = 500, int epochs_to_copy_target = 1,
+                  int sampling_flag = REWARD_SAMPLING, int diversity_driven_q_functions = 128):
         cdef int th = threads
         if(th < 2):
             return
@@ -3157,7 +4132,6 @@ cdef class rainbow:
                 return
         except:
             return
-        
         check_float(diversity_driven_minimum)
         check_float(diversity_driven_maximum)
         check_float(diversity_driven_decay)
@@ -3252,6 +4226,9 @@ cdef class rainbow:
     def __dealloc__(self):
         Pyllab.free_rainbow(self._r)
     
+    def update_exploration_probability(self):
+        Pyllab.update_exploration_probability(self._r)
+
     
     def get_action(self, inputs):
         check_size(inputs,self.online_net.get_input_size())
@@ -3268,8 +4245,8 @@ cdef class rainbow:
         check_size(state_t_1,self.online_net.get_input_size())
         check_int(action)
         check_float(reward)
-        #if action >= self.online_net.action_size:
-        #    return
+        if action >= self.online_net.action_size:
+            return
         cdef float[:] i = vector_is_valid(state_t)
         cdef float[:] k = vector_is_valid(state_t_1)
         cdef float* dynamic_array_t = <float*> malloc(self.online_net.get_input_size() * sizeof(float))

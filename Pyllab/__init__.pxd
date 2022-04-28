@@ -3,7 +3,6 @@ from libc cimport stdint
 ctypedef stdint.uint64_t uint64_t
 
 
-
 cdef extern from "../src/llab.h":
     ctypedef struct bn:
         pass
@@ -1171,6 +1170,8 @@ cdef extern from "../src/rainbow.h":
     int get_action_rainbow(rainbow* r, float* state_t, int input_size, int free_state)
     void add_experience(rainbow* r, float* state_t, float* state_t_1, int action, float reward, int nonterminal_s_t_1)
     void train_rainbow(rainbow* r, int last_t_1_was_terminal)
+    void update_exploration_probability(rainbow* r)
+
 
 cdef extern from "../src/scaled_l2_norm_layers.h":
     scaled_l2_norm* scaled_l2_normalization_layer(int vector_dimension)

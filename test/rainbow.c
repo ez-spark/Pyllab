@@ -1,6 +1,7 @@
 #include "../src/llab.h"
 
 int main(){
+	//char* model_string = "shared_hidden_layers;\nfully-connected;fully-connected;\nfully-connected;\n4;200;0;0;5;0;0;0;1;3;\nfully-connected;\n200;200;1;0;5;0;0;0;1;3;\nv_hidden_layers;\nfully-connected;\nfully-connected;\n200;200;0;0;5;0;0;0;1;3;\nv_linear_last_layer;\nfully-connected;\nfully-connected;\n200;51;0;0;0;0;0;0;1;3;\na_hidden_layers;\nfully-connected;\nfully-connected;\n200;200;0;0;5;0;0;0;1;3;\na_linear_last_layer;\nfully-connected;\nfully-connected;\n200;102;0;0;0;0;0;0;1;3;"
     dueling_categorical_dqn* online_net = parse_dueling_categorical_dqn_file("./model/model_027.txt");
     dueling_categorical_dqn* target_net = copy_dueling_categorical_dqn(online_net);
     int batch_size = 10,i,j;
@@ -47,6 +48,7 @@ int main(){
     float lr_decay = 0.0001;
     float momentum = 0.9;
     float ddl_threshold = 1;
+    srand(9);
     rainbow* r = init_rainbow(REWARD_SAMPLING,gd_flag,lr_decay_flag,feed_forward_flag,training_mode,clipping_flag,adaptive_clipping_flag,
                               mini_batch_size,threads,diversity_driven_q_functions,epochs_to_copy_target,max_buffer_size,n_step_rewards,
                               stop_epsilon_greedy,past_errors,lr_epoch_threshold,max_epsilon,min_epsilon,epsilon_decay,epsilon,alpha_priorization,
@@ -66,7 +68,7 @@ int main(){
         }
         for(j = 0; j < get_output_dimension_from_model(online_net->a_linear_last_layer); j++){
             if(r2() < 0.5)
-            q[j] = -r2();
+            q[j] = r2();
             else
             q[j] = r2();
         }
@@ -81,7 +83,7 @@ int main(){
         
         float reward = r2();
         if(r2() < 0.5)
-            reward = -reward;
+            reward = reward;
         int action = rand()%2;
         int nonterminal = 1;
         int terminal = 0;

@@ -27,6 +27,7 @@ epochs = 10
 d = pyllab.get_dict_from_model_setup_file("./model/model_023.txt")
 print(d)
 model = pyllab.model(d = d)
+print(d)
 model.set_training_edge_popup(0.5)
 model.make_multi_thread(batch_size)
 model.set_model_error(pyllab.FOCAL_LOSS,model.get_output_dimension_from_model(),gamma=2)

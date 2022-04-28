@@ -182,8 +182,8 @@ for e in range(n_episodes):
         agent.save(e,'./')
         make_video(agent)
         filename = str(e)+'.bin'
-        agent2 = DQNAgent(state_size, action_size, n_atoms, v_min, v_max, filename, batch_size, action_size, mode = True)
-        make_video(agent2)
+        #agent2 = DQNAgent(state_size, action_size, n_atoms, v_min, v_max, filename, batch_size, action_size, mode = True)
+        #make_video(agent2)
 
 
 

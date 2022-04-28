@@ -42,11 +42,11 @@ Executes all the basic functions used by neat.c
 python dqn.py
 ```
 
-A learning agent tries to learn cart-pole game from gym
+A learning agent tries to learn cart-pole game from gym (dueling categorical dqn version)
 
 ```
 rainbow.py
 ```
 
-A learning agent tries to learn cart-pole game from gym
+A learning agent tries to learn cart-pole game from gym (rainbow version)
 

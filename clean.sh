@@ -15,3 +15,4 @@ rm ./test/wrong_model_memchecker
 rm ./Pyllab/__init__.c
 rm libllab.so
 rm libllab.dll
+rm libllab.lib
