@@ -974,7 +974,7 @@ def neat_training_is_good(d):
 def rainbow_training_is_good(d):
     if type(d) != dict:
         return False
-    if len(list(d.keys())) != 41:
+    if len(list(d.keys())) != 42:
         return False
     if 'beta_priorization_increase' not in d:
         return False
@@ -1422,6 +1422,18 @@ def rainbow_training_is_good(d):
                 check_int(step)
                 if step < 1:
                     return False
+        except:
+            return False
+    return True
+    
+    if 'new_weights' not in d:
+        return False
+    else:
+        try:
+            new_weights = int(d['new_weights'])
+            check_int(new_weights)
+            if sampling_reward < 1:
+                return False
         except:
             return False
     return True
