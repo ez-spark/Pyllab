@@ -729,8 +729,30 @@ def check_float(float i):
 def neat_training_is_good(d):
     if type(d) != dict:
         return False
-    if len(list(d.keys())) != 22:
+    if len(list(d.keys())) != 24:
         return False
+    if 'input_size' not in d:
+        return False
+    else:
+        try:
+            input_size = int(d['input_size'])
+            check_int(input_size)
+            if input_size <= 0:
+                return False
+        except:
+            return False
+    
+    if 'output_size' not in d:
+        return False
+    else:
+        try:
+            output_size = int(d['output_size'])
+            check_int(output_size)
+            if output_size <= 0:
+                return False
+        except:
+            return False
+    
     if 'clock_time' not in d:
         return False
     else:
