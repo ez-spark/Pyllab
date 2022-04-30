@@ -89,5 +89,6 @@ void reverse_ptr(void* ptr, uint64_t size);
 void swap_array_bytes_order(void* ptr, uint64_t size, uint64_t len);
 void convert_data(void* ptr, uint64_t size, uint64_t len);
 int shuffle_int_array_until_length(int* m,int n, int length);
+void quick_sort_int(int A[], int I[], int lo, int hi);
 
 #endif

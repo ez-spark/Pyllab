@@ -825,6 +825,38 @@ void quick_sort(float A[], int I[], int lo, int hi){
     }
 }
 
+/* this function given a float array and a int array of indices from 0 to hi 
+ * already sorted will sort the array of indices based on the float a
+ * 
+ * input:
+ * 
+ *                 @ float A[]:= the array of values
+ *                 @ int I[]:= the array of indices
+ *                 @ int lo:= 0
+ *                 int hi:= len-1
+ * */
+void quick_sort_int(int A[], int I[], int lo, int hi){
+    if (lo < hi)
+    {
+        int pivot = A[I[lo + (hi - lo) / 2]];
+        int t;
+        int i = lo - 1;
+        int j = hi + 1;
+        while (1)
+        {
+            while (A[I[++i]] < pivot);
+            while (A[I[--j]] > pivot);
+            if (i >= j)
+                break;
+            t = I[i];
+            I[i] = I[j];
+            I[j] = t;
+        }
+        quick_sort_int(A, I, lo, j);
+        quick_sort_int(A, I, j + 1, hi);
+    }
+}
+
 char** get_files(int index1, int n_files){
     char** files = (char**)malloc(sizeof(char*)*n_files);
     int i;

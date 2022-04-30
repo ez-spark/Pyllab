@@ -729,8 +729,19 @@ def check_float(float i):
 def neat_training_is_good(d):
     if type(d) != dict:
         return False
-    if len(list(d.keys())) != 21:
+    if len(list(d.keys())) != 22:
         return False
+    if 'clock_time' not in d:
+        return False
+    else:
+        try:
+            clock_time = float(d['clock_time'])
+            check_float(clock_time)
+            if clock_time <= 0:
+                return False
+        except:
+            return False
+    
     if 'keep_parents' not in d:
         return False
     else:
@@ -974,8 +985,26 @@ def neat_training_is_good(d):
 def rainbow_training_is_good(d):
     if type(d) != dict:
         return False
-    if len(list(d.keys())) != 42:
+    if len(list(d.keys())) != 44:
         return False
+    if 'max_reward' not in d:
+        return False
+    else:
+        try:
+            max_reward = float(d['max_reward'])
+            check_float(max_reward)
+        except:
+            return False
+    if 'min_reward' not in d:
+        return False
+    else:
+        try:
+            min_reward = float(d['min_reward'])
+            check_float(max_reward)
+            if min_reward >= max_reward:
+                return False
+        except:
+            return False
     if 'beta_priorization_increase' not in d:
         return False
     else:
