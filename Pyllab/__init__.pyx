@@ -1483,7 +1483,17 @@ def rainbow_training_is_good(d):
         try:
             new_weights = int(d['new_weights'])
             check_int(new_weights)
-            if sampling_reward < 1:
+            if new_weights < 1:
+                return False
+        except:
+            return False
+    if 'iterations_to_merge' not in d:
+        return False
+    else:
+        try:
+            iterations_to_merge = int(d['iterations_to_merge'])
+            check_int(iterations_to_merge)
+            if iterations_to_merge < 1:
                 return False
         except:
             return False
@@ -4106,19 +4116,17 @@ cdef class genome:
     cdef int _input_size
     cdef int _output_size
     
-    def __cinit__(self,filename, int global_innovation_numb_nodes, int global_innovation_numb_connections, int input_size, int output_size):
-        check_int(global_innovation_numb_nodes)
-        check_int(global_innovation_numb_connections)
+    def __cinit__(self,filename, int input_size, int output_size):
         check_int(input_size)
         check_int(output_size)
-        self._global_innovation_numb_connections = global_innovation_numb_connections
-        self._global_innovation_numb_nodes = global_innovation_numb_nodes
         self._input_size = input_size
         self._output_size = output_size
         cdef char* ss = <char*>PyUnicode_AsUTF8(filename)
-        self._g = Pyllab.load_genome(global_innovation_numb_connections,ss)
+        self._g = Pyllab.load_genome_complete(ss)
         if self._g is NULL:
             raise MemoryError()
+        self._global_innovation_numb_nodes = Pyllab.get_global_innovation_number_nodes_from_genome(self._g)
+        self._global_innovation_numb_connections = Pyllab.get_global_innovation_number_connections_from_genome(self._g)
     
     def __dealloc__(self):
         Pyllab.free_genome(self._g,self.global_inn_numb_connections)

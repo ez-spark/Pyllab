@@ -895,6 +895,12 @@ cdef extern from "../src/neat_functions.h":
     int shuffle_genome_set(genome** m,int n)
     int save_genome(genome* g, int global_inn_numb_connections, int numb)
     genome* load_genome(int global_inn_numb_connections, char* filename)
+    int save_genome_complete(genome* g, int global_inn_numb_connections, int global_inn_numb_nodes, int numb)
+    genome* load_genome_complete(char* filename)
+    int get_global_innovation_number_connections_from_genome(genome* g)
+    int get_global_innovation_number_nodes_from_genome(genome* g)
+    
+    
     int round_up(float num)
     char* get_genome_array(genome* g, int global_inn_numb_connections)
     genome* init_genome_from_array(int global_inn_numb_connections, char* g_array)
