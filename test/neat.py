@@ -1,9 +1,9 @@
 import pyllab
 
 pyllab.get_randomness()
-neat = pyllab.neat(2,1)
+neat = pyllab.Neat(2,1)
 threads = 10
-for i in range(pyllab.GENERATIONS):
+for i in range(pyllab.PY_GENERATIONS):
     number_genomes = neat.get_number_of_genomes()
     neat.reset_fitnesses()
     for j in range(0,number_genomes,threads):
@@ -43,7 +43,7 @@ for i in range(pyllab.GENERATIONS):
         print(type(binary))
         print(len(binary))
         print(neat.get_lenght_of_char_neat())
-        neat2 = pyllab.neat(2,1,binary)
+        neat2 = pyllab.Neat(2,1,binary)
 
         print(neat2.get_lenght_of_char_neat())
         break

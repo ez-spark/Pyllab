@@ -26,7 +26,7 @@ batch_size = 10
 epochs = 10
 d = pyllab.get_dict_from_model_setup_file("./model/model_023.txt")
 print(d)
-model = pyllab.model(d = d)
+model = pyllab.Model(d = d)
 print(d)
 model.set_training_edge_popup(0.5)
 model.make_multi_thread(batch_size)

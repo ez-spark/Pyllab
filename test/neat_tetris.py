@@ -10,7 +10,7 @@ env = JoypadSpace(env, MOVEMENT)
 state_size = env.observation_space.shape[0]*env.observation_space.shape[1]
 action_size = env.action_space.n
 pyllab.get_randomness()
-neat = pyllab.neat(state_size,action_size)
+neat = pyllab.Neat(state_size,action_size)
 threads = 10
 max_iterations = 1000
 

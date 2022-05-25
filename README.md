@@ -14,7 +14,7 @@ sh generate_wheel_unix.sh
 - On Linux specifically you have to fix the wheel package:
 
 ```
-docker run -i -t -v `pwd`:/io quay.io/pypa/manylinux1_x86_64 /bin/bash
+sudo docker run -i -t -v `pwd`:/io quay.io/pypa/manylinux1_x86_64 /bin/bash
 ```
 
 go in /io and move the libllab.so to /usr/local/lib/
@@ -43,10 +43,10 @@ Pyllab is a cython library compiling .C files that use posix calls system. Now y
 
 - Install Mingw with MYSYS2: https://www.msys2.org/ follow the steps and also the passages to install mingw-w64 
 
--  now navigate to Pyllab with MYSYS2 and create the .dll library:
+-  now navigate to Pyllab with MYSYS2 and create the .lib library:
 
 ```
-sh create_shared_windows.sh
+sh create_library.sh
 ```
 
 - Go to your Python Folder (We assume as example we are using python 3.7):
@@ -74,7 +74,7 @@ compiler=mingw32
 
 - Move it to Python37\libs and to Python37\DLLs
 
-- Move libllab.dll previously built to Python37\libs
+- Move libllab.lib previously built to Python37\libs
 
 - Now, Move to Python37\Lib\distutils\cygwinccompiler.py and modify the function get_msvcr() as follows: https://bugs.python.org/file40608/patch.diff
 

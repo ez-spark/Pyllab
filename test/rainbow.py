@@ -24,7 +24,7 @@ class DQNAgent:
         self.online_net.make_multi_thread(batch_size)
         self.target_net.make_multi_thread(batch_size)
         if rain:
-            self.rainbow = pyllab.rainbow(online_net = self.online_net,target_net = self.target_net, sampling_flag = pyllab.UNIFORM_SAMPLING, threads = batch_size, batch_size = batch_size)
+            self.rainbow = pyllab.Rainbow(online_net = self.online_net,target_net = self.target_net, sampling_flag = pyllab.UNIFORM_SAMPLING, threads = batch_size, batch_size = batch_size)
     # The agent computes the action to perform given a state 
     def compute_action(self, current_state):
         return self.rainbow.get_action(current_state)

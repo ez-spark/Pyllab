@@ -6,146 +6,144 @@ cimport numpy as npc
 import numpy as np
 from libc cimport stdint
 from libc.stdio cimport printf
-ctypedef stdint.uint64_t uint64_t
 from libc.time cimport time
+ctypedef stdint.uint64_t uint64_t
 
-N_NORMALIZATION = Pyllab.N_NORMALIZATION
-BETA_NORMALIZATION = Pyllab.BETA_NORMALIZATION
-ALPHA_NORMALIZATION = Pyllab.ALPHA_NORMALIZATION
-K_NORMALIZATION = Pyllab.K_NORMALIZATION
-NESTEROV = Pyllab.NESTEROV
-ADAM = Pyllab.ADAM
-RADAM = Pyllab.RADAM
-DIFF_GRAD = Pyllab.DIFF_GRAD
-ADAMOD = Pyllab.ADAMOD
-FCLS = Pyllab.FCLS
-CLS = Pyllab.CLS
-RLS = Pyllab.RLS
-BNS = Pyllab.BNS
-LSTMS = Pyllab.LSTMS
-TRANSFORMER_ENCODER = Pyllab.TRANSFORMER_ENCODER
-TRANSFORMER_DECODER = Pyllab.TRANSFORMER_DECODER
-TRANSFORMER = Pyllab.TRANSFORMER
-MODEL = Pyllab.MODEL
-RMODEL = Pyllab.RMODEL
-ATTENTION = Pyllab.ATTENTION
-MULTI_HEAD_ATTENTION = Pyllab.MULTI_HEAD_ATTENTION
-L2_NORM_CONN = Pyllab.L2_NORM_CONN
-VECTOR = Pyllab.VECTOR
-NOTHING = Pyllab.NOTHING
-TEMPORAL_ENCODING_MODEL = Pyllab.TEMPORAL_ENCODING_MODEL
-NO_ACTIVATION = Pyllab.NO_ACTIVATION
-SIGMOID = Pyllab.SIGMOID
-RELU = Pyllab.RELU
-SOFTMAX = Pyllab.SOFTMAX
-TANH = Pyllab.TANH
-LEAKY_RELU = Pyllab.LEAKY_RELU
-ELU = Pyllab.ELU
-NO_POOLING = Pyllab.NO_POOLING
-MAX_POOLING = Pyllab.MAX_POOLING
-AVERAGE_POOLING = Pyllab.AVERAGE_POOLING
-NO_DROPOUT = Pyllab.NO_DROPOUT
-DROPOUT = Pyllab.DROPOUT
-DROPOUT_TEST = Pyllab.DROPOUT_TEST
-NO_NORMALIZATION = Pyllab.NO_NORMALIZATION
-LOCAL_RESPONSE_NORMALIZATION = Pyllab.LOCAL_RESPONSE_NORMALIZATION
-BATCH_NORMALIZATION = Pyllab.BATCH_NORMALIZATION
-GROUP_NORMALIZATION = Pyllab.GROUP_NORMALIZATION
-LAYER_NORMALIZATION = Pyllab.LAYER_NORMALIZATION
-SCALED_L2_NORMALIZATION = Pyllab.SCALED_L2_NORMALIZATION
-COSINE_NORMALIZATION = Pyllab.COSINE_NORMALIZATION
-BETA1_ADAM = Pyllab.BETA1_ADAM
-BETA2_ADAM = Pyllab.BETA2_ADAM
-BETA3_ADAMOD = Pyllab.BETA3_ADAMOD
-EPSILON_ADAM = Pyllab.EPSILON_ADAM
-EPSILON = Pyllab.EPSILON
-RADAM_THRESHOLD = Pyllab.RADAM_THRESHOLD
-NO_REGULARIZATION = Pyllab.NO_REGULARIZATION
-L2_REGULARIZATION = Pyllab.L2_REGULARIZATION
-NO_CONVOLUTION = Pyllab.NO_CONVOLUTION
-CONVOLUTION  = Pyllab.CONVOLUTION 
-TRANSPOSED_CONVOLUTION = Pyllab.TRANSPOSED_CONVOLUTION 
-BATCH_NORMALIZATION_TRAINING_MODE = Pyllab.BATCH_NORMALIZATION_TRAINING_MODE 
-BATCH_NORMALIZATION_FINAL_MODE  = Pyllab.BATCH_NORMALIZATION_FINAL_MODE 
-STATEFUL = Pyllab.STATEFUL
-STATELESS = Pyllab.STATELESS
-LEAKY_RELU_THRESHOLD = Pyllab.LEAKY_RELU_THRESHOLD 
-ELU_THRESHOLD = Pyllab.ELU_THRESHOLD
-LSTM_RESIDUAL  = Pyllab.LSTM_RESIDUAL 
-LSTM_NO_RESIDUAL = Pyllab.LSTM_NO_RESIDUAL
-TRANSFORMER_RESIDUAL = Pyllab.TRANSFORMER_RESIDUAL
-TRANSFORMER_NO_RESIDUAL  = Pyllab.TRANSFORMER_NO_RESIDUAL 
-NO_SET  = Pyllab.NO_SET 
-NO_LOSS = Pyllab.NO_LOSS
-CROSS_ENTROPY_LOSS = Pyllab.CROSS_ENTROPY_LOSS
-FOCAL_LOSS = Pyllab.FOCAL_LOSS
-HUBER1_LOSS = Pyllab.HUBER1_LOSS
-HUBER2_LOSS = Pyllab.HUBER2_LOSS
-MSE_LOSS = Pyllab.MSE_LOSS
-KL_DIVERGENCE_LOSS = Pyllab.KL_DIVERGENCE_LOSS
-ENTROPY_LOSS = Pyllab.ENTROPY_LOSS
-TOTAL_VARIATION_LOSS_2D = Pyllab.TOTAL_VARIATION_LOSS_2D
-CONTRASTIVE_2D_LOSS = Pyllab.CONTRASTIVE_2D_LOSS
-LOOK_AHEAD_ALPHA = Pyllab.LOOK_AHEAD_ALPHA
-LOOK_AHEAD_K = Pyllab.LOOK_AHEAD_K
-GRADIENT_DESCENT  = Pyllab.GRADIENT_DESCENT 
-EDGE_POPUP = Pyllab.EDGE_POPUP
-FULLY_FEED_FORWARD = Pyllab.FULLY_FEED_FORWARD
-FREEZE_TRAINING = Pyllab.FREEZE_TRAINING
-FREEZE_BIASES = Pyllab.FREEZE_BIASES
-ONLY_FF = Pyllab.ONLY_FF
-ONLY_DROPOUT = Pyllab.ONLY_DROPOUT
-STANDARD_ATTENTION = Pyllab.STANDARD_ATTENTION
-MASKED_ATTENTION = Pyllab.MASKED_ATTENTION
-RUN_ONLY_DECODER = Pyllab.RUN_ONLY_DECODER
-RUN_ONLY_ENCODER = Pyllab.RUN_ONLY_ENCODER
-RUN_ALL_TRANSF = Pyllab.RUN_ALL_TRANSF
-SORT_SWITCH_THRESHOLD = Pyllab.SORT_SWITCH_THRESHOLD
-NO_ACTION  = Pyllab.NO_ACTION 
-ADDITION = Pyllab.ADDITION
-SUBTRACTION  = Pyllab.SUBTRACTION 
-MULTIPLICATION = Pyllab.MULTIPLICATION
-RESIZE = Pyllab.RESIZE
-CONCATENATE = Pyllab.CONCATENATE
-DIVISION = Pyllab.DIVISION
-INVERSE = Pyllab.INVERSE
-CHANGE_SIGN = Pyllab.CHANGE_SIGN
-GET_MAX = Pyllab.GET_MAX
-NO_CONCATENATE = Pyllab.NO_CONCATENATE
-POSITIONAL_ENCODING = Pyllab.POSITIONAL_ENCODING
-SPECIES_THERESHOLD = Pyllab.SPECIES_THERESHOLD
-INITIAL_POPULATION = Pyllab.INITIAL_POPULATION
-GENERATIONS = Pyllab.GENERATIONS
-PERCENTAGE_SURVIVORS_PER_SPECIE = Pyllab.PERCENTAGE_SURVIVORS_PER_SPECIE
-CONNECTION_MUTATION_RATE = Pyllab.CONNECTION_MUTATION_RATE
-NEW_CONNECTION_ASSIGNMENT_RATE = Pyllab.NEW_CONNECTION_ASSIGNMENT_RATE
-ADD_CONNECTION_BIG_SPECIE_RATE = Pyllab.ADD_CONNECTION_BIG_SPECIE_RATE
-ADD_CONNECTION_SMALL_SPECIE_RATE = Pyllab.ADD_CONNECTION_SMALL_SPECIE_RATE
-ADD_NODE_SPECIE_RATE = Pyllab.ADD_NODE_SPECIE_RATE
-ACTIVATE_CONNECTION_RATE = Pyllab.ACTIVATE_CONNECTION_RATE
-REMOVE_CONNECTION_RATE = Pyllab.REMOVE_CONNECTION_RATE
-CHILDREN = Pyllab.CHILDREN
-CROSSOVER_RATE = Pyllab.CROSSOVER_RATE
-SAVING = Pyllab.SAVING
-LIMITING_SPECIES = Pyllab.LIMITING_SPECIES
-LIMITING_THRESHOLD = Pyllab.LIMITING_THRESHOLD
-MAX_POPULATION = Pyllab.MAX_POPULATION
-SAME_FITNESS_LIMIT = Pyllab.SAME_FITNESS_LIMIT
-AGE_SIGNIFICANCE = Pyllab.AGE_SIGNIFICANCE
-LR_NO_DECAY = Pyllab.LR_NO_DECAY
-LR_CONSTANT_DECAY = Pyllab.LR_CONSTANT_DECAY
-LR_TIME_BASED_DECAY = Pyllab.LR_TIME_BASED_DECAY
-LR_STEP_DECAY = Pyllab.LR_STEP_DECAY
-LR_ANNEALING_DECAY = Pyllab.LR_ANNEALING_DECAY
-REWARD_SAMPLING = Pyllab.REWARD_SAMPLING
-UNIFORM_SAMPLING = Pyllab.UNIFORM_SAMPLING
-RANKED_SAMPLING = Pyllab.RANKED_SAMPLING
+PY_N_NORMALIZATION = Pyllab.N_NORMALIZATION
+PY_BETA_NORMALIZATION = Pyllab.BETA_NORMALIZATION
+PY_ALPHA_NORMALIZATION = Pyllab.ALPHA_NORMALIZATION
+PY_K_NORMALIZATION = Pyllab.K_NORMALIZATION
+PY_NESTEROV = Pyllab.NESTEROV
+PY_ADAM = Pyllab.ADAM
+PY_RADAM = Pyllab.RADAM
+PY_DIFF_GRAD = Pyllab.DIFF_GRAD
+PY_ADAMOD = Pyllab.ADAMOD
+PY_FCLS = Pyllab.FCLS
+PY_CLS = Pyllab.CLS
+PY_RLS = Pyllab.RLS
+PY_BNS = Pyllab.BNS
+PY_LSTMS = Pyllab.LSTMS
+PY_TRANSFORMER_ENCODER = Pyllab.TRANSFORMER_ENCODER
+PY_TRANSFORMER_DECODER = Pyllab.TRANSFORMER_DECODER
+PY_TRANSFORMER = Pyllab.TRANSFORMER
+PY_MODEL = Pyllab.MODEL
+PY_RMODEL = Pyllab.RMODEL
+PY_ATTENTION = Pyllab.ATTENTION
+PY_MULTI_HEAD_ATTENTION = Pyllab.MULTI_HEAD_ATTENTION
+PY_L2_NORM_CONN = Pyllab.L2_NORM_CONN
+PY_VECTOR = Pyllab.VECTOR
+PY_NOTHING = Pyllab.NOTHING
+PY_TEMPORAL_ENCODING_MODEL = Pyllab.TEMPORAL_ENCODING_MODEL
+PY_NO_ACTIVATION = Pyllab.NO_ACTIVATION
+PY_SIGMOID = Pyllab.SIGMOID
+PY_RELU = Pyllab.RELU
+PY_SOFTMAX = Pyllab.SOFTMAX
+PY_TANH = Pyllab.TANH
+PY_LEAKY_RELU = Pyllab.LEAKY_RELU
+PY_ELU = Pyllab.ELU
+PY_NO_POOLING = Pyllab.NO_POOLING
+PY_MAX_POOLING = Pyllab.MAX_POOLING
+PY_AVERAGE_POOLING = Pyllab.AVERAGE_POOLING
+PY_NO_DROPOUT = Pyllab.NO_DROPOUT
+PY_DROPOUT = Pyllab.DROPOUT
+PY_DROPOUT_TEST = Pyllab.DROPOUT_TEST
+PY_NO_NORMALIZATION = Pyllab.NO_NORMALIZATION
+PY_LOCAL_RESPONSE_NORMALIZATION = Pyllab.LOCAL_RESPONSE_NORMALIZATION
+PY_BATCH_NORMALIZATION = Pyllab.BATCH_NORMALIZATION
+PY_GROUP_NORMALIZATION = Pyllab.GROUP_NORMALIZATION
+PY_LAYER_NORMALIZATION = Pyllab.LAYER_NORMALIZATION
+PY_SCALED_L2_NORMALIZATION = Pyllab.SCALED_L2_NORMALIZATION
+PY_COSINE_NORMALIZATION = Pyllab.COSINE_NORMALIZATION
+PY_BETA1_ADAM = Pyllab.BETA1_ADAM
+PY_BETA2_ADAM = Pyllab.BETA2_ADAM
+PY_BETA3_ADAMOD = Pyllab.BETA3_ADAMOD
+PY_EPSILON_ADAM = Pyllab.EPSILON_ADAM
+PY_EPSILON = Pyllab.EPSILON
+PY_RADAM_THRESHOLD = Pyllab.RADAM_THRESHOLD
+PY_NO_REGULARIZATION = Pyllab.NO_REGULARIZATION
+PY_L2_REGULARIZATION = Pyllab.L2_REGULARIZATION
+PY_NO_CONVOLUTION = Pyllab.NO_CONVOLUTION
+PY_CONVOLUTION  = Pyllab.CONVOLUTION 
+PY_TRANSPOSED_CONVOLUTION = Pyllab.TRANSPOSED_CONVOLUTION 
+PY_BATCH_NORMALIZATION_TRAINING_MODE = Pyllab.BATCH_NORMALIZATION_TRAINING_MODE 
+PY_BATCH_NORMALIZATION_FINAL_MODE  = Pyllab.BATCH_NORMALIZATION_FINAL_MODE 
+PY_STATEFUL = Pyllab.STATEFUL
+PY_STATELESS = Pyllab.STATELESS
+PY_LEAKY_RELU_THRESHOLD = Pyllab.LEAKY_RELU_THRESHOLD 
+PY_ELU_THRESHOLD = Pyllab.ELU_THRESHOLD
+PY_LSTM_RESIDUAL  = Pyllab.LSTM_RESIDUAL 
+PY_LSTM_NO_RESIDUAL = Pyllab.LSTM_NO_RESIDUAL
+PY_TRANSFORMER_RESIDUAL = Pyllab.TRANSFORMER_RESIDUAL
+PY_TRANSFORMER_NO_RESIDUAL  = Pyllab.TRANSFORMER_NO_RESIDUAL 
+PY_NO_SET  = Pyllab.NO_SET 
+PY_NO_LOSS = Pyllab.NO_LOSS
+PY_CROSS_ENTROPY_LOSS = Pyllab.CROSS_ENTROPY_LOSS
+PY_FOCAL_LOSS = Pyllab.FOCAL_LOSS
+PY_HUBER1_LOSS = Pyllab.HUBER1_LOSS
+PY_HUBER2_LOSS = Pyllab.HUBER2_LOSS
+PY_MSE_LOSS = Pyllab.MSE_LOSS
+PY_KL_DIVERGENCE_LOSS = Pyllab.KL_DIVERGENCE_LOSS
+PY_ENTROPY_LOSS = Pyllab.ENTROPY_LOSS
+PY_TOTAL_VARIATION_LOSS_2D = Pyllab.TOTAL_VARIATION_LOSS_2D
+PY_CONTRASTIVE_2D_LOSS = Pyllab.CONTRASTIVE_2D_LOSS
+PY_LOOK_AHEAD_ALPHA = Pyllab.LOOK_AHEAD_ALPHA
+PY_LOOK_AHEAD_K = Pyllab.LOOK_AHEAD_K
+PY_GRADIENT_DESCENT  = Pyllab.GRADIENT_DESCENT 
+PY_EDGE_POPUP = Pyllab.EDGE_POPUP
+PY_FULLY_FEED_FORWARD = Pyllab.FULLY_FEED_FORWARD
+PY_FREEZE_TRAINING = Pyllab.FREEZE_TRAINING
+PY_FREEZE_BIASES = Pyllab.FREEZE_BIASES
+PY_ONLY_FF = Pyllab.ONLY_FF
+PY_ONLY_DROPOUT = Pyllab.ONLY_DROPOUT
+PY_STANDARD_ATTENTION = Pyllab.STANDARD_ATTENTION
+PY_MASKED_ATTENTION = Pyllab.MASKED_ATTENTION
+PY_RUN_ONLY_DECODER = Pyllab.RUN_ONLY_DECODER
+PY_RUN_ONLY_ENCODER = Pyllab.RUN_ONLY_ENCODER
+PY_RUN_ALL_TRANSF = Pyllab.RUN_ALL_TRANSF
+PY_SORT_SWITCH_THRESHOLD = Pyllab.SORT_SWITCH_THRESHOLD
+PY_NO_ACTION  = Pyllab.NO_ACTION 
+PY_ADDITION = Pyllab.ADDITION
+PY_SUBTRACTION  = Pyllab.SUBTRACTION 
+PY_MULTIPLICATION = Pyllab.MULTIPLICATION
+PY_RESIZE = Pyllab.RESIZE
+PY_CONCATENATE = Pyllab.CONCATENATE
+PY_DIVISION = Pyllab.DIVISION
+PY_INVERSE = Pyllab.INVERSE
+PY_CHANGE_SIGN = Pyllab.CHANGE_SIGN
+PY_GET_MAX = Pyllab.GET_MAX
+PY_NO_CONCATENATE = Pyllab.NO_CONCATENATE
+PY_POSITIONAL_ENCODING = Pyllab.POSITIONAL_ENCODING
+PY_SPECIES_THERESHOLD = Pyllab.SPECIES_THERESHOLD
+PY_INITIAL_POPULATION = Pyllab.INITIAL_POPULATION
+PY_GENERATIONS = Pyllab.GENERATIONS
+PY_PERCENTAGE_SURVIVORS_PER_SPECIE = Pyllab.PERCENTAGE_SURVIVORS_PER_SPECIE
+PY_CONNECTION_MUTATION_RATE = Pyllab.CONNECTION_MUTATION_RATE
+PY_NEW_CONNECTION_ASSIGNMENT_RATE = Pyllab.NEW_CONNECTION_ASSIGNMENT_RATE
+PY_ADD_CONNECTION_BIG_SPECIE_RATE = Pyllab.ADD_CONNECTION_BIG_SPECIE_RATE
+PY_ADD_CONNECTION_SMALL_SPECIE_RATE = Pyllab.ADD_CONNECTION_SMALL_SPECIE_RATE
+PY_ADD_NODE_SPECIE_RATE = Pyllab.ADD_NODE_SPECIE_RATE
+PY_ACTIVATE_CONNECTION_RATE = Pyllab.ACTIVATE_CONNECTION_RATE
+PY_REMOVE_CONNECTION_RATE = Pyllab.REMOVE_CONNECTION_RATE
+PY_CHILDREN = Pyllab.CHILDREN
+PY_CROSSOVER_RATE = Pyllab.CROSSOVER_RATE
+PY_SAVING = Pyllab.SAVING
+PY_LIMITING_SPECIES = Pyllab.LIMITING_SPECIES
+PY_LIMITING_THRESHOLD = Pyllab.LIMITING_THRESHOLD
+PY_MAX_POPULATION = Pyllab.MAX_POPULATION
+PY_SAME_FITNESS_LIMIT = Pyllab.SAME_FITNESS_LIMIT
+PY_AGE_SIGNIFICANCE = Pyllab.AGE_SIGNIFICANCE
+PY_LR_NO_DECAY = Pyllab.LR_NO_DECAY
+PY_LR_CONSTANT_DECAY = Pyllab.LR_CONSTANT_DECAY
+PY_LR_TIME_BASED_DECAY = Pyllab.LR_TIME_BASED_DECAY
+PY_LR_STEP_DECAY = Pyllab.LR_STEP_DECAY
+PY_LR_ANNEALING_DECAY = Pyllab.LR_ANNEALING_DECAY
+PY_REWARD_SAMPLING = Pyllab.REWARD_SAMPLING
+PY_UNIFORM_SAMPLING = Pyllab.UNIFORM_SAMPLING
+PY_RANKED_SAMPLING = Pyllab.RANKED_SAMPLING
 
 cdef extern from "Python.h":
     char* PyUnicode_AsUTF8(object unicode)
 
-cdef extern from "Python.h":
-    bytes PyUnicode_Decode(char* c, Py_ssize_t size, const char *encoding, const char *errors)
 
 
 def check_size(vector, dim):
@@ -399,17 +397,17 @@ def check_if_convolution_overflows(l):
         rows2 = ((rows1 - pooling_rows)/stride2_rows + 1 + 2*padding2_rows)
         cols1 = ((input_cols-kernel_cols)/stride1_cols +1 + 2*padding1_cols)
         cols2 = ((cols1 - pooling_cols)/stride2_cols + 1 + 2*padding2_cols)
-        if convolutional_flag == CONVOLUTION or convolutional_flag == NO_CONVOLUTION:
+        if convolutional_flag == PY_CONVOLUTION or convolutional_flag == PY_NO_CONVOLUTION:
             if rows1*n_kernels < 0 or rows1*n_kernels >= 2**31-1:
                 return True
         
-        elif convolutional_flag == TRANSPOSED_CONVOLUTION:
+        elif convolutional_flag == PY_TRANSPOSED_CONVOLUTION:
             rows1 = ((input_rows-1)*stride1_rows +kernel_rows - 2*padding1_rows)
             if rows1*n_kernels < 0 or rows1*n_kernels >= 2**31-1:
                 return True
         
         
-        if convolutional_flag == CONVOLUTION or convolutional_flag == TRANSPOSED_CONVOLUTION:
+        if convolutional_flag == PY_CONVOLUTION or convolutional_flag == PY_TRANSPOSED_CONVOLUTION:
             if rows2*n_kernels < 0 or rows2*n_kernels >= 2**31-1:
                 return True
             
@@ -418,17 +416,17 @@ def check_if_convolution_overflows(l):
             if rows2*n_kernels < 0 or rows2*n_kernels >= 2**31-1:
                 return True
         
-        if convolutional_flag == CONVOLUTION or convolutional_flag == NO_CONVOLUTION:
+        if convolutional_flag == PY_CONVOLUTION or convolutional_flag == PY_NO_CONVOLUTION:
             if cols1*n_kernels < 0 or cols1*n_kernels >= 2**31-1:
                 return True
         
         
-        elif convolutional_flag == TRANSPOSED_CONVOLUTION:
+        elif convolutional_flag == PY_TRANSPOSED_CONVOLUTION:
             cols1 = ((input_cols-1)*stride1_cols +kernel_cols - 2*padding1_cols)
             if cols1*n_kernels < 0 or cols1*n_kernels >= 2**31-1:
                 return True
         
-        if convolutional_flag == CONVOLUTION or convolutional_flag == TRANSPOSED_CONVOLUTION:
+        if convolutional_flag == PY_CONVOLUTION or convolutional_flag == PY_TRANSPOSED_CONVOLUTION:
             if cols2*n_kernels < 0 or cols2*n_kernels >= 2**31-1:
                 return True
         else:
@@ -1288,7 +1286,7 @@ def rainbow_training_is_good(d):
         try:
             lr_decay_flag = int(d['lr_decay_flag'])
             check_int(lr_decay_flag)
-            if lr_decay_flag != LR_ANNEALING_DECAY and lr_decay_flag != LR_CONSTANT_DECAY and lr_decay_flag != LR_NO_DECAY and lr_decay_flag != LR_STEP_DECAY and lr_decay_flag != LR_TIME_BASED_DECAY:
+            if lr_decay_flag != PY_LR_ANNEALING_DECAY and lr_decay_flag != PY_LR_CONSTANT_DECAY and lr_decay_flag != PY_LR_NO_DECAY and lr_decay_flag != PY_LR_STEP_DECAY and lr_decay_flag != PY_LR_TIME_BASED_DECAY:
                 return False
         except:
             return False
@@ -1299,7 +1297,7 @@ def rainbow_training_is_good(d):
         try:
             feed_forward_flag = int(d['feed_forward_flag'])
             check_int(feed_forward_flag)
-            if feed_forward_flag != FULLY_FEED_FORWARD and feed_forward_flag != EDGE_POPUP:
+            if feed_forward_flag != PY_FULLY_FEED_FORWARD and feed_forward_flag != PY_EDGE_POPUP:
                 return False
         except:
             return False
@@ -1311,7 +1309,7 @@ def rainbow_training_is_good(d):
         try:
             training_mode = int(d['training_mode'])
             check_int(training_mode)
-            if training_mode != GRADIENT_DESCENT and training_mode != EDGE_POPUP:
+            if training_mode != PY_GRADIENT_DESCENT and training_mode != PY_EDGE_POPUP:
                 return False
         except:
             return False
@@ -1355,7 +1353,7 @@ def rainbow_training_is_good(d):
         try:
             gd_flag = int(d['gd_flag'])
             check_int(gd_flag)
-            if gd_flag != NESTEROV and gd_flag != ADAM and gd_flag != RADAM and gd_flag != ADAMOD and gd_flag != DIFF_GRAD:
+            if gd_flag != PY_NESTEROV and gd_flag != PY_ADAM and gd_flag != PY_RADAM and gd_flag != PY_ADAMOD and gd_flag != PY_DIFF_GRAD:
                 return False
         except:
             return False
@@ -1410,7 +1408,7 @@ def rainbow_training_is_good(d):
         try:
             sampling_reward = int(d['sampling_reward'])
             check_int(sampling_reward)
-            if sampling_reward != RANKED_SAMPLING and sampling_reward != REWARD_SAMPLING and sampling_reward != UNIFORM_SAMPLING:
+            if sampling_reward != PY_RANKED_SAMPLING and sampling_reward != PY_REWARD_SAMPLING and sampling_reward != PY_UNIFORM_SAMPLING:
                 return False
         except:
             return False
@@ -1458,7 +1456,6 @@ def rainbow_training_is_good(d):
                     return False
         except:
             return False
-    return True
     
     if 'exchange' not in d:
         return False
@@ -1475,7 +1472,6 @@ def rainbow_training_is_good(d):
                     return False
         except:
             return False
-    return True
     
     if 'new_weights' not in d:
         return False
@@ -1500,7 +1496,7 @@ def rainbow_training_is_good(d):
     return True
     
 
-cdef class bn:
+cdef class Bn:
     cdef Pyllab.bn* _bn 
     cdef int _batch_size
     cdef int _vector_input_dimension
@@ -1569,31 +1565,31 @@ cdef class bn:
     
 
 
-def paste_bn(bn b1, bn b2):
+def py_paste_bn(Bn b1, Bn b2):
     if b1._does_have_arrays and b1._does_have_learning_parameters and b2._does_have_arrays and b2._does_have_learning_parameters and not b1._is_only_for_feedforward and not b2._is_only_for_feedforward:
        
         Pyllab.paste_bn(b1._bn,b2._bn)
     
-def paste_bn_without_learning_parameters(bn b1, bn b2):
+def py_paste_bn_without_learning_parameters(Bn b1, Bn b2):
     if b1._does_have_arrays and b2._does_have_arrays and not b1._is_only_for_feedforward and not b2._is_only_for_feedforward:
         Pyllab.paste_bn_without_learning_parameters(b1._bn,b2._bn)
 
-def slow_paste_bn(bn b1, bn b2, float tau):
+def py_slow_paste_bn(Bn b1, Bn b2, float tau):
     if b1._does_have_arrays and b1._does_have_learning_parameters and b2._does_have_arrays and b2._does_have_learning_parameters and not b1._is_only_for_feedforward and not b2._is_only_for_feedforward:
        
         Pyllab.slow_paste_bn(b1._bn, b2._bn,tau)
 
-def copy_bn(bn b):
-    cdef bn bb = bn(b._batch_size, b._vector_input_dimension,does_have_learning_parameters = b._does_have_learning_parameters, does_have_arrays = b._does_have_arrays,is_only_for_feedforward = b._is_only_for_feedforward)
-    paste_bn(b,bb)
+def py_copy_bn(Bn b):
+    cdef Bn bb = Bn(b._batch_size, b._vector_input_dimension,does_have_learning_parameters = b._does_have_learning_parameters, does_have_arrays = b._does_have_arrays,is_only_for_feedforward = b._is_only_for_feedforward)
+    py_paste_bn(b,bb)
     return bb
 
-def copy_bn_without_learning_parameters(bn b):
-    cdef bn bb = bn(b._batch_size, b._vector_input_dimension,does_have_learning_parameters = False, does_have_arrays = b._does_have_arrays,is_only_for_feedforward = b._is_only_for_feedforward)
-    paste_bn_without_learning_parameters(b,bb)
+def py_copy_bn_without_learning_parameters(Bn b):
+    cdef Bn bb = Bn(b._batch_size, b._vector_input_dimension,does_have_learning_parameters = False, does_have_arrays = b._does_have_arrays,is_only_for_feedforward = b._is_only_for_feedforward)
+    py_paste_bn_without_learning_parameters(b,bb)
     return bb
 
-cdef class cl:
+cdef class Cl:
     cdef Pyllab.cl* _cl
     cdef int _channels
     cdef int _input_rows
@@ -1764,35 +1760,35 @@ cdef class cl:
             return Pyllab.count_weights_cl(self._cl)
 
 
-def paste_cl(cl c1, cl c2):
+def py_paste_cl(Cl c1, Cl c2):
     if c1._does_have_arrays and c1._does_have_learning_parameters and not c1._is_only_for_feedforward and c2._does_have_arrays and c2._does_have_learning_parameters and not c2._is_only_for_feedforward:
         Pyllab.paste_cl(c1._cl,c2._cl)
     
-def paste_cl_without_learning_parameters(cl c1, cl c2):
+def py_paste_cl_without_learning_parameters(Cl c1, Cl c2):
     if c1._does_have_arrays and c2._does_have_arrays and not c1._is_only_for_feedforward and not c2._is_only_for_feedforward:
         Pyllab.paste_cl_without_learning_parameters(c1._cl,c2._cl)
 
-def copy_cl(cl c):
-    cdef cl cc = cl(c._channels,c._input_rows,c._input_cols,c._kernel_rows,c._kernel_cols,c._n_kernels,c._stride1_rows,c._stride1_cols,c._padding1_rows,c._padding1_cols,c._stride2_rows,c._stride2_cols,c._padding2_rows,c._padding2_cols,c._pooling_rows,c._pooling_cols,c._normalization_flag,c._activation_flag,c._pooling_flag,c._group_norm_channels,c._convolutional_flag,c._training_mode,c._feed_forward_flag,c._layer,c._does_have_learning_parameters,c._does_have_arrays,c._is_only_for_feedforward)
-    paste_cl(c,cc)
+def py_copy_cl(Cl c):
+    cdef Cl cc = Cl(c._channels,c._input_rows,c._input_cols,c._kernel_rows,c._kernel_cols,c._n_kernels,c._stride1_rows,c._stride1_cols,c._padding1_rows,c._padding1_cols,c._stride2_rows,c._stride2_cols,c._padding2_rows,c._padding2_cols,c._pooling_rows,c._pooling_cols,c._normalization_flag,c._activation_flag,c._pooling_flag,c._group_norm_channels,c._convolutional_flag,c._training_mode,c._feed_forward_flag,c._layer,c._does_have_learning_parameters,c._does_have_arrays,c._is_only_for_feedforward)
+    py_paste_cl(c,cc)
     return cc
 
-def copy_cl_without_learning_parameters(cl c):
-    cdef cl cc = cl(c._channels,c._input_rows,c._input_cols,c._kernel_rows,c._kernel_cols,c._n_kernels,c._stride1_rows,c._stride1_cols,c._padding1_rows,c._padding1_cols,c._stride2_rows,c._stride2_cols,c._padding2_rows,c._padding2_cols,c._pooling_rows,c._pooling_cols,c._normalization_flag,c._activation_flag,c._pooling_flag,c._group_norm_channels,c._convolutional_flag,c._training_mode,c._feed_forward_flag,c._layer,False,c._does_have_arrays,c._is_only_for_feedforward)
-    paste_cl_without_learning_parameters(c,cc)
+def py_copy_cl_without_learning_parameters(Cl c):
+    cdef Cl cc = Cl(c._channels,c._input_rows,c._input_cols,c._kernel_rows,c._kernel_cols,c._n_kernels,c._stride1_rows,c._stride1_cols,c._padding1_rows,c._padding1_cols,c._stride2_rows,c._stride2_cols,c._padding2_rows,c._padding2_cols,c._pooling_rows,c._pooling_cols,c._normalization_flag,c._activation_flag,c._pooling_flag,c._group_norm_channels,c._convolutional_flag,c._training_mode,c._feed_forward_flag,c._layer,False,c._does_have_arrays,c._is_only_for_feedforward)
+    py_paste_cl_without_learning_parameters(c,cc)
     return cc
 
-def slow_paste_cl(cl c1, cl c2, float tau):
+def py_slow_paste_cl(Cl c1, Cl c2, float tau):
     if c1._does_have_arrays and c1._does_have_learning_parameters and not c1._is_only_for_feedforward and c2._does_have_arrays and c2._does_have_learning_parameters and not c2._is_only_for_feedforward:
         Pyllab.slow_paste_cl(c1._cl, c2._cl,tau)
 
-def copy_vector_to_params_cl(cl c, vector):
+def py_copy_vector_to_params_cl(Cl c, vector):
     check_size(vector,c.get_array_size_params())
     cdef float[:] v = vector_is_valid(vector)
     if c._does_have_arrays and c._does_have_learning_parameters:
         Pyllab.memcopy_vector_to_params_cl(c._cl,<float*>&v[0])
 
-def copy_params_to_vector_cl(cl c):
+def py_copy_params_to_vector_cl(Cl c):
     vector = np.arange(c.get_array_size_params(),dtype=np.float32)
     cdef float[:] v = vector
     if c._does_have_arrays and c._does_have_learning_parameters:
@@ -1800,13 +1796,13 @@ def copy_params_to_vector_cl(cl c):
         return vector
     return None
 
-def copy_vector_to_weights_cl(cl c, vector):
+def py_copy_vector_to_weights_cl(Cl c, vector):
     check_size(vector,c.get_array_size_weights())
     cdef float[:] v = vector_is_valid(vector)
     if c._does_have_arrays and c._does_have_learning_parameters:
         Pyllab.memcopy_vector_to_weights_cl(c._cl,<float*>&v[0])
 
-def copy_weights_to_vector_cl(cl c):
+def py_copy_weights_to_vector_cl(Cl c):
     vector = np.arange(c.get_array_size_weights(),dtype=np.float32)
     cdef float[:] v = vector
     if c._does_have_arrays and c._does_have_learning_parameters:
@@ -1814,13 +1810,13 @@ def copy_weights_to_vector_cl(cl c):
         return vector
     return None
 
-def copy_vector_to_scores_cl(cl c, vector):
+def py_copy_vector_to_scores_cl(Cl c, vector):
     check_size(vector,c.get_array_size_scores())
     cdef float[:] v = vector_is_valid(vector)
     if c._does_have_arrays and c._does_have_learning_parameters:
         Pyllab.memcopy_vector_to_scores_cl(c._cl,<float*>&v[0])
 
-def copy_scores_to_vector_cl(cl c):
+def py_copy_scores_to_vector_cl(Cl c):
     vector = np.arange(c.get_array_size_scores(),dtype=np.float32)
     cdef float[:] v = vector
     if c._does_have_arrays and c._does_have_learning_parameters:
@@ -1828,13 +1824,13 @@ def copy_scores_to_vector_cl(cl c):
         return vector
     return None
 
-def copy_vector_to_derivative_params_cl(cl c, vector):
+def py_copy_vector_to_derivative_params_cl(Cl c, vector):
     check_size(vector,c.get_array_size_params())
     cdef float[:] v = vector_is_valid(vector)
     if c._does_have_arrays and c._does_have_learning_parameters and not c._is_only_for_feedforward:
         Pyllab.memcopy_vector_to_derivative_params_cl(c._cl,<float*>&v[0])
 
-def copy_derivative_params_to_vector_cl(cl c):
+def py_copy_derivative_params_to_vector_cl(Cl c):
     vector = np.arange(c.get_array_size_params(),dtype=np.float32)
     cdef float[:] v = vector
     if c._does_have_arrays and c._does_have_learning_parameters and not c._is_only_for_feedforward:
@@ -1842,17 +1838,17 @@ def copy_derivative_params_to_vector_cl(cl c):
         return vector
     return None
 
-def compare_score_cl(cl c1, cl c2, cl c_output):
+def py_compare_score_cl(Cl c1, Cl c2, Cl c_output):
     if c1._does_have_arrays and c1._does_have_learning_parameters and c2._does_have_arrays and c2._does_have_learning_parameters and c_output._does_have_arrays and c_output._does_have_learning_parameters: 
         Pyllab.compare_score_cl(c1._cl, c2._cl,c_output._cl)
     
-def compare_score_cl_with_vector(cl c1, vector, cl c_output):
+def py_compare_score_cl_with_vector(Cl c1, vector, Cl c_output):
     check_size(vector,c1.get_array_size_scores())
     cdef float[:] v = vector_is_valid(vector)
     if c1._does_have_arrays and c1._does_have_learning_parameters and c_output._does_have_arrays and c_output._does_have_learning_parameters:
         Pyllab.compare_score_cl_with_vector(c1._cl, <float*>&v[0],c_output._cl)
 
-cdef class fcl:
+cdef class Fcl:
     cdef Pyllab.fcl* _fcl
     cdef int _input
     cdef int _output
@@ -1980,35 +1976,35 @@ cdef class fcl:
             return Pyllab.count_weights_fcl(self._fcl)
 
 
-def paste_fcl(fcl f1, fcl f2):
+def py_paste_fcl(Fcl f1, Fcl f2):
     if f1._does_have_arrays and f1._does_have_learning_parameters and not f1._is_only_for_feedforward and f2._does_have_arrays and f2._does_have_learning_parameters and not f2._is_only_for_feedforward:
         Pyllab.paste_fcl(f1._fcl,f2._fcl)
     
-def paste_fcl_without_learning_parameters(fcl f1, fcl f2):
+def py_paste_fcl_without_learning_parameters(Fcl f1, Fcl f2):
     if f1._does_have_arrays and f2._does_have_arrays and not f1._is_only_for_feedforward and not f2._is_only_for_feedforward:
         Pyllab.paste_fcl_without_learning_parameters(f1._fcl,f2._fcl)
 
-def copy_fcl(fcl f):
-    cdef fcl ff = (f._input,f._output,f._layer,f._dropout_flag,f._activation_flag, f._dropout_threshold,f._n_groups,f._normalization_flag,f._training_mode,f._feed_forward_flag,f._does_have_learning_parameters, f._does_have_arrays, f._is_only_for_feedforward)
-    paste_fcl(f,ff)
+def py_copy_fcl(Fcl f):
+    cdef Fcl ff = Fcl(f._input,f._output,f._layer,f._dropout_flag,f._activation_flag, f._dropout_threshold,f._n_groups,f._normalization_flag,f._training_mode,f._feed_forward_flag,f._does_have_learning_parameters, f._does_have_arrays, f._is_only_for_feedforward)
+    py_paste_fcl(f,ff)
     return ff
 
-def copy_fcl_without_learning_parameters(fcl f):
-    cdef fcl ff = (f._input,f._output,f._layer,f._dropout_flag,f._activation_flag, f._dropout_threshold,f._n_groups,f._normalization_flag,f._training_mode,f._feed_forward_flag,False, f._does_have_arrays, f._is_only_for_feedforward)
-    paste_fcl_without_learning_parameters(f,ff)
+def py_copy_fcl_without_learning_parameters(Fcl f):
+    cdef Fcl ff = Fcl(f._input,f._output,f._layer,f._dropout_flag,f._activation_flag, f._dropout_threshold,f._n_groups,f._normalization_flag,f._training_mode,f._feed_forward_flag,False, f._does_have_arrays, f._is_only_for_feedforward)
+    py_paste_fcl_without_learning_parameters(f,ff)
     return ff
 
-def slow_paste_fcl(fcl f1, fcl f2, float tau):
+def py_slow_paste_fcl(Fcl f1, Fcl f2, float tau):
     if f1._does_have_arrays and f1._does_have_learning_parameters and f2._does_have_arrays and f2._does_have_learning_parameters and not f1._is_only_for_feedforward and not f2._is_only_for_feedforward:
         Pyllab.slow_paste_fcl(f1._fcl, f2._fcl,tau)
 
-def copy_vector_to_params_fcl(fcl f, vector):
+def py_copy_vector_to_params_fcl(Fcl f, vector):
     check_size(vector,f.get_array_size_params())
     cdef float[:] v = vector_is_valid(vector)
     if f._does_have_arrays and f._does_have_learning_parameters:
         Pyllab.memcopy_vector_to_params(f._fcl,<float*>&v[0])
 
-def copy_params_to_vector_fcl(fcl f):
+def py_copy_params_to_vector_fcl(Fcl f):
     vector = np.arange(f.get_array_size_params(),dtype=np.float32)
     cdef float[:] v = vector
     if f._does_have_arrays and f._does_have_learning_parameters:
@@ -2016,13 +2012,13 @@ def copy_params_to_vector_fcl(fcl f):
         return vector
     return None
 
-def copy_vector_to_weights_fcl(fcl f, vector):
+def py_copy_vector_to_weights_fcl(Fcl f, vector):
     check_size(vector,f.get_array_size_weights())
     cdef float[:] v = vector_is_valid(vector)
     if f._does_have_arrays and f._does_have_learning_parameters:
         Pyllab.memcopy_vector_to_weights(f._fcl,<float*>&v[0])
 
-def copy_weights_to_vector_fcl(fcl f):
+def py_copy_weights_to_vector_fcl(Fcl f):
     vector = np.arange(f.get_array_size_weights(),dtype=np.float32)
     cdef float[:] v = vector
     if f._does_have_arrays and f._does_have_learning_parameters:
@@ -2030,13 +2026,13 @@ def copy_weights_to_vector_fcl(fcl f):
         return vector
     return None
 
-def copy_vector_to_scores_fcl(fcl f, vector):
+def py_copy_vector_to_scores_fcl(Fcl f, vector):
     check_size(vector,f.get_array_size_scores())
     cdef float[:] v = vector_is_valid(vector)
     if f._does_have_arrays and f._does_have_learning_parameters:
         Pyllab.memcopy_vector_to_scores(f._fcl,<float*>&v[0])
 
-def copy_scores_to_vector_fcl(fcl f):
+def py_copy_scores_to_vector_fcl(Fcl f):
     vector = np.arange(f.get_array_size_scores(),dtype=np.float32)
     cdef float[:] v = vector
     if f._does_have_arrays and f._does_have_learning_parameters:
@@ -2044,13 +2040,13 @@ def copy_scores_to_vector_fcl(fcl f):
         return vector
     return None
 
-def copy_vector_to_derivative_params_fcl(fcl f, vector):
+def py_copy_vector_to_derivative_params_fcl(Fcl f, vector):
     check_size(vector,f.get_array_size_params())
     cdef float[:] v = vector_is_valid(vector)
     if f._does_have_arrays and f._does_have_learning_parameters and not f._is_only_for_feedforward:
         Pyllab.memcopy_vector_to_derivative_params(f._fcl,<float*>&v[0])
 
-def copy_derivative_params_to_vector_fcl(fcl f):
+def py_copy_derivative_params_to_vector_fcl(Fcl f):
     vector = np.arange(f.get_array_size_params(),dtype=np.float32)
     cdef float[:] v = vector
     if f._does_have_arrays and f._does_have_learning_parameters and not f._is_only_for_feedforward:
@@ -2058,17 +2054,17 @@ def copy_derivative_params_to_vector_fcl(fcl f):
         return vector
     return None
 
-def compare_score_fcl(fcl f1, fcl f2, fcl f_output):
+def py_compare_score_fcl(Fcl f1, Fcl f2, Fcl f_output):
     if f1._does_have_arrays and f1._does_have_learning_parameters and f2._does_have_arrays and f2._does_have_learning_parameters and f_output._does_have_arrays and f_output._does_have_learning_parameters: 
         Pyllab.compare_score_fcl(f1._fcl, f2._fcl,f_output._fcl)
     
-def compare_score_fcl_with_vector(fcl f1, vector, fcl f_output):
+def py_compare_score_fcl_with_vector(Fcl f1, vector, Fcl f_output):
     check_size(vector,f1.get_array_size_scores())
     cdef float[:] v = vector_is_valid(vector)
     if f1._does_have_arrays and f1._does_have_learning_parameters and f_output._does_have_arrays and f_output._does_have_learning_parameters:
         Pyllab.compare_score_fcl_with_vector(f1._fcl, <float*>&v[0],f_output._fcl)
 
-cdef class rl:
+cdef class Rl:
     cdef Pyllab.rl* _rl
     cdef Pyllab.cl** _c_cls
     cdef int _channels
@@ -2171,43 +2167,43 @@ cdef class rl:
             for i in range(0,self._n_cl):
                 self._cls[i].make_it_only_for_ff()
          
-def paste_rl(rl r1, rl r2):
+def py_paste_rl(Rl r1, Rl r2):
     if r1.does_have_arrays and r1.does_have_learning_parameters and r2.does_have_arrays and r2.does_have_learning_parameters and not r1._is_only_for_feedforward and not r2._is_only_for_feedforward:
         Pyllab.paste_rl(r1._rl,r2._rl)
     
-def paste_rl_without_learning_parameters(rl r1, rl r2):
+def py_paste_rl_without_learning_parameters(Rl r1, Rl r2):
     if r1.does_have_arrays and r2.does_have_arrays and not r1._is_only_for_feedforward and not r2._is_only_for_feedforward:
         Pyllab.paste_rl_without_learning_parameters(r1._rl,r2._rl)
 
-def copy_rl(rl r):
+def py_copy_rl(Rl r):
     l = []
     for i in range(0,len(r._cls)):
-        l.append(copy_cl(r._cls[i]))
-    cdef rl rr = rl(r._channels,r._input_rows,r._input_cols,r._n_cl,l, does_have_learning_parameters = r._does_have_learning_parameters, does_have_arrays = r._does_have_arrays, is_only_for_feedforward = r._is_only_for_feedforward)
-    paste_rl(r,rr)
+        l.append(py_copy_cl(r._cls[i]))
+    cdef Rl rr = Rl(r._channels,r._input_rows,r._input_cols,r._n_cl,l, does_have_learning_parameters = r._does_have_learning_parameters, does_have_arrays = r._does_have_arrays, is_only_for_feedforward = r._is_only_for_feedforward)
+    py_paste_rl(r,rr)
     return rr
 
-def copy_rl_without_learning_parameters(rl r):
+def py_copy_rl_without_learning_parameters(Rl r):
     l = []
     for i in range(0,len(r._cls)):
-        l.append(copy_cl(r._cls[i]))
-    cdef rl rr = rl(r._channels,r._input_rows,r._input_cols,r._n_cl,l, does_have_learning_parameters = False, does_have_arrays = r._does_have_arrays, is_only_for_feedforward = r._is_only_for_feedforward)
-    paste_rl_without_learning_parameters(r,rr)
+        l.append(py_copy_cl(r._cls[i]))
+    cdef Rl rr = Rl(r._channels,r._input_rows,r._input_cols,r._n_cl,l, does_have_learning_parameters = False, does_have_arrays = r._does_have_arrays, is_only_for_feedforward = r._is_only_for_feedforward)
+    py_paste_rl_without_learning_parameters(r,rr)
     return rr
 
-def slow_paste_rl(rl r1, rl r2, float tau):
+def py_slow_paste_rl(Rl r1, Rl r2, float tau):
     if len(r1._cls) != len(r2._cls):
         return
     if r1.does_have_arrays and r1.does_have_learning_parameters and r2.does_have_arrays and r2.does_have_learning_parameters and not r1._is_only_for_feedforward and not r2._is_only_for_feedforward:
         Pyllab.slow_paste_rl(r1._rl,r2._rl,tau)
 
-def copy_vector_to_params_rl(rl r, vector):
+def py_copy_vector_to_params_rl(Rl r, vector):
     check_size(vector,r.get_array_size_params())
     cdef float[:] v = vector_is_valid(vector)
     if r._does_have_arrays and r._does_have_learning_parameters:
         Pyllab.memcopy_vector_to_params_rl(r._rl,<float*>&v[0])
 
-def copy_params_to_vector_rl(rl r):
+def py_copy_params_to_vector_rl(Rl r):
     vector = np.arange(r.get_array_size_params(),dtype=np.float32)
     cdef float[:] v = vector
     if r._does_have_arrays and r._does_have_learning_parameters:
@@ -2215,13 +2211,13 @@ def copy_params_to_vector_rl(rl r):
         return vector
     return None
 
-def copy_vector_to_weights_rl(rl r, vector):
+def py_copy_vector_to_weights_rl(Rl r, vector):
     check_size(vector,r.get_array_size_weights())
     cdef float[:] v = vector_is_valid(vector)
     if r._does_have_arrays and r._does_have_learning_parameters:
         Pyllab.memcopy_vector_to_weights_rl(r._rl,<float*>&v[0])
 
-def copy_weights_to_vector_rl(rl r):
+def py_copy_weights_to_vector_rl(Rl r):
     vector = np.arange(r.get_array_size_weights(),dtype=np.float32)
     cdef float[:] v = vector
     if r._does_have_arrays and r._does_have_learning_parameters:
@@ -2229,13 +2225,13 @@ def copy_weights_to_vector_rl(rl r):
         return vector
     return None
 
-def copy_vector_to_scores_rl(rl r, vector):
+def py_copy_vector_to_scores_rl(Rl r, vector):
     check_size(vector,r.get_array_size_scores())
     cdef float[:] v = vector_is_valid(vector)
     if r._does_have_arrays and r._does_have_learning_parameters:
         Pyllab.memcopy_vector_to_scores_rl(r._rl,<float*>&v[0])
 
-def copy_scores_to_vector_rl(rl r):
+def py_copy_scores_to_vector_rl(Rl r):
     vector = np.arange(r.get_array_size_scores(),dtype=np.float32)
     cdef float[:] v = vector
     if r._does_have_arrays and r._does_have_learning_parameters:
@@ -2243,13 +2239,13 @@ def copy_scores_to_vector_rl(rl r):
         return vector
     return None
 
-def copy_vector_to_derivative_params_rl(rl r, vector):
+def py_copy_vector_to_derivative_params_rl(Rl r, vector):
     check_size(vector,r.get_array_size_params())
     cdef float[:] v = vector_is_valid(vector)
     if r._does_have_arrays and r._does_have_learning_parameters and not r._is_only_for_feedforward:
         Pyllab.memcopy_vector_to_derivative_params_rl(r._rl,<float*>&v[0])
 
-def copy_derivative_params_to_vector_rl(rl r):
+def py_copy_derivative_params_to_vector_rl(Rl r):
     vector = np.arange(r.get_array_size_scores(),dtype=np.float32)
     cdef float[:] v = vector
     if r._does_have_arrays and r._does_have_learning_parameters and not r._is_only_for_feedforward:
@@ -2257,18 +2253,18 @@ def copy_derivative_params_to_vector_rl(rl r):
         return vector
     return None
 
-def compare_score_rl(rl r1, rl r2, rl r_output):
+def py_compare_score_rl(Rl r1, Rl r2, Rl r_output):
     if r1._does_have_arrays and r1._does_have_learning_parameters and r2._does_have_arrays and r2._does_have_learning_parameters and r_output._does_have_arrays and r_output._does_have_learning_parameters:
         Pyllab.compare_score_rl(r1._rl, r2._rl,r_output._rl)
     
-def compare_score_rl_with_vector(rl r1, vector, rl r_output):
+def py_compare_score_rl_with_vector(Rl r1, vector, Rl r_output):
     check_size(vector,r1.get_array_size_scores())
     cdef float[:] v
     if r1._does_have_arrays and r1._does_have_learning_parameters and r_output._does_have_arrays and r_output._does_have_learning_parameters:
         v = vector_is_valid(vector)
         Pyllab.compare_score_rl_with_vector(r1._rl, <float*>&v[0],r_output._rl)  
 
-cdef class model:
+cdef class Model:
     cdef Pyllab.model* _model
     cdef Pyllab.model** _models
     cdef fcls
@@ -2925,19 +2921,19 @@ cdef class model:
             
             
        
-def paste_model(model m1, model m2):
+def py_paste_model(Model m1, Model m2):
     if m1._model is NULL or m2._model is NULL:
         return
     if m1._does_have_arrays and m1._does_have_learning_parameters and m2._does_have_arrays and m2._does_have_learning_parameters and not m1._is_only_for_feedforward and not m2._is_only_for_feedforward:
         Pyllab.paste_model(m1._model,m2._model)
     
-def paste_model_without_learning_parameters(model m1, model m2):
+def py_paste_model_without_learning_parameters(Model m1, Model m2):
     if m1._model is NULL or m2._model is NULL:
         return
     if m1._does_have_arrays and m2._does_have_arrays and not m1._is_only_for_feedforward and not m2._is_only_for_feedforward:
         Pyllab.paste_model_without_learning_parameters(m1._model,m2._model)
 
-def copy_model(model m):
+def py_copy_model(Model m):
     if m._model is NULL:
         return
     cdef Pyllab.model* copy
@@ -2945,22 +2941,22 @@ def copy_model(model m):
         if not m._is_from_char:
             l1 = []
             for i in range(0,len(m.fcls)):
-                l1.append(copy_fcl(m.fcls[i]))
+                l1.append(py_copy_fcl(m.fcls[i]))
             l2 = []
             for i in range(0,len(m.cls)):
-                l2.append(copy_cl(m.cls[i]))
+                l2.append(py_copy_cl(m.cls[i]))
             l3 = []
             for i in range(0,len(m.rls)):
-                l3.append(copy_rl(m.rls[i]))
-            mm = model(m._n_fcl,m._n_cl,m._n_rl,l1,l2,l3)
-            paste_model(m,mm)
+                l3.append(py_copy_rl(m.rls[i]))
+            mm = Model(m._n_fcl,m._n_cl,m._n_rl,l1,l2,l3)
+            py_paste_model(m,mm)
             return mm
         copy = Pyllab.copy_model(m._model)
-        mod = model(mod = True)
+        mod = Model(mod = True)
         mod._model = copy
         return mod
     
-def copy_model_without_learning_parameters(model m):
+def py_copy_model_without_learning_parameters(Model m):
     if m._model is NULL:
         return
     cdef Pyllab.model* copy 
@@ -2968,29 +2964,29 @@ def copy_model_without_learning_parameters(model m):
         if not m._is_from_char:
             l1 = []
             for i in range(0,len(m.fcls)):
-                l1.append(copy_fcl_without_learning_parameters(m.fcls[i]))
+                l1.append(py_copy_fcl_without_learning_parameters(m.fcls[i]))
             l2 = []
             for i in range(0,len(m.cls)):
-                l2.append(copy_cl_without_learning_parameters(m.cls[i]))
+                l2.append(py_copy_cl_without_learning_parameters(m.cls[i]))
             l3 = []
             for i in range(0,len(m.rls)):
-                l3.append(copy_rl_without_learning_parameters(m.rls[i]))
-            mm = model(m._n_fcl,m._n_cl,m._n_rl,l1,l2,l3)
-            paste_model_without_learning_parameters(m,mm)
+                l3.append(py_copy_rl_without_learning_parameters(m.rls[i]))
+            mm = Model(m._n_fcl,m._n_cl,m._n_rl,l1,l2,l3)
+            py_paste_model_without_learning_parameters(m,mm)
             return mm
         copy = Pyllab.copy_model_without_learning_parameters(m._model)
-        mod = model(mod = True)
+        mod = Model(mod = True)
         mod._model = copy
         mod._does_have_learning_parameters = False
         return mod
 
-def slow_paste_model(model m1, model m2, float tau):
+def py_slow_paste_model(Model m1, Model m2, float tau):
     if m1._model is NULL or m2._model is NULL:
         return
     if m1._does_have_arrays and m1._does_have_learning_parameters and m2._does_have_arrays and m2._does_have_learning_parameters and not m1._is_only_for_feedforward and not m2._is_only_for_feedforward:
         Pyllab.slow_paste_model(m1._model, m2._model,tau)
 
-def copy_vector_to_params_model(model m, vector):
+def py_copy_vector_to_params_model(Model m, vector):
     if m._model is NULL:
         return
     check_size(vector,m.get_array_size_params())
@@ -2998,7 +2994,7 @@ def copy_vector_to_params_model(model m, vector):
     if m._does_have_arrays and m._does_have_learning_parameters:
         Pyllab.memcopy_vector_to_params_model(m._model,<float*>&v[0])
 
-def copy_params_to_vector_model(model m):
+def py_copy_params_to_vector_model(Model m):
     if m._model is NULL:
         return
     vector = np.arange(m.get_array_size_params(),dtype=np.float32)
@@ -3008,7 +3004,7 @@ def copy_params_to_vector_model(model m):
         return vector
     return None
 
-def copy_vector_to_weights_model(model m, vector):
+def py_copy_vector_to_weights_model(Model m, vector):
     if m._model is NULL:
         return
     check_size(vector,m.get_array_size_weights())
@@ -3016,7 +3012,7 @@ def copy_vector_to_weights_model(model m, vector):
     if m._does_have_arrays and m._does_have_learning_parameters:
         Pyllab.memcopy_vector_to_weights_model(m._model,<float*>&v[0])
 
-def copy_weights_to_vector_model(model m):
+def py_copy_weights_to_vector_model(Model m):
     if m._model is NULL:
         return
     vector = np.arange(m.get_array_size_weights(),dtype=np.float32)
@@ -3026,7 +3022,7 @@ def copy_weights_to_vector_model(model m):
         return vector
     return None
 
-def copy_vector_to_scores_model(model m, vector):
+def py_copy_vector_to_scores_model(Model m, vector):
     if m._model is NULL:
         return
     check_size(vector,m.get_array_size_scores())
@@ -3034,7 +3030,7 @@ def copy_vector_to_scores_model(model m, vector):
     if m._does_have_arrays and m._does_have_learning_parameters:
         Pyllab.memcopy_vector_to_scores_model(m._model,<float*>&v[0])
 
-def copy_scores_to_vector_model(model m):
+def py_copy_scores_to_vector_model(Model m):
     if m._model is NULL:
         return
     vector = np.arange(m.get_array_size_scores(),dtype=np.float32)
@@ -3044,7 +3040,7 @@ def copy_scores_to_vector_model(model m):
         return vector
     return None
 
-def copy_vector_to_derivative_params_model(model m, vector):
+def py_copy_vector_to_derivative_params_model(Model m, vector):
     if m._model is NULL:
         return
     check_size(vector,m.get_array_size_params())
@@ -3052,7 +3048,7 @@ def copy_vector_to_derivative_params_model(model m, vector):
     if m._does_have_arrays and m._does_have_learning_parameters:
         Pyllab.memcopy_vector_to_derivative_params_model(m._model,<float*>&v[0])
 
-def copy_derivative_params_to_vector_model(model m):
+def py_copy_derivative_params_to_vector_model(Model m):
     if m._model is NULL:
         return
     vector = np.arange(m.get_array_size_params(),dtype=np.float32)
@@ -3062,12 +3058,12 @@ def copy_derivative_params_to_vector_model(model m):
         return vector
     return None
 
-def compare_score_model(model m1, model m2, model m_output):
+def py_compare_score_model(Model m1, Model m2, Model m_output):
     if m1._model is NULL or m2._model is NULL or m_output._model is NULL:
         return
     Pyllab.compare_score_model(m1._model, m2._model,m_output._model)
     
-def compare_score_model_with_vector(model m1, vector, model m_output):
+def py_compare_score_model_with_vector(Model m1, vector, Model m_output):
     if m1._model is NULL or m_output._model is NULL:
         return    
     check_size(vector,m1.get_array_size_scores())
@@ -3075,7 +3071,7 @@ def compare_score_model_with_vector(model m1, vector, model m_output):
     cdef float[:] v = vector_is_valid(vector)
     Pyllab.compare_score_model_with_vector(m1._model, <float*>&v[0],m_output._model)
     
-def sum_score_model(model m1,model m2, model m_output):
+def py_sum_score_model(Model m1,Model m2, Model m_output):
     if m1._model is NULL or m2._model is NULL or m_output._model is NULL:
         return    
     Pyllab.sum_score_model(m1._model,m2._model,m_output._model)
@@ -3083,11 +3079,11 @@ def sum_score_model(model m1,model m2, model m_output):
 cdef class duelingCategoricalDQN:
     cdef Pyllab.dueling_categorical_dqn* _dqn
     cdef Pyllab.dueling_categorical_dqn** _dqns
-    cdef model shared
-    cdef model v_hid
-    cdef model v_lin
-    cdef model a_hid
-    cdef model a_lin
+    cdef Model shared
+    cdef Model v_hid
+    cdef Model v_lin
+    cdef Model a_hid
+    cdef Model a_lin
     cdef int threads
     cdef bint _is_multithread
     cdef bint _does_have_learning_parameters
@@ -3108,7 +3104,7 @@ cdef class duelingCategoricalDQN:
      all the other parameters from layers and going forward, are used if we pass the class cl, ,fcl, rl. Basically
      we are building the model from each class defined in python, we pass all the classes defined in python and et voilà we build in C the struct model
     '''
-    def __cinit__(self,filename=None, dict d = None,bint mode = False, model shared=None, model v_hid=None, model v_lin=None, model a_hid = None, model a_lin = None,int input_size = 0, int action_size = 0, int n_atoms = 0, float v_min = 0, float v_max = 0, bint does_have_learning_parameters = True, bint does_have_arrays = True, bint is_only_for_feedforward = False):
+    def __cinit__(self,filename=None, dict d = None,bint mode = False, Model shared=None, Model v_hid=None, Model v_lin=None, Model a_hid = None, Model a_lin = None,int input_size = 0, int action_size = 0, int n_atoms = 0, float v_min = 0, float v_max = 0, bint does_have_learning_parameters = True, bint does_have_arrays = True, bint is_only_for_feedforward = False):
         check_int(input_size)
         check_int(action_size)
         check_int(n_atoms)
@@ -3637,46 +3633,46 @@ cdef class duelingCategoricalDQN:
         if self._is_multithread:
             Pyllab.sum_dueling_categorical_dqn_partial_derivatives_multithread(self._dqns, self._dqn, self.threads, 0)
             
-def paste_dueling_categorical_dqn(duelingCategoricalDQN dqn1, duelingCategoricalDQN dqn2):
+def py_paste_dueling_categorical_dqn(duelingCategoricalDQN dqn1, duelingCategoricalDQN dqn2):
     if dqn1._dqn is NULL or dqn2._dqn is NULL:
         return
     if dqn1._does_have_arrays and dqn1._does_have_learning_parameters and dqn2._does_have_arrays and dqn2._does_have_learning_parameters and not dqn1._is_only_for_feedforward and not dqn2._is_only_for_feedforward:
         Pyllab.paste_dueling_categorical_dqn(dqn1._dqn,dqn2._dqn)
     
-def paste_dueling_categorical_dqn_without_learning_parameters(duelingCategoricalDQN dqn1, duelingCategoricalDQN dqn2):
+def py_paste_dueling_categorical_dqn_without_learning_parameters(duelingCategoricalDQN dqn1, duelingCategoricalDQN dqn2):
     if dqn1._dqn is NULL or dqn2._dqn is NULL:
         return
     if dqn1._does_have_arrays and dqn2._does_have_arrays and not dqn1._is_only_for_feedforward and not dqn2._is_only_for_feedforward:
         Pyllab.paste_dueling_categorical_dqn_without_learning_parameters(dqn1._dqn,dqn2._dqn)
 
-def copy_dueling_categorical_dqn(duelingCategoricalDQN dqn):
+def py_copy_dueling_categorical_dqn(duelingCategoricalDQN dqn):
     if dqn._dqn is NULL:
         return
     cdef Pyllab.dueling_categorical_dqn* copy
     if dqn._does_have_learning_parameters and dqn._does_have_arrays and not dqn._is_only_for_feedforward:
         if not dqn._is_from_char:
-            shared = copy_model(dqn.shared)
-            v_hid = copy_model(dqn.v_hid)
-            v_lin = copy_model(dqn.v_lin)
-            a_hid = copy_model(dqn.a_hid)
-            a_lin = copy_model(dqn.a_lin)
+            shared = py_copy_model(dqn.shared)
+            v_hid = py_copy_model(dqn.v_hid)
+            v_lin = py_copy_model(dqn.v_lin)
+            a_hid = py_copy_model(dqn.a_hid)
+            a_lin = py_copy_model(dqn.a_lin)
             return duelingCategoricalDQN(shared = shared, v_hid = v_hid, v_lin = v_lin , a_hid = a_hid, a_lin = a_lin, input_size = dqn.input_size,action_size = dqn.action_size,n_atoms = dqn.n_atoms,v_min = dqn.v_min,v_max = dqn.v_max)
         copy = Pyllab.copy_dueling_categorical_dqn(dqn._dqn)
         mod = duelingCategoricalDQN(mode = True)
         mod._dqn = copy
         return mod
     
-def copy_dueling_categorical_dqn_without_learning_parameters(duelingCategoricalDQN dqn):
+def py_copy_dueling_categorical_dqn_without_learning_parameters(duelingCategoricalDQN dqn):
     if dqn._dqn is NULL:
         return
     cdef Pyllab.dueling_categorical_dqn* copy 
     if dqn._does_have_learning_parameters and dqn._does_have_arrays and not dqn._is_only_for_feedforward:
         if not dqn._is_from_char:
-            shared = copy_model_without_learning_parameters(dqn.shared)
-            v_hid = copy_model_without_learning_parameters(dqn.v_hid)
-            v_lin = copy_model_without_learning_parameters(dqn.v_lin)
-            a_hid = copy_model_without_learning_parameters(dqn.a_hid)
-            a_lin = copy_model_without_learning_parameters(dqn.a_lin)
+            shared = py_copy_model_without_learning_parameters(dqn.shared)
+            v_hid = py_copy_model_without_learning_parameters(dqn.v_hid)
+            v_lin = py_copy_model_without_learning_parameters(dqn.v_lin)
+            a_hid = py_copy_model_without_learning_parameters(dqn.a_hid)
+            a_lin = py_copy_model_without_learning_parameters(dqn.a_lin)
             return duelingCategoricalDQN(shared = shared, v_hid = v_hid, v_lin = v_lin , a_hid = a_hid, a_lin = a_lin, input_size = dqn.input_size,action_size = dqn.action_size,n_atoms = dqn.n_atoms,v_min = dqn.v_min,v_max = dqn.v_max,does_have_learning_parameters = False)
         copy = Pyllab.copy_dueling_categorical_dqn_without_learning_parameters(dqn._dqn)
         mod = duelingCategoricalDQN(mod = True,does_have_learning_parameters = False)
@@ -3684,14 +3680,14 @@ def copy_dueling_categorical_dqn_without_learning_parameters(duelingCategoricalD
         return mod
     
 
-def slow_paste_dueling_categorical_dqn(duelingCategoricalDQN dqn1, duelingCategoricalDQN dqn2, float tau):
+def py_slow_paste_dueling_categorical_dqn(duelingCategoricalDQN dqn1, duelingCategoricalDQN dqn2, float tau):
     check_float(tau)
     if dqn1._dqn is NULL or dqn2._dqn is NULL:
         return
     if dqn1._does_have_arrays and dqn1._does_have_learning_parameters and dqn2._does_have_arrays and dqn2._does_have_learning_parameters and not dqn1._is_only_for_feedforward and not dqn2._is_only_for_feedforward:
         Pyllab.slow_paste_dueling_categorical_dqn(dqn1._dqn, dqn2._dqn,tau)
 
-def copy_vector_to_params_dueling_categorical_dqn(duelingCategoricalDQN dqn, vector):
+def py_copy_vector_to_params_dueling_categorical_dqn(duelingCategoricalDQN dqn, vector):
     if dqn._dqn is NULL:
         return
     check_size(vector,dqn.get_array_size_params())
@@ -3699,7 +3695,7 @@ def copy_vector_to_params_dueling_categorical_dqn(duelingCategoricalDQN dqn, vec
     if dqn._does_have_arrays and dqn._does_have_learning_parameters:
         Pyllab.memcopy_vector_to_params_dueling_categorical_dqn(dqn._dqn,<float*>&v[0])
 
-def copy_params_to_vector_dueling_categorical_dqn(duelingCategoricalDQN dqn):
+def py_copy_params_to_vector_dueling_categorical_dqn(duelingCategoricalDQN dqn):
     if dqn._dqn is NULL:
         return
     vector = np.arange(dqn.get_array_size_params(),dtype=np.float32)
@@ -3709,7 +3705,7 @@ def copy_params_to_vector_dueling_categorical_dqn(duelingCategoricalDQN dqn):
         return vector
     return None
 
-def copy_vector_to_weights_dueling_categorical_dqn(duelingCategoricalDQN dqn, vector):
+def py_copy_vector_to_weights_dueling_categorical_dqn(duelingCategoricalDQN dqn, vector):
     if dqn._dqn is NULL:
         return
     check_size(vector,dqn.get_array_size_weights())
@@ -3717,7 +3713,7 @@ def copy_vector_to_weights_dueling_categorical_dqn(duelingCategoricalDQN dqn, ve
     if dqn._does_have_arrays and dqn._does_have_learning_parameters:
         Pyllab.memcopy_vector_to_weights_dueling_categorical_dqn(dqn._dqn,<float*>&v[0])
 
-def copy_weights_to_vector_dueling_categorical_dqn(duelingCategoricalDQN dqn):
+def py_copy_weights_to_vector_dueling_categorical_dqn(duelingCategoricalDQN dqn):
     if dqn._dqn is NULL:
         return
     vector = np.arange(dqn.get_array_size_weights(),dtype=np.float32)
@@ -3727,7 +3723,7 @@ def copy_weights_to_vector_dueling_categorical_dqn(duelingCategoricalDQN dqn):
         return vector
     return None
 
-def copy_vector_to_scores_dueling_categorical_dqn(duelingCategoricalDQN dqn, vector):
+def py_copy_vector_to_scores_dueling_categorical_dqn(duelingCategoricalDQN dqn, vector):
     if dqn._dqn is NULL:
         return
     check_size(vector,dqn.get_array_size_scores())
@@ -3735,7 +3731,7 @@ def copy_vector_to_scores_dueling_categorical_dqn(duelingCategoricalDQN dqn, vec
     if dqn._does_have_arrays and dqn._does_have_learning_parameters:
         Pyllab.memcopy_vector_to_scores_dueling_categorical_dqn(dqn._dqn,<float*>&v[0])
 
-def copy_scores_to_vector_dueling_categorical_dqn(duelingCategoricalDQN dqn):
+def py_copy_scores_to_vector_dueling_categorical_dqn(duelingCategoricalDQN dqn):
     if dqn._dqn is NULL:
         return
     vector = np.arange(dqn.get_array_size_scores(),dtype=np.float32)
@@ -3745,12 +3741,12 @@ def copy_scores_to_vector_dueling_categorical_dqn(duelingCategoricalDQN dqn):
         return vector
     return None
     
-def compare_score_dueling_categorical_dqn(duelingCategoricalDQN dqn1, duelingCategoricalDQN dqn2, duelingCategoricalDQN dqn_output):
+def py_compare_score_dueling_categorical_dqn(duelingCategoricalDQN dqn1, duelingCategoricalDQN dqn2, duelingCategoricalDQN dqn_output):
     if dqn1._dqn is NULL or dqn2._dqn is NULL or dqn_output._dqn is NULL:
         return
     Pyllab.compare_score_dueling_categorical_dqn(dqn1._dqn,dqn2._dqn,dqn_output._dqn)
     
-def compare_score_dueling_categorical_dqn_with_vector(duelingCategoricalDQN dqn1, vector, duelingCategoricalDQN dqn_output):
+def py_compare_score_dueling_categorical_dqn_with_vector(duelingCategoricalDQN dqn1, vector, duelingCategoricalDQN dqn_output):
     if dqn1._dqn is NULL or dqn_output._dqn is NULL:
         return
     check_size(vector,dqn1.get_array_size_scores())
@@ -3758,12 +3754,12 @@ def compare_score_dueling_categorical_dqn_with_vector(duelingCategoricalDQN dqn1
     cdef float[:] v = vector_is_valid(vector)
     Pyllab.compare_score_dueling_categorical_dqn_with_vector(dqn1._dqn, <float*>&v[0],dqn_output._dqn)
     
-def sum_score_dueling_categorical_dqn(duelingCategoricalDQN dqn1, duelingCategoricalDQN dqn2, duelingCategoricalDQN dqn_output):
+def py_sum_score_dueling_categorical_dqn(duelingCategoricalDQN dqn1, duelingCategoricalDQN dqn2, duelingCategoricalDQN dqn_output):
     if dqn1._dqn is NULL or dqn2._dqn is NULL or dqn_output._dqn is NULL:
         return
     Pyllab.sum_score_dueling_categorical_dqn(dqn1._dqn,dqn2._dqn,dqn_output._dqn)
              
-cdef class training:
+cdef class Training:
     cdef float lr
     cdef float start_lr
     cdef float momentum
@@ -3782,7 +3778,7 @@ cdef class training:
     cdef float lr_maximum
     cdef int timestep_threshold
     cdef float decay
-    def __cinit__(self, float lr = 0.1, float momentum = 0.9, int batch_size = 0, int gradient_descent_flag = NESTEROV, float current_beta1 = BETA1_ADAM, float current_beta2 = BETA2_ADAM, int regularization = NO_REGULARIZATION, uint64_t total_number_weights = 0, float lambda_value = 0, int lr_decay_flag = LR_NO_DECAY, int timestep_threshold = 0, float lr_minimum = 0, float lr_maximum = 1, float decay = 0):
+    def __cinit__(self, float lr = 0.1, float momentum = 0.9, int batch_size = 0, int gradient_descent_flag = PY_NESTEROV, float current_beta1 = PY_BETA1_ADAM, float current_beta2 = PY_BETA2_ADAM, int regularization = PY_NO_REGULARIZATION, uint64_t total_number_weights = 0, float lambda_value = 0, int lr_decay_flag = PY_LR_NO_DECAY, int timestep_threshold = 0, float lr_minimum = 0, float lr_maximum = 1, float decay = 0):
         check_float(lr)
         check_float(decay)
         check_float(momentum)
@@ -3830,12 +3826,12 @@ cdef class training:
             print("Error: your momentum mmust be in [0,1]")
             exit(1)
         self.momentum = momentum
-    def set_batch_size(self, model m):
+    def set_batch_size(self, Model m):
         self.batch_size = m.threads
     
     def set_gradient_descent(self, int flag):
         check_int(flag)
-        if flag != NESTEROV and flag != ADAMOD and flag != ADAM and flag != DIFF_GRAD and flag != RADAM:
+        if flag != PY_NESTEROV and flag != PY_ADAMOD and flag != PY_ADAM and flag != PY_DIFF_GRAD and flag != PY_RADAM:
             print("Error: flag not recognized")
             exit(1)
         self.gradient_descent_flag = flag
@@ -3856,11 +3852,11 @@ cdef class training:
     
     def set_regularization(self, int regularization):
         check_int(regularization)
-        if regularization != NO_REGULARIZATION and regularization != L2_REGULARIZATION:
+        if regularization != PY_NO_REGULARIZATION and regularization != PY_L2_REGULARIZATION:
             print("Error: either no regularization or l2 regularization must be applied")
             exit(1)
     
-    def set_weights_number(self, model m):
+    def set_weights_number(self, Model m):
         self.total_number_weights = m.get_number_of_weights()
         
     def set_lambda(self, float lambda_value):
@@ -3876,7 +3872,7 @@ cdef class training:
         check_float(lr_minimum) 
         check_float(decay) 
         check_float(lr_maximum)
-        if lr_decay_flag != LR_ANNEALING_DECAY and lr_decay_flag != LR_NO_DECAY and lr_decay_flag != LR_CONSTANT_DECAY and lr_decay_flag != LR_STEP_DECAY and lr_decay_flag != LR_TIME_BASED_DECAY:
+        if lr_decay_flag != PY_LR_ANNEALING_DECAY and lr_decay_flag != PY_LR_NO_DECAY and lr_decay_flag != PY_LR_CONSTANT_DECAY and lr_decay_flag != PY_LR_STEP_DECAY and lr_decay_flag != PY_LR_TIME_BASED_DECAY:
             print("Error: no decay flag recognized")
             exit(1)
         if lr_minimum > 1 or lr_minimum < -1 or lr_maximum > 1 or lr_maximum < -1:
@@ -3890,7 +3886,7 @@ cdef class training:
         self.lr_maximum = lr_maximum
         self.timestep_threshold = timestep_threshold
         self.decay = decay
-    def update_model(self, model m):
+    def update_model(self, Model m):
         if m._model is NULL:
             return
         Pyllab.update_model(m._model, self.lr, self.momentum,self.batch_size,self.gradient_descent_flag,&self.current_beta1,&self.current_beta2,self.regularization, self.total_number_weights,self.lambda_value,&self.t)
@@ -3905,7 +3901,7 @@ cdef class training:
         if self.lr_decay_flag != Pyllab.LR_NO_DECAY:
             Pyllab.update_lr(&self.lr, self.lr_minimum, self.lr_maximum,self.start_lr, self.decay, <int>self.t, self.timestep_threshold, self.lr_decay_flag)
 
-cdef class neat:
+cdef class Neat:
     cdef Pyllab.neat* _neat
     cdef bint _keep_parents
     cdef int _species_threshold
@@ -3930,7 +3926,7 @@ cdef class neat:
     cdef int _inputs
     cdef int _outputs
     
-    def __cinit__(self,int inputs, int outputs, bytes neat_as_byte = None, bint keep_parents = True, int species_threshold = Pyllab.SPECIES_THERESHOLD, int initial_population = Pyllab.INITIAL_POPULATION,
+    def __cinit__(self,int inputs, int outputs, neat_as_byte = None, bint keep_parents = True, int species_threshold = Pyllab.SPECIES_THERESHOLD, int initial_population = Pyllab.INITIAL_POPULATION,
                   int generations = Pyllab.GENERATIONS, float percentage_survivors_per_specie = Pyllab.PERCENTAGE_SURVIVORS_PER_SPECIE, float connection_mutation_rate = Pyllab.CONNECTION_MUTATION_RATE,
                   float new_connection_assignment_rate = Pyllab.NEW_CONNECTION_ASSIGNMENT_RATE, float add_connection_big_specie_rate = Pyllab.ADD_CONNECTION_BIG_SPECIE_RATE,
                   float add_connection_small_specie_rate = Pyllab.ADD_CONNECTION_SMALL_SPECIE_RATE, float add_node_specie_rate = Pyllab.ADD_NODE_SPECIE_RATE, float activate_connection_rate = Pyllab.ACTIVATE_CONNECTION_RATE,
@@ -3982,13 +3978,13 @@ cdef class neat:
         self._inputs = inputs
         self._outputs = outputs
         cdef char* s
-        
+        self._neat = NULL;
         if inputs == 0 or outputs == 0:
             print("Error: either you pass inputs and outputs > 0 or a neat as char characters!")
             exit(1)
         
         if neat_as_byte != None:
-            s = neat_as_byte
+            s = <char*>PyUnicode_AsUTF8(neat_as_byte)
             
             self._neat = Pyllab.init_from_char(&s[0], inputs,outputs,initial_population,species_threshold,max_population,generations, 
                                                percentage_survivors_per_specie, connection_mutation_rate, new_connection_assignment_rate, add_connection_big_specie_rate, 
@@ -4003,7 +3999,7 @@ cdef class neat:
                                      saving, limiting_species, limiting_threshold, same_fitness_limit, keep_parents, age_significance)
         if self._neat is NULL:
             raise MemoryError()
-            
+        
         
     def __dealloc__(self):
         Pyllab.free_neat(self._neat)
@@ -4109,7 +4105,7 @@ cdef class neat:
         check_int(index)
         Pyllab.save_ith_genome(self._neat, index, n)
 
-cdef class genome:
+cdef class Genome:
     cdef Pyllab.genome* _g
     cdef int _global_innovation_numb_nodes
     cdef int _global_innovation_numb_connections
@@ -4139,7 +4135,7 @@ cdef class genome:
         free(output)
         return nd_output
 
-cdef class rainbow:
+cdef class Rainbow:
     cdef Pyllab.rainbow* _r
     cdef duelingCategoricalDQN online_net
     cdef duelingCategoricalDQN target_net
@@ -4187,11 +4183,11 @@ cdef class rainbow:
     
     def __cinit__(self,duelingCategoricalDQN online_net, duelingCategoricalDQN target_net, float beta_priorization_increase = 0.05, float max_epsilon = 1, float min_epsilon = 0.001,
                   float diversity_driven_decay = 0, float diversity_driven_minimum = 0.001, float diversity_driven_maximum = 1, float epsilon_decay = 0.005,float epsilon = 1, float alpha_priorization = 0.4,
-                  float beta_priorization = 0.4, float tau_copying = 0.8, float momentum = 0.9, float gamma = 0.99, float beta1 = BETA1_ADAM, float beta2 = BETA2_ADAM, float beta3 = BETA3_ADAMOD,
+                  float beta_priorization = 0.4, float tau_copying = 0.8, float momentum = 0.9, float gamma = 0.99, float beta1 = PY_BETA1_ADAM, float beta2 = PY_BETA2_ADAM, float beta3 = PY_BETA3_ADAMOD,
                   float k_percentage = 1, float clipping_gradient_value = 1, float adaptive_clipping_gradient_value = 0.01, float diversity_driven_threshold = 0.05, float lr = 0.001, float lr_minimum = 0.0001, float lr_maximum = 0.1,
-                  float lr_decay = 0.0001, int lr_epoch_threshold = 500, int lr_decay_flag = LR_NO_DECAY, int feed_forward_flag = FULLY_FEED_FORWARD, int training_mode = GRADIENT_DESCENT, int adaptive_clipping_flag = 0,
-                  int batch_size = 128,int threads = 128, int gd_flag = ADAM, int max_buffer_size = 10000, int n_step_rewards = 2, int stop_epsilon_greedy = 500, int epochs_to_copy_target = 1,
-                  int sampling_flag = REWARD_SAMPLING, int diversity_driven_q_functions = 128):
+                  float lr_decay = 0.0001, int lr_epoch_threshold = 500, int lr_decay_flag = PY_LR_NO_DECAY, int feed_forward_flag = PY_FULLY_FEED_FORWARD, int training_mode = PY_GRADIENT_DESCENT, int adaptive_clipping_flag = 0,
+                  int batch_size = 128,int threads = 128, int gd_flag = PY_ADAM, int max_buffer_size = 10000, int n_step_rewards = 2, int stop_epsilon_greedy = 500, int epochs_to_copy_target = 1,
+                  int sampling_flag = PY_REWARD_SAMPLING, int diversity_driven_q_functions = 128):
         cdef int th = threads
         if(th < 2):
             return
