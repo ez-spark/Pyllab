@@ -6,8 +6,9 @@
 or
 
 
-# Build .whl package On Linux/Mac:
+# Build .whl package On Linux:
 ```
+pip install -r requirements.txt
 sh generate_wheel_unix.sh
 ```
 
@@ -33,6 +34,12 @@ auditwheel repair package.whl --plat manylinux2014_x86_64
 
 in the wheelhouse directory you have the fixed wheel package
 
+# Build .whl package on MacOS
+```
+pip install -r requirements.txt
+sh generate_wheel_unix.sh
+sh repair_wheel_macos.sh
+```
 
 # Build .whl package on Windows
 
