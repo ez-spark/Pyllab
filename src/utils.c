@@ -917,7 +917,7 @@ void merge(float* values, int* indices, int temp[], int from_index, int mid, int
     }
 }
  
-void mergesort(float* values, int* indices, int low, int high){
+void merge_sort(float* values, int* indices, int low, int high){
     int i,m,from,mid,to,length = high-low + 1;
     int* temp = (int*)calloc(length,sizeof(int));
     for(i = 0; i < length; i++){
@@ -937,7 +937,7 @@ void mergesort(float* values, int* indices, int low, int high){
 
 void sort(float* values, int* indices, int low, int high){
     if(high-low > SORT_SWITCH_THRESHOLD)
-        mergesort(values,indices,low,high);
+        merge_sort(values,indices,low,high);
     else
         quick_sort(values,indices,low,high);
 }

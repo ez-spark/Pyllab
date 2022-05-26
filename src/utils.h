@@ -61,7 +61,7 @@ int shuffle_int_array(int* m,int n);
 char** get_files(int index1, int n_files);
 int check_nans_matrix(float** m, int rows, int cols);
 void merge(float* values, int* indices, int temp[], int from_index, int mid, int to, int length);
-void mergesort(float* values, int* indices, int low, int high);
+void merge_sort(float* values, int* indices, int low, int high);
 void sort(float* values, int* indices, int low, int high);
 void free_tensor(float*** t, int dim1, int dim2);
 int shuffle_float_matrix_float_tensor(float** m,float*** t,int n);
