@@ -19,14 +19,14 @@ class DQNAgent:
     
     def __init__(self, state_size, action_size, n_atoms, v_min, v_max, filename, batch_size, n_actions, mode = False):
         self.online_net = pyllab.duelingCategoricalDQN(filename = filename,input_size = state_size,action_size = action_size, n_atoms = n_atoms, v_min = v_min, v_max = v_max, mode = mode)
-        self.target_net = pyllab.copy_dueling_categorical_dqn(self.online_net)
+        self.target_net = pyllab.py_copy_dueling_categorical_dqn(self.online_net)
         self.online_net.make_multi_thread(batch_size)
         self.target_net.make_multi_thread(batch_size)
         self.lr = 0.001
         self.gamma = 0.99
         self.exploration_proba = 1.0
         self.exploration_proba_decay = 0.005
-        self.training = pyllab.training(lr = self.lr, momentum = 0.9,batch_size = batch_size,gradient_descent_flag = pyllab.ADAM,current_beta1 = pyllab.BETA1_ADAM,current_beta2 = pyllab.BETA2_ADAM, regularization = pyllab.NO_REGULARIZATION,total_number_weights = 0, lambda_value = 0, lr_decay_flag = pyllab.LR_NO_DECAY,timestep_threshold = 0,lr_minimum = 0,lr_maximum = 1,decay = 0)
+        self.training = pyllab.Training(lr = self.lr, momentum = 0.9,batch_size = batch_size,gradient_descent_flag = pyllab.PY_ADAM,current_beta1 = pyllab.PY_BETA1_ADAM,current_beta2 = pyllab.PY_BETA2_ADAM, regularization = pyllab.PY_NO_REGULARIZATION,total_number_weights = 0, lambda_value = 0, lr_decay_flag = pyllab.PY_LR_NO_DECAY,timestep_threshold = 0,lr_minimum = 0,lr_maximum = 1,decay = 0)
         self.memory_buffer= list()
         self.max_memory_buffer = 20000
         self.batch_size = batch_size
