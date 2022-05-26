@@ -1,4 +1,4 @@
-DIR:= ./src/
+DIR:= src/
 
 
 SRCS = $(wildcard $(DIR)*.c)
