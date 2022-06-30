@@ -43,7 +43,7 @@ def make_video(genome):
     env_to_wrap.close()
     return rewards
     
-for i in range(pyllab.GENERATIONS):
+for i in range(pyllab.PY_GENERATIONS):
     number_genomes = neat.get_number_of_genomes()
     neat.reset_fitnesses()
     env = []
@@ -83,10 +83,10 @@ for i in range(pyllab.GENERATIONS):
         for k in range(j,j+n_ff):
             neat.increment_fitness_of_genome_ith(k,rewards[k])
     neat.generation_run()
-    if(i%pyllab.SAVING == 0 or i == pyllab.GENERATIONS -1):
+    if(i%pyllab.PY_SAVING == 0 or i == pyllab.PY_GENERATIONS -1):
         global_innovation_number_connections = neat.get_global_innovation_number_connections()
         global_innovation_number_nodes = neat.get_global_innovation_number_nodes()
-        genome = pyllab.genome(str(i)+'.bin',global_innovation_number_nodes,global_innovation_number_connections,state_size,action_size)
+        genome = pyllab.Genome(str(i)+'.bin',global_innovation_number_nodes,global_innovation_number_connections,state_size,action_size)
         make_video(genome)
         
         

@@ -102,7 +102,7 @@ class DQNAgent:
         self.online_net.adaptive_clip(0.01,1e-3);
         self.training.update_dqn_categorical_dqn(self.online_net)
         self.training.update_parameters()
-        pyllab.slow_paste_dueling_categorical_dqn(self.online_net,self.target_net,0.8)
+        pyllab.py_slow_paste_dueling_categorical_dqn(self.online_net,self.target_net,0.8)
         self.online_net.reset()
         self.target_net.reset_all()
         

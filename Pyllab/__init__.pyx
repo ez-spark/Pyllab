@@ -7,7 +7,7 @@ import numpy as np
 from libc cimport stdint
 from libc.stdio cimport printf
 from libc.time cimport time
-#ctypedef stdint.uint64_t uint64_t
+ctypedef stdint.uint64_t uint64_t
 
 PY_N_NORMALIZATION = Pyllab.N_NORMALIZATION
 PY_BETA_NORMALIZATION = Pyllab.BETA_NORMALIZATION

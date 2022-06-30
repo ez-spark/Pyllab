@@ -23,11 +23,11 @@ class DQNAgent:
     
     def __init__(self, state_size, action_size, n_atoms, v_min, v_max, filename, batch_size, n_actions, mode = False, rain = True):
         self.online_net = pyllab.duelingCategoricalDQN(filename = filename,input_size = state_size,action_size = action_size, n_atoms = n_atoms, v_min = v_min, v_max = v_max, mode = mode)
-        self.target_net = pyllab.copy_dueling_categorical_dqn(self.online_net)
+        self.target_net = pyllab.py_copy_dueling_categorical_dqn(self.online_net)
         self.online_net.make_multi_thread(batch_size)
         self.target_net.make_multi_thread(batch_size)
         if rain:
-            self.rainbow = pyllab.Rainbow(online_net = self.online_net,target_net = self.target_net, max_buffer_size = 10000, sampling_flag = pyllab.REWARD_SAMPLING, threads = batch_size, batch_size = batch_size, stop_epsilon_greedy =10000,adaptive_clipping_flag = 0, diversity_driven_q_functions = batch_size)
+            self.rainbow = pyllab.Rainbow(online_net = self.online_net,target_net = self.target_net, max_buffer_size = 10000, sampling_flag = pyllab.PY_REWARD_SAMPLING, threads = batch_size, batch_size = batch_size, stop_epsilon_greedy =10000,adaptive_clipping_flag = 0, diversity_driven_q_functions = batch_size)
     # The agent computes the action to perform given a state 
     def compute_action(self, current_state):
         return self.rainbow.get_action(current_state)
