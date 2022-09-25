@@ -12,24 +12,17 @@ pip install -r requirements.txt
 sh generate_wheel_unix.sh
 ```
 
-- On Linux specifically you have to fix the wheel package:
+- On Linux specifically you have to fix the wheel package, use the container with the repair tool:
 
 ```
 sudo docker run -i -t -v `pwd`:/io quay.io/pypa/manylinux1_x86_64 /bin/bash
 ```
 
-go in /io and move the libllab.so to /usr/local/lib/
+when you are in run these lines:
 
 ```
 cd io
-mv libllab.so /usr/local/lib/
-```
-
-Then repair the wheel package it.
-
-```
-cd dist
-auditwheel repair package.whl --plat manylinux2014_x86_64
+sh repair_wheel_linux.sh
 ```
 
 in the wheelhouse directory you have the fixed wheel package
@@ -47,6 +40,11 @@ sh repair_wheel_macos.sh
 
 Pyllab is a cython library compiling .C files that use posix calls system. Now you can see the problem here. Just follow me in this journey:
 
+- First of all you need to comment this line in __init__.pyx:
+
+```
+ctypedef stdint.uint64_t uint64_t
+```
 
 - Install Mingw with MYSYS2: https://www.msys2.org/ follow the steps and also the passages to install mingw-w64 
 
