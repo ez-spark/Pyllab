@@ -1,6 +1,6 @@
 # Install
 ```
- pip install Pyllab
+pip install Pyllab
 ```
 
 or
@@ -135,4 +135,100 @@ pip install package.whl
 import pyllab
 ```
 
+# Pyllab supports
+
+- Version: 1.0.0
+
+ - [x] Fully connected Layers
+ - [x] Convolutional Layers
+ - [x] Transposed Convolutional Layers
+ - [x] Residual Layers
+ - [x] Dropout
+ - [x] Layer normalization for Fully-connected Layers Transposed Convolutional and Convolutional Layers
+ - [x] Group normalization for Convolutional and Transposed Convolutional Layers
+ - [x] 2d Max Pooling
+ - [x] 2d Avarage Pooling
+ - [x] 2d Padding
+ - [x] Local Response Normalization for Fully-connected, Convolutional, Transposed Convolutional Layers
+ - [x] Local Response Normalization for Fully-connected, Convolutional, Transposed Convolutional Layers
+ - [x] sigmoid function
+ - [x] relu function
+ - [x] softmax function
+ - [x] leaky_relu function
+ - [x] elu function
+ - [x] standard gd and sgd
+ - [x] Nesterov optimization algorithm
+ - [x] ADAM optimization algorithm
+ - [x] RADAM optimization algorithm
+ - [x] DiffGrad optimization algorithm
+ - [x] ADAMOD optimization algorithm
+ - [x] Cross Entropy Loss
+ - [x] Focal Loss
+ - [x] Huber Loss type1
+ - [x] Huber Loss type2
+ - [x] MSE Loss
+ - [x] KL Divergence Loss
+ - [x] Entropy Loss
+ - [x] Total Variational Loss
+ - [x] Contrastive 2D Loss
+ - [x] Edge Pop-up algorithm
+ - [x] Dueling Categorical DQN
+ - [x] Rainbow Training
+ - [x] Genetic Algorithm training (NEAT)
+ - [x] Multi Thread
+ - [x] Numpy input arrays
+ - [ ] GPU Training and inference (Future implementation)
+ - [ ] RNN
+ - [ ] LSTM (Future implementation already tested in C)
+ - [ ] Transformers (Future implementation semi-implemented in C)
+ - [ ] Attention mechanism (Future implementation already tested in C)
+ - [ ] Multi-head Attention mechanism (Future implementation already tested in C)
+
+# Genome API
+
+```
+import pyllab
+# Init a genome from a .bin file
+g = pyllab.Genome("file.bin", input_size, output_size)
+# Get the output from an input list
+inputs = [1]*input_size
+output = g.ff(inputs)
+```
+
+# DL Model API
+
+```
+import pyllab
+# Init a model from a .txt file
+model = pyllab.Model(pyllab.get_dict_from_model_setup_file("./model/model_023.txt"))
+# select the training mode (default is standard training, otherwise you can choose edge oppup)
+percentage_of_used_weights_per_layer = 0.5
+model.set_training_edge_popup(percentage_of_used_weights_per_layer)
+# select the multi-thread option
+model.make_multi_thread(batch_size)
+# select the loss function
+model.set_model_error(pyllab.PY_FOCAL_LOSS,model.get_output_dimension_from_model(),gamma=2)
+# init the optimization hyperparameters
+train = pyllab.Training(lr = 0.01, momentum = 0.9,batch_size = batch_size,gradient_descent_flag = pyllab.PY_ADAM,current_beta1 = pyllab.PY_BETA1_ADAM,current_beta2 = pyllab.PY_BETA2_ADAM, regularization = pyllab.PY_NO_REGULARIZATION,total_number_weights = 0, lambda_value = 0, lr_decay_flag = pyllab.PY_LR_NO_DECAY,timestep_threshold = 0,lr_minimum = 0,lr_maximum = 1,decay = 0)
+# train in supervised mode on a bunch of data
+for i in range(epochs):
+    # save the model in a binary file "i.bin"
+    model.save(i)
+    inputs, outputs = shuffle(inputs, outputs)
+    for j in range(0,inputs.shape[0],batch_size):
+        # compute feedforward, error, backpropagation
+        model.ff_error_bp_opt_multi_thread(1, 28,28, inputs[j:j+batch_size], outputs[j:j+batch_size], model.get_output_dimension_from_model())
+        # sum the partial derivatives over the batch
+        model.sum_models_partial_derivatives()
+        # update the model according to the optimization hyperparameters
+        train.update_model(model)
+        # update the optimization hyperparameters
+        train.update_parameters()
+        # reset the needed structures for another iteration
+        model.reset()
+```
+
+# Rainbow API
+
+Look at the rainbow.py file in the test directory
 
