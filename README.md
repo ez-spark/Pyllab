@@ -158,7 +158,6 @@ import pyllab
  - [x] 2d Avarage Pooling
  - [x] 2d Padding
  - [x] Local Response Normalization for Fully-connected, Convolutional, Transposed Convolutional Layers
- - [x] Local Response Normalization for Fully-connected, Convolutional, Transposed Convolutional Layers
  - [x] sigmoid function
  - [x] relu function
  - [x] softmax function
