@@ -1,7 +1,15 @@
 # Install
 ```
- pip install Pyllab
+pip install Pyllab
 ```
+
+Warning:
+
+from pip you will download the corresponding .whl file according to your OS and python version.
+All the .whl files have been created from the compilation of C code. The files on pypi have been compiled
+for the x86_64 architecture with the extensions "-mavx2". So, if you have a pentium for example
+or a processor that does not support the extension avx2 you can find in the github repo in the releases
+the different .whl files with: no extensions, sse extension, sse2 extension, avx extension.
 
 or
 
@@ -12,24 +20,17 @@ pip install -r requirements.txt
 sh generate_wheel_unix.sh
 ```
 
-- On Linux specifically you have to fix the wheel package:
+- On Linux specifically you have to fix the wheel package, use the container with the repair tool:
 
 ```
 sudo docker run -i -t -v `pwd`:/io quay.io/pypa/manylinux1_x86_64 /bin/bash
 ```
 
-go in /io and move the libllab.so to /usr/local/lib/
+when you are in run these lines:
 
 ```
 cd io
-mv libllab.so /usr/local/lib/
-```
-
-Then repair the wheel package it.
-
-```
-cd dist
-auditwheel repair package.whl --plat manylinux2014_x86_64
+sh repair_wheel_linux.sh
 ```
 
 in the wheelhouse directory you have the fixed wheel package
@@ -47,6 +48,11 @@ sh repair_wheel_macos.sh
 
 Pyllab is a cython library compiling .C files that use posix calls system. Now you can see the problem here. Just follow me in this journey:
 
+- First of all you need to comment this line in __init__.pyx:
+
+```
+ctypedef stdint.uint64_t uint64_t
+```
 
 - Install Mingw with MYSYS2: https://www.msys2.org/ follow the steps and also the passages to install mingw-w64 
 
@@ -62,7 +68,6 @@ sh create_library.sh
 
 ```
 import sys
-
 locate_python = sys.exec_prefix
 print(locate_python)
 ```
@@ -72,7 +77,6 @@ print(locate_python)
 ```
 [build]
 compiler=mingw32
- 
 [build_ext]
 compiler=mingw32
 ```
@@ -99,10 +103,8 @@ elif msc_ver == '1916':
 
 - Now other bug fix: go to Python37\include\pyconfig.h and add these lines:
 
- ```
- /* Compiler specific defines */
- 
-
+```
+/* Compiler specific defines */
 #ifdef __MINGW32__
 #ifdef _WIN64
 #define MS_WIN64
@@ -117,12 +119,12 @@ sh build_python_library.sh
 ```
 
 - Links:
- - https://www.msys2.org/ (To get MYSYS2 with mingw-w64)
- - https://wiki.python.org/moin/WindowsCompilers (distutils.cfg)
- - https://datatofish.com/locate-python-windows/ (Python folder search script)
- - https://stackoverflow.com/questions/34135280/valueerror-unknown-ms-compiler-version-1900 (vcruntime140-dll lacking dll)
- - https://bugs.python.org/file40608/patch.diff (function fix, changing from 1900 to 1916 was my guess and it worked, it enables the use of the .dll previously installed)
- - https://github.com/cython/cython/issues/3405 (For the ifdef stuff, cython bug)
+- https://www.msys2.org/ (To get MYSYS2 with mingw-w64)
+- https://wiki.python.org/moin/WindowsCompilers (distutils.cfg)
+- https://datatofish.com/locate-python-windows/ (Python folder search script)
+- https://stackoverflow.com/questions/34135280/valueerror-unknown-ms-compiler-version-1900 (vcruntime140-dll lacking dll)
+- https://bugs.python.org/file40608/patch.diff (function fix, changing from 1900 to 1916 was my guess and it worked, it enables the use of the .dll previously installed)
+- https://github.com/cython/cython/issues/3405 (For the ifdef stuff, cython bug)
 
 # Install .whl files
 
@@ -137,4 +139,70 @@ pip install package.whl
 import pyllab
 ```
 
+# Pyllab supports
+
+- Version: 1.0.0
+
+- [x] Fully connected Layers
+- [x] Convolutional Layers
+- [x] Transposed Convolutional Layers
+- [x] Residual Layers
+- [x] Dropout
+- [x] Layer normalization for Fully-connected Layers Transposed Convolutional and Convolutional Layers
+- [x] Group normalization for Convolutional and Transposed Convolutional Layers
+- [x] 2d Max Pooling
+- [x] 2d Avarage Pooling
+- [x] 2d Padding
+- [x] Local Response Normalization for Fully-connected, Convolutional, Transposed Convolutional Layers
+- [x] sigmoid function
+- [x] relu function
+- [x] softmax function
+- [x] leaky_relu function
+- [x] elu function
+- [x] standard gd and sgd
+- [x] Nesterov optimization algorithm
+- [x] ADAM optimization algorithm
+- [x] RADAM optimization algorithm
+- [x] DiffGrad optimization algorithm
+- [x] ADAMOD optimization algorithm
+- [x] Cross Entropy Loss
+- [x] Focal Loss
+- [x] Huber Loss type1
+- [x] Huber Loss type2
+- [x] MSE Loss
+- [x] KL Divergence Loss
+- [x] Entropy Loss
+- [x] Total Variational Loss
+- [x] Contrastive 2D Loss
+- [x] Edge Pop-up algorithm
+- [x] Dueling Categorical DQN
+- [x] Rainbow Training
+- [x] Genetic Algorithm training (NEAT)
+- [x] Multi Thread
+- [x] Numpy input arrays
+- [ ] GPU Training and inference (Future implementation)
+- [ ] RNN
+- [ ] LSTM (Future implementation already tested in C)
+- [ ] Transformers (Future implementation semi-implemented in C)
+- [ ] Attention mechanism (Future implementation already tested in C)
+- [ ] Multi-head Attention mechanism (Future implementation already tested in C)
+
+# Genome API
+
+```
+import pyllab
+# Init a genome from a .bin file
+g = pyllab.Genome("file.bin", input_size, output_size)
+# Get the output from an input list
+inputs = [1]*input_size
+output = g.ff(inputs)
+```
+
+# DL Model API
+
+Check the github repo for Examples
+
+# Rainbow API
+
+Look at the rainbow.py file in the test directory
 

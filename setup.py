@@ -56,7 +56,7 @@ class Build(build_ext):
     
 setup(
     name="Pyllab",
-    version="1.0.0",
+    version="1.0.1",
     cmdclass={'build_ext': Build},
     packages=find_packages(),
     setup_requires=['setuptools>=18.0','wheel','cython', 'numpy'],
@@ -72,7 +72,7 @@ setup(
                                        libraries=["llab"],
                                        library_dirs = ['./'], 
                                        extra_link_args=["-DSOME_DEFINE_OPT", "-L . "],
-                                       extra_compile_args=["-O3", "-mavx2"])],
+                                       extra_compile_args=["-O3"])],
                             compiler_directives={'language_level' : "3"})
 )
 

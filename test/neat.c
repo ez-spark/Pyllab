@@ -52,7 +52,7 @@ int main(){
    }
    
    // testing saves and loads and char* genome array and char neat
-   genome* load  = load_genome(nes->global_inn_numb_connections,"11.bin");
+   genome* load  = load_genome_complete("1.bin");
    free_genome(load, nes->global_inn_numb_connections);
    /*deallocation*/
    

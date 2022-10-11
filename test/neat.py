@@ -39,13 +39,6 @@ for i in range(pyllab.PY_GENERATIONS):
     neat.generation_run()
     print(neat.get_best_fitness())
     if neat.get_best_fitness() >= 3.5:
-        binary = neat.get_neat_in_char()
-        print(type(binary))
-        print(len(binary))
-        print(neat.get_lenght_of_char_neat())
-        neat2 = pyllab.Neat(2,1,binary)
-
-        print(neat2.get_lenght_of_char_neat())
         break
     neat.reset_fitnesses()
 print(neat.get_global_innovation_number_connections())

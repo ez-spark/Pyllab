@@ -2439,7 +2439,7 @@ cdef class Model:
     
     def make_multi_thread(self, int threads):
         check_int(threads)
-        if not self._models is NULL and self._does_have_arrays and self._does_have_learning_parameters:
+        if self._models is NULL and self._does_have_arrays and self._does_have_learning_parameters:
             if threads < 1:
                 print("Error: the number of threads must be >= 1")
                 exit(1)
@@ -3982,8 +3982,10 @@ cdef class Neat:
         if inputs == 0 or outputs == 0:
             print("Error: either you pass inputs and outputs > 0 or a neat as char characters!")
             exit(1)
-        
+        neat_as_byte = None
+        #not ready yet
         if neat_as_byte != None:
+            
             s = <char*>PyUnicode_AsUTF8(neat_as_byte)
             
             self._neat = Pyllab.init_from_char(&s[0], inputs,outputs,initial_population,species_threshold,max_population,generations, 
