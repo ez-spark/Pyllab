@@ -72,7 +72,7 @@ setup(
                                        libraries=["llab"],
                                        library_dirs = ['./'], 
                                        extra_link_args=["-DSOME_DEFINE_OPT", "-L . "],
-                                       extra_compile_args=["-O3"])],
+                                       extra_compile_args=["-O3", "-mavx2"])],
                             compiler_directives={'language_level' : "3"})
 )
 

@@ -8,7 +8,7 @@ PROGTESTS = $(patsubst %.c,%,$(SRCSTEST))
 
 CC:= gcc
 
-CFLAGS:= -O3
+CFLAGS:= -O3 -mavx2
 LDLIBS:= -lm -lpthread -fPIC
 LABLIB:= -lllab
 
