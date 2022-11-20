@@ -1,14 +1,9 @@
 import numpy as np
 import gym
 import pyllab
-from gym import wrappers
-from nes_py.wrappers import JoypadSpace
-import gym_tetris
-from gym_tetris.actions import MOVEMENT
-env = gym.make('TetrisA-v0')
-env = JoypadSpace(env, MOVEMENT)
-state_size = env.observation_space.shape[0]*env.observation_space.shape[1]
-action_size = env.action_space.n
+env = gym.make('gym_mytetris:mytetris-v0')
+state_size = 200
+action_size = 4
 pyllab.get_randomness()
 neat = pyllab.Neat(state_size,action_size)
 threads = 10
@@ -25,8 +20,7 @@ def convert_array(arr):
     return np.array(l, dtype=np.float32)
     
 def make_video(genome):
-    env = gym.make('TetrisA-v0')
-    env = JoypadSpace(env, MOVEMENT)
+    env = gym.make('gym_mytetris:mytetris-v0')
     rewards = 0
     steps = 0
     done = False
@@ -51,9 +45,9 @@ for i in range(pyllab.PY_GENERATIONS):
     states = []
     dones = []
     for j in range(number_genomes):
-        temp_env = gym.make('TetrisA-v0')
-        env.append(JoypadSpace(temp_env, MOVEMENT))
-        states.append(convert_array(env[j].reset()))
+        temp_env = gym.make('gym_mytetris:mytetris-v0')
+        env.append(temp_env)
+        states.append(env[j].reset())
         rewards.append(0)
         dones.append(False)
     for j in range(0,number_genomes,threads):
@@ -77,7 +71,7 @@ for i in range(pyllab.PY_GENERATIONS):
                             m = out[k-j][w]
                             index = w
                     next_state, reward, done, _ = env[k].step(index)
-                    states[k] = convert_array(next_state)
+                    states[k] = next_state
                     rewards[k]+=reward
                     dones[k] = done
         for k in range(j,j+n_ff):
@@ -86,7 +80,7 @@ for i in range(pyllab.PY_GENERATIONS):
     if(i%pyllab.PY_SAVING == 0 or i == pyllab.PY_GENERATIONS -1):
         global_innovation_number_connections = neat.get_global_innovation_number_connections()
         global_innovation_number_nodes = neat.get_global_innovation_number_nodes()
-        genome = pyllab.Genome(str(i)+'.bin',global_innovation_number_nodes,global_innovation_number_connections,state_size,action_size)
+        genome = pyllab.Genome(str(i)+'.bin',state_size,action_size)
         make_video(genome)
         
         

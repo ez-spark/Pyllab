@@ -125,8 +125,8 @@ neat* init(int input, int output, int initial_population, int species_threshold,
     /*filling the gg list with init genome, we allocate a big space for gg.
      * gg is a list filled with genomes for each generation, this number of genomes
      * could vary during the generations*/
-    gg = (genome**)malloc(sizeof(genome*)*max_population*2);
-    temp_gg2 = (genome**)malloc(sizeof(genome*)*max_population*2);//is used for crossover
+    gg = (genome**)malloc(sizeof(genome*)*max_population*3*20*children*4);
+    temp_gg2 = (genome**)malloc(sizeof(genome*)*max_population*3*20*children*4);//is used for crossover
     
     gg[0] = copy_genome(g);
     free_genome(g,global_inn_numb_connections);
@@ -135,7 +135,10 @@ neat* init(int input, int output, int initial_population, int species_threshold,
     
     for(i = 1; i < initial_population; i++){
         gg[i] = copy_genome(gg[0]);
-        add_random_connection(gg[i],&global_inn_numb_connections,&matrix_connections,&dict_connections);
+        for(j = 0; j < input*output; j++){
+            add_random_connection(gg[i],&global_inn_numb_connections,&matrix_connections,&dict_connections);
+        }
+        connections_mutation(gg[i],global_inn_numb_connections, connection_mutation_rate,new_connection_assignment_rate);
     }
     
     
@@ -279,8 +282,13 @@ void neat_generation_run(neat* nes){
         /*compute mean fitnesses of specie*/
         
         nes->b = get_mean_specie_fitness(nes->s,nes->i,oldest_age,nes->age_significance);
-        nes->b/=nes->a;//nes->b>=1 is higher then mean fitness among species
-        
+        if(nes->b == 0 && nes->a == 0){
+            nes->b = 1;
+        }
+        else if(nes->a >= 1)
+            nes->b/=nes->a;
+        if (nes->b > 20)
+            nes->b = 20;
         //nes->temp_gg1 has the sorted genomes of this specie (temp_gg1[k]->fitness > temp_gg1[k+1]->fitness for each k)
         nes->temp_gg1 = sort_genomes_by_fitness(nes->s[nes->i].all_other_genomes,nes->s[nes->i].numb_all_other_genomes);
         
@@ -314,7 +322,7 @@ void neat_generation_run(neat* nes){
             // nes->b is how well this specie is doing respect to the other species
             // we mutiply it by 3.67
             // then the value will be mutiplied for children
-            double bb = round_up(nes->b*3.67);
+            double bb = round_up((1+nes->b)*3.67);
             
             // we get the mutations from the nes->percentage_survivors_per_specie best genomes
             for(nes->z = 0; nes->z < (nes->children*(bb)); nes->z+=round_up(nes->s[nes->i].numb_all_other_genomes*nes->percentage_survivors_per_specie)){

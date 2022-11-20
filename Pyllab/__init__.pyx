@@ -4127,13 +4127,13 @@ cdef class Genome:
         self._global_innovation_numb_connections = Pyllab.get_global_innovation_number_connections_from_genome(self._g)
     
     def __dealloc__(self):
-        Pyllab.free_genome(self._g,self.global_inn_numb_connections)
+        Pyllab.free_genome(self._g,self._global_innovation_numb_connections)
     
     def ff(self, inputs):
-        check_size(inputs,self.input_size)
+        check_size(inputs,self._input_size)
         cdef float[:] i = vector_is_valid(inputs)
-        cdef float* output = Pyllab.feed_forward(self._g, <float*>&i[0], self.global_inn_numb_nodes, self.global_inn_numb_connections)
-        nd_output = from_float_to_ndarray(output,self.output_size)
+        cdef float* output = Pyllab.feed_forward(self._g, <float*>&i[0], self._global_innovation_numb_nodes, self._global_innovation_numb_connections)
+        nd_output = from_float_to_ndarray(output,self._output_size)
         free(output)
         return nd_output
 
