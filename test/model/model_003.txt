@@ -1,5 +1,5 @@
 fully-connected;fully-connected;
 fully-connected;
-784;100;0;0;1;0;0;0;1;3;
+784;100;0;0;1;0;0;0;1;3;0;
 fully-connected;
-100;10;1;0;3;0;0;0;1;3:
+100;10;1;0;3;0;0;0;1;3:0;

@@ -7,6 +7,7 @@ import numpy as np
 from libc cimport stdint
 from libc.stdio cimport printf
 from libc.time cimport time
+from sys import exit
 ctypedef stdint.uint64_t uint64_t
 
 PY_N_NORMALIZATION = Pyllab.N_NORMALIZATION
@@ -489,7 +490,7 @@ def dict_to_pass_to_model_is_good(d):
                         # for rconvolutional 26 ints
                         #that's it
                         if ii == 'fully-connected':
-                            if type(d[i][k][ii]) != list or len(d[i][k][ii]) != 10:
+                            if type(d[i][k][ii]) != list or len(d[i][k][ii]) != 11:
                                 print("Error: either you value for a fully-connected is not a list, or its length is not 10!")
                                 return False
                             for j in range(0,len(d[i][k][ii])):
@@ -1860,11 +1861,12 @@ cdef class Fcl:
     cdef int _normalization_flag
     cdef int _training_mode
     cdef int _feed_forward_flag
+    cdef int _mode
     cdef bint _does_have_learning_parameters
     cdef bint _does_have_arrays
     cdef bint _is_only_for_feedforward
     
-    def __cinit__(self,int input, int output, int layer, int dropout_flag, int activation_flag, float dropout_threshold, int n_groups, int normalization_flag, int training_mode, int feed_forward_flag, bint does_have_learning_parameters = True, bint does_have_arrays = True, bint is_only_for_feedforward = False):
+    def __cinit__(self,int input, int output, int layer, int dropout_flag, int activation_flag, float dropout_threshold, int n_groups, int normalization_flag, int training_mode, int feed_forward_flag,int mode, bint does_have_learning_parameters = True, bint does_have_arrays = True, bint is_only_for_feedforward = False):
         check_int(input)
         check_int(output)
         check_int(layer)
@@ -1874,6 +1876,7 @@ cdef class Fcl:
         check_int(normalization_flag)
         check_int(training_mode)
         check_int(feed_forward_flag)
+        check_int(mode)
         check_float(dropout_threshold)
         
         self._input = input
@@ -1886,21 +1889,22 @@ cdef class Fcl:
         self._normalization_flag = normalization_flag
         self._training_mode = training_mode
         self._feed_forward_flag = feed_forward_flag
+        self._mode = mode
         self._does_have_learning_parameters = does_have_learning_parameters
         self._does_have_arrays = does_have_arrays
         self._is_only_for_feedforward = is_only_for_feedforward
         
         if does_have_arrays:
             if does_have_learning_parameters:
-                self._fcl = Pyllab.fully_connected(input, output, layer, dropout_flag, activation_flag, dropout_threshold, n_groups, normalization_flag, training_mode, feed_forward_flag)
+                self._fcl = Pyllab.fully_connected(input, output, layer, dropout_flag, activation_flag, dropout_threshold, n_groups, normalization_flag, training_mode, feed_forward_flag, mode)
             else:
-                self._fcl = Pyllab.fully_connected_without_learning_parameters(input, output, layer, dropout_flag, activation_flag, dropout_threshold, n_groups, normalization_flag, training_mode, feed_forward_flag)
+                self._fcl = Pyllab.fully_connected_without_learning_parameters(input, output, layer, dropout_flag, activation_flag, dropout_threshold, n_groups, normalization_flag, training_mode, feed_forward_flag, mode)
 
             
             if is_only_for_feedforward:
                 Pyllab.make_the_fcl_only_for_ff(self._fcl)
         else:
-            self._fcl = Pyllab.fully_connected_without_arrays(input, output, layer, dropout_flag, activation_flag, dropout_threshold, n_groups, normalization_flag, training_mode, feed_forward_flag)
+            self._fcl = Pyllab.fully_connected_without_arrays(input, output, layer, dropout_flag, activation_flag, dropout_threshold, n_groups, normalization_flag, training_mode, feed_forward_flag, mode)
         
         if self._fcl is NULL:
             raise MemoryError()
@@ -1985,12 +1989,12 @@ def py_paste_fcl_without_learning_parameters(Fcl f1, Fcl f2):
         Pyllab.paste_fcl_without_learning_parameters(f1._fcl,f2._fcl)
 
 def py_copy_fcl(Fcl f):
-    cdef Fcl ff = Fcl(f._input,f._output,f._layer,f._dropout_flag,f._activation_flag, f._dropout_threshold,f._n_groups,f._normalization_flag,f._training_mode,f._feed_forward_flag,f._does_have_learning_parameters, f._does_have_arrays, f._is_only_for_feedforward)
+    cdef Fcl ff = Fcl(f._input,f._output,f._layer,f._dropout_flag,f._activation_flag, f._dropout_threshold,f._n_groups,f._normalization_flag,f._training_mode,f._feed_forward_flag,f._does_have_learning_parameters, f._does_have_arrays, f._is_only_for_feedforward, f._mode)
     py_paste_fcl(f,ff)
     return ff
 
 def py_copy_fcl_without_learning_parameters(Fcl f):
-    cdef Fcl ff = Fcl(f._input,f._output,f._layer,f._dropout_flag,f._activation_flag, f._dropout_threshold,f._n_groups,f._normalization_flag,f._training_mode,f._feed_forward_flag,False, f._does_have_arrays, f._is_only_for_feedforward)
+    cdef Fcl ff = Fcl(f._input,f._output,f._layer,f._dropout_flag,f._activation_flag, f._dropout_threshold,f._n_groups,f._normalization_flag,f._training_mode,f._feed_forward_flag,False, f._does_have_arrays, f._is_only_for_feedforward, f._mode)
     py_paste_fcl_without_learning_parameters(f,ff)
     return ff
 
@@ -3446,6 +3450,11 @@ cdef class duelingCategoricalDQN:
         check_float(beta)
         Pyllab.set_dueling_categorical_dqn_beta_adamod(self._dqn, beta)
     
+    def eliminate_noise_in_layers(self):
+        if self._dqn is NULL:
+            return
+        Pyllab.dueling_dqn_eliminate_noisy_layers(self._dqn)
+
     def get_beta1(self):
         if self._dqn is NULL:
             return
@@ -4090,8 +4099,8 @@ cdef class Neat:
         check_int(index)
         return Pyllab.get_fitness_of_ith_genome(self._neat, index)
    
-    def get_lenght_of_char_neat(self):
-        return Pyllab.get_lenght_of_char_neat(self._neat)
+    def get_length_of_char_neat(self):
+        return Pyllab.get_length_of_char_neat(self._neat)
    
     def get_neat_in_char(self):
         cdef char* c = Pyllab.get_neat_in_char_vector(self._neat)
@@ -4297,7 +4306,6 @@ cdef class Rainbow:
     
     def update_exploration_probability(self):
         Pyllab.update_exploration_probability(self._r)
-
     
     def get_action(self, inputs):
         check_size(inputs,self.online_net.get_input_size())

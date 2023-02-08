@@ -56,7 +56,7 @@ class Build(build_ext):
     
 setup(
     name="Pyllab",
-    version="1.0.2",
+    version="1.0.3",
     cmdclass={'build_ext': Build},
     packages=find_packages(),
     setup_requires=['setuptools>=18.0','wheel','cython', 'numpy'],

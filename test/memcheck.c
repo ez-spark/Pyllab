@@ -95,6 +95,7 @@ int main( int argc,char** argv){
     compare_score_model(m,m2,m);
     free_model(m2);
     save_model(m,0);
+    
     // Training
     for(k = 0; k < epochs; k++){
         // Shuffling before each epoch
@@ -136,7 +137,7 @@ int main( int argc,char** argv){
     free(outputs);
     
     
-    
+
     // Initializing Testing resources
     model* test_m;
     char** ksource2 = (char**)malloc(sizeof(char*));
@@ -172,7 +173,7 @@ int main( int argc,char** argv){
         temp3[2] = 'i';
         temp3[3] = 'n';
         temp3[4] = '\0';
-        itoa(k,temp2);
+        itoa_n(k,temp2);
         strcat(temp2,temp3);
         test_m = load_model(temp2);
         if(edge > 0){
@@ -199,12 +200,12 @@ int main( int argc,char** argv){
                 cm = confusion_matrix(test_m->output_layer, outputs_test[i],cm, 10,0.5);
             reset_model(test_m);
         }
-        /*
-        print_accuracy(cm,output_dimension);
-        print_precision(cm,output_dimension);
-        print_sensitivity(cm,output_dimension);
-        print_specificity(cm,output_dimension);
-        */
+        
+        //print_accuracy(cm,output_dimension);
+        //print_precision(cm,output_dimension);
+        //print_sensitivity(cm,output_dimension);
+        //print_specificity(cm,output_dimension);
+        
         for(i = 0; i < output_dimension*2; i++){
             free(cm[i]);
         }

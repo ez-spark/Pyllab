@@ -543,6 +543,7 @@ cdef extern from "../src/dueling_categorical_dqn.h":
     void set_k_percentage_of_ith_layer_dueling_categorical_dqn_a_hid(dueling_categorical_dqn* dqn, int ith, float k_percentage)
     void set_k_percentage_of_ith_layer_dueling_categorical_dqn_a_lin(dueling_categorical_dqn* dqn, int ith, float k_percentage)
     int get_input_layer_size_dueling_categorical_dqn(dueling_categorical_dqn* dqn)
+    void dueling_dqn_eliminate_noisy_layers(dueling_categorical_dqn* dqn)
     
 cdef extern from "../src/fully_connected.h":
     void fully_connected_feed_forward(float* input, float* output, float* weight,float* bias, int input_size, int output_size)
@@ -551,20 +552,26 @@ cdef extern from "../src/fully_connected.h":
     void fully_connected_feed_forward_edge_popup(float* input, float* output, float* weight,float* bias, int input_size, int output_size, int* indices, int last_n)
     void fully_connected_back_prop_edge_popup_ff_gd_bp(float* input, float* output_error, float* weight,float* input_error, float* weight_error,float* bias_error, int input_size, int output_size,float* score_error, int* indices, int last_n)
     void paste_w_fcl(fcl* f,fcl* copy)
+    void noisy_fully_connected_feed_forward(float* noise, float* new_weights,float* noisy_weights, float* input, float* output, float* weight,float* bias, int input_size, int output_size)
+    void noisy_fully_connected_feed_forward_edge_popup(float* noise, float* new_weights,float* noisy_weights, float* input, float* output, float* weight,float* bias, int input_size, int output_size, int* indices, int last_n)
+    void noisy_fully_connected_back_prop(float* noise, float* new_weights,float* noisy_weights, float* noisy_weights_error, float* input, float* output_error, float* weight,float* input_error, float* weight_error,float* bias_error, int input_size, int output_size,int training_flag)
+    void noisy_fully_connected_back_prop_edge_popup(float* new_weights,float* input, float* output_error, float* weight,float* input_error, float* weight_error,float* bias_error, int input_size, int output_size,float* score_error, int* indices, int last_n)
+    void noisy_fully_connected_back_prop_edge_popup_ff_gd_bp(float* noise, float* new_weights,float* noisy_weights, float* noisy_weights_error,float* input, float* output_error, float* weight,float* input_error, float* weight_error,float* bias_error, int input_size, int output_size,float* score_error, int* indices, int last_n)
+
     
 cdef extern from "../src/fully_connected_layers.h":
-    fcl* fully_connected(int input, int output, int layer, int dropout_flag, int activation_flag, float dropout_threshold, int n_groups, int normalization_flag, int training_mode, int feed_forward_flag)
-    bint exists_params_fcl(fcl* f)
-    bint exists_d_params_fcl(fcl* f)
-    bint exists_dropout_stuff_fcl(fcl* f)
-    bint exists_edge_popup_stuff_fcl(fcl* f)
-    bint exists_activation_fcl(fcl* f)
-    bint exists_normalization_fcl(fcl* f)
+    fcl* fully_connected(int input, int output, int layer, int dropout_flag, int activation_flag, float dropout_threshold, int n_groups, int normalization_flag, int training_mode, int feed_forward_flag, int mode)
+    int exists_params_fcl(fcl* f)
+    int exists_d_params_fcl(fcl* f)
+    int exists_dropout_stuff_fcl(fcl* f)
+    int exists_edge_popup_stuff_fcl(fcl* f)
+    int exists_activation_fcl(fcl* f)
+    int exists_normalization_fcl(fcl* f)
     void free_fully_connected(fcl* f)
     void free_fully_connected_for_edge_popup(fcl* f)
     void free_fully_connected_complementary_edge_popup(fcl* f)
     void save_fcl(fcl* f, int n)
-    void copy_fcl_params(fcl* f, float* weights, float* biases)
+    void copy_fcl_params(fcl* f, float* weights,float* noisy_weights, float* biases)
     fcl* load_fcl(FILE* fr)
     fcl* copy_fcl(fcl* f)
     fcl* copy_light_fcl(fcl* f)
@@ -601,16 +608,20 @@ cdef extern from "../src/fully_connected_layers.h":
     void set_low_score_fcl(fcl* f)
     int* get_used_outputs(fcl* f, int* used_output, int flag, int output_size)
     fcl* copy_fcl_without_learning_parameters(fcl* f)
-    fcl* fully_connected_without_learning_parameters(int input, int output, int layer, int dropout_flag, int activation_flag, float dropout_threshold, int n_groups, int normalization_flag, int training_mode, int feed_forward_flag)
+    fcl* fully_connected_without_learning_parameters(int input, int output, int layer, int dropout_flag, int activation_flag, float dropout_threshold, int n_groups, int normalization_flag, int training_mode, int feed_forward_flag, int mode)
     fcl* reset_fcl_without_learning_parameters(fcl* f)
     uint64_t size_of_fcls_without_learning_parameters(fcl* f)
     void paste_fcl_without_learning_parameters(fcl* f,fcl* copy)
     fcl* reset_fcl_without_dwdb_without_learning_parameters(fcl* f)
     uint64_t count_weights_fcl(fcl* f)
     void make_the_fcl_only_for_ff(fcl* f)
-    fcl* fully_connected_without_arrays(int input, int output, int layer, int dropout_flag, int activation_flag, float dropout_threshold, int n_groups, int normalization_flag, int training_mode, int feed_forward_flag)
+    fcl* fully_connected_without_arrays(int input, int output, int layer, int dropout_flag, int activation_flag, float dropout_threshold, int n_groups, int normalization_flag, int training_mode, int feed_forward_flag, int mode)
     void free_fully_connected_without_arrays(fcl* f)
-
+    void inference_fcl(fcl* f)
+    void train_fcl(fcl* f)
+    int is_noisy(fcl* f)
+    void eliminate_noisy_layers(fcl* f)
+    
 cdef extern from "../src/gd.h":
     void nesterov_momentum(float* p, float lr, float m, int mini_batch_size, float dp, float* delta)
     void adam_algorithm(float* p,float* delta1, float* delta2, float dp, float lr, float b1, float b2, float bb1, float bb2, float epsilon, int mini_batch_size)
@@ -816,6 +827,7 @@ cdef extern from "../src/model.h":
     float get_beta3_from_model(model* m)
     int model_tensor_input_ff_without_arrays(model* m, int tensor_depth, int tensor_i, int tensor_j, float* input)
     int get_input_layer_size(model* m)
+    void model_eliminate_noisy_layers(model* m)
     
 cdef extern from "../src/multi_core_dueling_categorical_dqn.h":
     void* dueling_categorical_dqn_train_thread(void* _args)
@@ -894,17 +906,19 @@ cdef extern from "../src/neat_functions.h":
     int shuffle_connection_set(connection** m,int n)
     int shuffle_genome_set(genome** m,int n)
     int save_genome(genome* g, int global_inn_numb_connections, int numb)
-    genome* load_genome(int global_inn_numb_connections, char* filename)
     int save_genome_complete(genome* g, int global_inn_numb_connections, int global_inn_numb_nodes, int numb)
+    genome* load_genome(int global_inn_numb_connections, char* filename)
     genome* load_genome_complete(char* filename)
     int get_global_innovation_number_connections_from_genome(genome* g)
     int get_global_innovation_number_nodes_from_genome(genome* g)
-    
-    
     int round_up(float num)
     char* get_genome_array(genome* g, int global_inn_numb_connections)
     genome* init_genome_from_array(int global_inn_numb_connections, char* g_array)
     int get_genome_array_size(genome* g, int global_inn_numb_connections)
+    void adjust_genome(genome* g)
+
+
+    #Functions defined in mutations.c
 
     void connections_mutation(genome* g, int global_inn_numb_connections, float first_thereshold, float second_thereshold)
     int split_random_connection(genome* g,int* global_inn_numb_nodes,int* global_inn_numb_connections, int** dict_connections, int*** matrix_nodes, int*** matrix_connections)
@@ -915,9 +929,14 @@ cdef extern from "../src/neat_functions.h":
     void activate_bias(genome* g)
 
 
+    #Functions defined in feedforward.c
+
     float* feed_forward(genome* g1, float* inputs, int global_inn_numb_nodes, int global_inn_numb_connections)
     int ff_reconstruction(genome* g, int** array, node* head, int len, ff** lists,int* size, int* global_j)
     int recursive_computation(int** array, node* head, genome* g, connection* c,float* actual_value)
+
+
+    #Functions defined in species.c
 
     float compute_species_distance(genome* g1, genome* g2, int global_inn_numb_connections)
     species* create_species(genome** g, int numb_genomes, int global_inn_numb_connections, float species_threshold, int* total_species)
@@ -928,9 +947,16 @@ cdef extern from "../src/neat_functions.h":
     void delete_species_without_population(species** s, int* total_species, int global_inn_numb_connections)
     void update_best_specie_fitnesses(species* s, int total_species)
 
-    float get_mean_fitness(species* s, int n_species, int oldest_age, float age_significance)
-    float get_mean_specie_fitness(species* s, int i,int oldest_age, float age_significance)
+
+
+    #Functions defined in fitness.c
+
+    float get_mean_fitness(species* s, int n_species, int oldest_age, float age_significance, double worst, double best)
+    float get_mean_specie_fitness(species* s, int i,int oldest_age, float age_significance, double worst, double best)
+    float get_mean_specie_fitness_no_norm(species* s, int i,int oldest_age, float age_significance)
     genome** sort_genomes_by_fitness(genome** g, int size)
+
+    #Functions defined in neat.c
 
     neat* init(int input, int output, int initial_popoulation, int species_threshold, int max_population,int generations, float percentage_survivors_per_specie, float connection_mutation_rate, float  new_connection_assignment_rate, float add_connection_big_specie_rate, float add_connection_small_specie_rate, float add_node_specie_rate, float activate_connection_rate, float remove_connection_rate, int children, float crossover_rate, int saving, int limiting_species, int limiting_threshold, int same_fitness_limit, int keep_parents, float age_significance)
     void neat_generation_run(neat* nes)
@@ -945,10 +971,19 @@ cdef extern from "../src/neat_functions.h":
     void increment_fitness_of_genome_ith(neat* nes, int index, float increment)
     int get_global_innovation_number_nodes(neat* nes)
     int get_global_innovation_number_connections(neat* nes)
-    int get_lenght_of_char_neat(neat* nes)
+    uint64_t get_length_of_char_neat(neat* nes)
     int get_number_of_genomes(neat* nes)
     void save_ith_genome(neat* nes, int index, int n)
     float best_fitness(neat* nes)
+    void set_generation_iter(neat* nes, int gen)
+    int get_generation_iter(neat* nes)
+    float** feed_forward_all_genomes(neat* nes, float** input, int n_genome, int n_threads)
+    float** feed_forward_all_genomes_with_indices(neat* nes, float** input,int* indices, int n_genome, int n_threads)
+    double get_worst_specie_fitness(species* s, int n_species, int oldest_age, float age_significance)
+    double get_best_specie_fitness(species* s, int n_species, int oldest_age, float age_significance)
+    void save_neat(char* filename, neat* nes)
+    neat* load_neat(char* filename, int input, int output, int initial_population, int species_threshold, int max_population,int generations, float percentage_survivors_per_specie, float connection_mutation_rate, float  new_connection_assignment_rate, float add_connection_big_specie_rate, float add_connection_small_specie_rate, float add_node_specie_rate, float activate_connection_rate, float remove_connection_rate, int children, float crossover_rate, int saving, int limiting_species, int limiting_threshold, int same_fitness_limit, int keep_parents, float age_significance)
+    void set_max_population(neat* nes, int max_population)
     
 cdef extern from "../src/multi_core_neat.h":
     void* genome_thread_ff(void* _args)

@@ -19,20 +19,26 @@ class DQNAgent:
     n_actions = None
     
     def __init__(self, state_size, action_size, n_atoms, v_min, v_max, filename, batch_size, n_actions, mode = False, rain = True):
+        self.filename =filename
+        self.input_size = state_size
+        self.action_size = action_size
+        self.n_atoms = n_atoms
+        self.v_min = v_min
+        self.v_max = v_max
+        self.mode = mode
         self.online_net = pyllab.duelingCategoricalDQN(filename = filename,input_size = state_size,action_size = action_size, n_atoms = n_atoms, v_min = v_min, v_max = v_max, mode = mode)
+        self.inference_net = None
         self.target_net = pyllab.py_copy_dueling_categorical_dqn(self.online_net)
         self.online_net.make_multi_thread(batch_size)
         self.target_net.make_multi_thread(batch_size)
         if rain:
-            self.rainbow = pyllab.Rainbow(online_net = self.online_net,target_net = self.target_net, sampling_flag = pyllab.PY_UNIFORM_SAMPLING, threads = batch_size, batch_size = batch_size)
+            self.rainbow = pyllab.Rainbow(online_net = self.online_net,target_net = self.target_net, threads = batch_size, batch_size = batch_size, stop_epsilon_greedy=500000, min_epsilon = 0.00001, epsilon = 0.00001)
     # The agent computes the action to perform given a state 
     def compute_action(self, current_state):
         return self.rainbow.get_action(current_state)
-    def update_exploration_probability(self):
-        self.rainbow.update_exploration_probability()
     def compute_real_action(self,current_state):
-        action = self.online_net.get_best_action(current_state,self.online_net.get_input_size())
-        self.online_net.reset()
+        action = self.inference_net.get_best_action(current_state,self.online_net.get_input_size())
+        self.inference_net.reset()
         return action
     # when an episode is finished, we update the exploration probability using 
     # espilon greedy algorithm
@@ -41,6 +47,11 @@ class DQNAgent:
     def store_episode(self,current_state, action, reward, next_state, done):
         #We use a dictionary to store them
         self.rainbow.add_experience(current_state,next_state,action,reward,done)
+    
+    def set_inference_net(self):
+        self.inference_net = pyllab.duelingCategoricalDQN(filename = self.filename,input_size = self.input_size,action_size = self.action_size, n_atoms = self.n_atoms, v_min = self.v_min, v_max = self.v_max, mode = self.mode)
+        pyllab.py_paste_dueling_categorical_dqn(self.online_net,self.inference_net)
+        self.inference_net.eliminate_noise_in_layers()
 
     def save(self, number_of_file, directory):
         self.online_net.save(number_of_file, directory)
@@ -112,11 +123,11 @@ for e in range(n_episodes):
         # if the episode is ended, we leave the loop after
         # updating the exploration probability
         if done:
-            agent.update_exploration_probability()
             break
         current_state = next_state
     
     if e%100== 0 or e == n_episodes-1:
+        agent.set_inference_net()
         l.append(make_video(agent,directory+str(k)))
         k+=1
 print(l)

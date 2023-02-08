@@ -145,7 +145,7 @@ import pyllab
 
 # Pyllab supports
 
-- Version: 1.0.0
+- Version: 1.0.2
 
  - [x] Fully connected Layers
  - [x] Convolutional Layers
