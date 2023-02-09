@@ -1,3 +1,4 @@
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 cimport Pyllab
 from libc.stdlib cimport free, malloc, srand
 from cpython cimport array
