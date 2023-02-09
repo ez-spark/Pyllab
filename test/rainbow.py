@@ -49,8 +49,9 @@ class DQNAgent:
         self.rainbow.add_experience(current_state,next_state,action,reward,done)
     
     def set_inference_net(self):
-        self.inference_net = pyllab.duelingCategoricalDQN(filename = self.filename,input_size = self.input_size,action_size = self.action_size, n_atoms = self.n_atoms, v_min = self.v_min, v_max = self.v_max, mode = self.mode)
-        pyllab.py_paste_dueling_categorical_dqn(self.online_net,self.inference_net)
+        self.inference_net = pyllab.py_copy_dueling_categorical_dqn(self.online_net)
+        #self.inference_net = pyllab.duelingCategoricalDQN(filename = self.filename,input_size = self.input_size,action_size = self.action_size, n_atoms = self.n_atoms, v_min = self.v_min, v_max = self.v_max, mode = self.mode)
+        #pyllab.py_paste_dueling_categorical_dqn(self.online_net,self.inference_net)
         self.inference_net.eliminate_noise_in_layers()
 
     def save(self, number_of_file, directory):

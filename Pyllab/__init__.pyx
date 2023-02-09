@@ -3668,7 +3668,7 @@ def py_copy_dueling_categorical_dqn(duelingCategoricalDQN dqn):
             a_lin = py_copy_model(dqn.a_lin)
             return duelingCategoricalDQN(shared = shared, v_hid = v_hid, v_lin = v_lin , a_hid = a_hid, a_lin = a_lin, input_size = dqn.input_size,action_size = dqn.action_size,n_atoms = dqn.n_atoms,v_min = dqn.v_min,v_max = dqn.v_max)
         copy = Pyllab.copy_dueling_categorical_dqn(dqn._dqn)
-        mod = duelingCategoricalDQN(mode = True)
+        mod = duelingCategoricalDQN(mode = True, input_size = dqn.input_size, action_size = dqn.action_size, v_min = dqn.v_min, v_max = dqn.v_max, n_atoms = dqn.n_atoms)
         mod._dqn = copy
         return mod
     
@@ -3685,7 +3685,7 @@ def py_copy_dueling_categorical_dqn_without_learning_parameters(duelingCategoric
             a_lin = py_copy_model_without_learning_parameters(dqn.a_lin)
             return duelingCategoricalDQN(shared = shared, v_hid = v_hid, v_lin = v_lin , a_hid = a_hid, a_lin = a_lin, input_size = dqn.input_size,action_size = dqn.action_size,n_atoms = dqn.n_atoms,v_min = dqn.v_min,v_max = dqn.v_max,does_have_learning_parameters = False)
         copy = Pyllab.copy_dueling_categorical_dqn_without_learning_parameters(dqn._dqn)
-        mod = duelingCategoricalDQN(mod = True,does_have_learning_parameters = False)
+        mod = duelingCategoricalDQN(mod = True,does_have_learning_parameters = False, input_size = dqn.input_size, action_size = dqn.action_size, v_min = dqn.v_min, v_max = dqn.v_max, n_atoms = dqn.n_atoms)
         mod._dqn = copy
         return mod
     
