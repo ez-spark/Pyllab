@@ -4198,8 +4198,8 @@ cdef class Rainbow:
                   float beta_priorization = 0.4, float tau_copying = 0.8, float momentum = 0.9, float gamma = 0.99, float beta1 = PY_BETA1_ADAM, float beta2 = PY_BETA2_ADAM, float beta3 = PY_BETA3_ADAMOD,
                   float k_percentage = 1, float clipping_gradient_value = 1, float adaptive_clipping_gradient_value = 0.01, float diversity_driven_threshold = 0.05, float lr = 0.001, float lr_minimum = 0.0001, float lr_maximum = 0.1,
                   float lr_decay = 0.0001, int lr_epoch_threshold = 500, int lr_decay_flag = PY_LR_NO_DECAY, int feed_forward_flag = PY_FULLY_FEED_FORWARD, int training_mode = PY_GRADIENT_DESCENT, int adaptive_clipping_flag = 0,
-                  int batch_size = 128,int threads = 128, int gd_flag = PY_ADAM, int max_buffer_size = 10000, int n_step_rewards = 2, int stop_epsilon_greedy = 500, int epochs_to_copy_target = 1,
-                  int sampling_flag = PY_REWARD_SAMPLING, int diversity_driven_q_functions = 128):
+                  int batch_size = 128,int threads = 128, int gd_flag = PY_ADAM, int max_buffer_size = 10000, int n_step_rewards = 3, int stop_epsilon_greedy = 500, int epochs_to_copy_target = 1,
+                  int sampling_flag = PY_RANKED_SAMPLING, int diversity_driven_q_functions = 128):
         cdef int th = threads
         if(th < 2):
             return
