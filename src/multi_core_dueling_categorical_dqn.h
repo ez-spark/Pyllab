@@ -36,5 +36,8 @@ void dueling_categorical_dqn_train_with_error(int threads, dueling_categorical_d
 void dueling_categorical_reset_without_learning_parameters_reset(dueling_categorical_dqn** dqn, int threads);
 float dueling_categorical_dqn_train_kl(int threads, dueling_categorical_dqn* online_net, dueling_categorical_dqn** online_net_wlp, float** states_t, float** q_functions, float weight, float alpha, float clip);
 void* dueling_categorical_dqn_train_kl_thread(void* _args);
+void* dueling_categorical_dqn_train_l1_thread(void* _args);
+float dueling_categorical_dqn_train_l1(int batch_size, int threads, dueling_categorical_dqn* online_net, dueling_categorical_dqn** online_net_wlp, float** states_t, float** q_functions, float weight, float alpha, float clip);
+
 
 #endif

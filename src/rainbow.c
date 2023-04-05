@@ -676,6 +676,10 @@ rainbow* copy_rainbow(rainbow* rain, int sampling_flag, int gd_flag, int lr_deca
     r->nonterminal_state_t_1 = (int*)calloc(r->max_buffer_size,sizeof(int));// allocation tells us if state t+1 is terminal or not
     r->actions = (int*)calloc(r->max_buffer_size,sizeof(int));// allocation buffer of actions
     r->rewards = (float*)calloc(r->max_buffer_size,sizeof(float));// allocation buffer of rewards
+    r->online_net = online_net;// the online net
+    r->online_net_wlp = online_net_wlp;// the online net without learning parameters
+    r->target_net = target_net;// the target net
+    r->target_net_wlp = target_net_wlp;// the target net without learning parameters
     copy_int_array(rain->nonterminal_state_t_1,r->nonterminal_state_t_1,r->max_buffer_size);
     copy_int_array(rain->actions,r->actions,r->max_buffer_size);
     copy_array(rain->rewards,r->rewards,r->max_buffer_size);
@@ -1099,7 +1103,7 @@ rainbow* reset_rainbow(rainbow* r, int sampling_flag, int gd_flag, int lr_decay_
     //r->negative_sum_error_priorization_buffer = 0;// the total error ranked priorization over the buffer
     //r->neutral_sum_error_priorization_buffer = 0;// the total error ranked priorization over the buffer
     //r->action_taken_iteration = 0;// the iteration of the action taken
-    r->max_buffer_size = max_buffer_size;// the maximum size of the buffer where we store transitions
+    //r->max_buffer_size = max_buffer_size;// the maximum size of the buffer where we store transitions
     //r->train_iteration = 1;// the iteration of the update
     //r->buffer_current_index = 0;// where we actually will store the next state
     r->n_step_rewards = n_step_rewards;// n step reward for the td error
@@ -1245,10 +1249,10 @@ int get_action_rainbow(rainbow* r, float* state_t, int input_size, int free_stat
         return n;
     }
     else{
-        inference_dqn(r->online_net);
+        inference_dqn(r->online_net);// in case of dropout layers we drop the dropout
         compute_probability_distribution(state_t , input_size, r->online_net);
         int action = argmax(compute_q_functions(r->online_net),r->online_net->action_size);
-        train_dqn(r->online_net);
+        train_dqn(r->online_net);// in case of dropout we set again the dropout
         if(r->action_taken_iteration >= r->stop_epsilon_greedy){
             copy_array(r->online_net->q_functions,r->diversity_driven_q_functions_buffer+r->diversity_driven_q_functions_counter*r->online_net->action_size,r->online_net->action_size);
             free(r->diversity_driven_states[r->diversity_driven_q_functions_counter]);
@@ -1711,19 +1715,19 @@ void train_rainbow(rainbow* r, int last_t_1_was_terminal){
             index = (r->batch[i]+j)%r->max_buffer_size;
             
             if(!cycled_buffer && index < r->batch[i]+j)
-				cycled_buffer = 1;
-			
-			if(cycled_buffer)
-				if(r->buffer_current_index <= index)
-					break;
-					
-			if(r->batch[i] < r->buffer_current_index && r->batch[i]+j >= r->buffer_current_index)
-				break;
-			
+                cycled_buffer = 1;
+            
+            if(cycled_buffer)
+                if(r->buffer_current_index <= index)
+                    break;
+                    
+            if(r->batch[i] < r->buffer_current_index && r->batch[i]+j >= r->buffer_current_index)
+                break;
+            
             reward+=lambda*r->rewards[index];
             r->temp_states_t_1[i] = r->buffer_state_t_1[index];
-			r->temp_nonterminal_state_t_1[i] = r->nonterminal_state_t_1[index];
-			
+            r->temp_nonterminal_state_t_1[i] = r->nonterminal_state_t_1[index];
+            
             if(!r->nonterminal_state_t_1[index]){
                 break;
             }
@@ -1760,7 +1764,7 @@ void train_rainbow(rainbow* r, int last_t_1_was_terminal){
         dueling_categorical_reset_without_learning_parameters_reset(r->target_net_wlp,min);
     }
     
-    // now dd error
+    // now diversity driven exploration error
     // uniform random sampling (we could maybe sample with ranked based priorization as the td sampling is done, maybe future implementation)
     float real_ret = 0;
     if(length >= r->diversity_driven_q_functions){
@@ -1781,19 +1785,11 @@ void train_rainbow(rainbow* r, int last_t_1_was_terminal){
             shuffle_int_array(r->array_to_shuffle,r->diversity_driven_q_functions);
         
         if(flag){
-            
             for(i = 0; i < r->batch_size; i++){
                 r->temp_diversity_states_t[i] = r->diversity_driven_states[r->array_to_shuffle[i]];
-                r->qs[i] = &r->diversity_driven_q_functions_buffer[r->array_to_shuffle[i]];
+                r->qs[i] = &r->diversity_driven_q_functions_buffer[r->array_to_shuffle[i]*r->online_net->action_size];
             }
-            for(i = 0; i < r->batch_size; i+=r->threads){
-                int min = r->threads;
-                if(r->batch_size-i < min)
-                    min = r->batch_size-i;
-                ret+=dueling_categorical_dqn_train_kl(min,r->online_net,r->online_net_wlp,r->temp_diversity_states_t+i,r->qs+i,1,r->alpha,r->clipping_gradient_value);
-                sum_dueling_categorical_dqn_partial_derivatives_multithread(r->online_net_wlp,r->online_net,min,0);// log n
-                dueling_categorical_reset_without_learning_parameters_reset(r->online_net_wlp,min);
-            }
+            ret = dueling_categorical_dqn_train_l1(r->batch_size, r->threads, r->online_net, r->online_net_wlp, r->temp_diversity_states_t, r->qs, 1,r->alpha, r->clipping_gradient_value);// l1-norm shows the best performance! suggestion init alpha = 0.1 dd_threshold = 0.05, dd_decay = 0
             ret/=r->batch_size;
             if(ret < 0)
                 ret = -ret;

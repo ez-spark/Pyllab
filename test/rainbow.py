@@ -4,6 +4,8 @@ import pyllab
 from gym import wrappers
 import matplotlib as plt
 import time
+import cv2
+
 
 class DQNAgent:
     online_net = None
@@ -32,7 +34,7 @@ class DQNAgent:
         self.online_net.make_multi_thread(batch_size)
         self.target_net.make_multi_thread(batch_size)
         if rain:
-            self.rainbow = pyllab.Rainbow(online_net = self.online_net,target_net = self.target_net, threads = batch_size, sampling_flag = pyllab.PY_UNIFORM_SAMPLING, batch_size = batch_size,epsilon = 0.00001, stop_epsilon_greedy = 500000)
+            self.rainbow = pyllab.Rainbow(online_net = self.online_net,target_net = self.target_net, threads = batch_size, sampling_flag = pyllab.PY_RANKED_SAMPLING, batch_size = batch_size, diversity_driven_q_functions = 2*batch_size, epsilon = 0.8, stop_epsilon_greedy = 5, epochs_to_copy_target = 1, k_percentage = 0.5, feed_forward_flag = pyllab.PY_EDGE_POPUP)
     # The agent computes the action to perform given a state 
     def compute_action(self, current_state):
         return self.rainbow.get_action(current_state)
@@ -72,7 +74,7 @@ max_iteration_ep = 1000
 n_atoms = 51
 v_min = -10.0
 v_max = 10.0
-filename = "./model/model_027.txt"
+filename = "./model/model_035.txt"
 batch_size = 128
 # We define our agent
 agent = DQNAgent(state_size, action_size, n_atoms, v_min, v_max, filename, batch_size, action_size, rain = True)
@@ -80,22 +82,47 @@ total_steps = 0
 
 
 def make_video(ag, directory):
-    env_to_wrap = gym.make("CartPole-v1")
-    env = wrappers.Monitor(env_to_wrap, directory, force=True)
+    env = gym.make("CartPole-v1", render_mode="rgb_array")
+    #env = wrappers.Monitor(env_to_wrap, directory, force=True)
     rewards = 0
     steps = 0
     done = False
-    state = env.reset()
+    state = env.reset()[0]
     state = np.array([state])
-    while not done:
+    l = []
+    while not done and steps < 500:
+        l.append(env.render())
         action = ag.compute_real_action(state)
-        state, reward, done, _ = env.step(action)
+        t = env.step(action)
+        state = t[0]
+        reward = t[1]
+        done = t[2] 
         state = np.array([state])            
         steps += 1
         rewards += reward
+        
     print(rewards)
     env.close()
-    env_to_wrap.close()
+
+    # Define the codec and create VideoWriter object
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    out = cv2.VideoWriter(directory+'/output.mp4', fourcc, 25, (600, 400))
+
+    # Iterate through each numpy array in the list and add it to the video
+    for frame in l:
+        # Convert the numpy array to a 8-bit image
+        frame = np.uint8(frame)
+        # Write the frame to the video file
+        out.write(frame)
+
+    # Release the video writer and destroy any windows
+    out.release()
+    cv2.destroyAllWindows()
+    
+    
+    
+    
+    #env_to_wrap.close()
     return rewards
 
 # We iterate over episodes
@@ -106,7 +133,7 @@ for e in range(n_episodes):
     # We initialize the first state and reshape it to fit 
     #  with the input layer of the DNN
     
-    current_state = env.reset()
+    current_state = env.reset()[0]
     current_state = np.array([current_state])
     for step in range(max_iteration_ep):
         total_steps = total_steps + 1
@@ -114,7 +141,10 @@ for e in range(n_episodes):
         action = agent.compute_action(current_state)
         # the envrionment runs the action and returns
         # the next state, a reward and whether the agent is done
-        next_state, reward, done, _ = env.step(action)
+        t = env.step(action)
+        next_state = t[0]
+        reward = t[1]
+        done = t[2] 
         if done:
             reward = -10
         next_state = np.array([next_state])

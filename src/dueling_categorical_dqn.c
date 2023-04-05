@@ -496,6 +496,38 @@ void free_dueling_categorical_dqn_without_arrays(dueling_categorical_dqn* dqn){
     return;
 }
 
+void free_scores_dueling_categorical_dqn(dueling_categorical_dqn* dqn){
+	free_scores_model(dqn->shared_hidden_layers);
+	free_scores_model(dqn->v_hidden_layers);
+	free_scores_model(dqn->a_hidden_layers);
+	free_scores_model(dqn->v_linear_last_layer);
+	free_scores_model(dqn->a_linear_last_layer);
+}
+
+void free_indices_dueling_categorical_dqn(dueling_categorical_dqn* dqn){
+	free_indices_model(dqn->shared_hidden_layers);
+	free_indices_model(dqn->v_hidden_layers);
+	free_indices_model(dqn->a_hidden_layers);
+	free_indices_model(dqn->v_linear_last_layer);
+	free_indices_model(dqn->a_linear_last_layer);
+}
+
+void set_null_scores_dueling_categorical_dqn(dueling_categorical_dqn* dqn){
+	set_null_scores_model(dqn->shared_hidden_layers);
+	set_null_scores_model(dqn->v_hidden_layers);
+	set_null_scores_model(dqn->a_hidden_layers);
+	set_null_scores_model(dqn->v_linear_last_layer);
+	set_null_scores_model(dqn->a_linear_last_layer);
+}
+
+void set_null_indices_dueling_categorical_dqn(dueling_categorical_dqn* dqn){
+	set_null_indices_model(dqn->shared_hidden_layers);
+	set_null_indices_model(dqn->v_hidden_layers);
+	set_null_indices_model(dqn->a_hidden_layers);
+	set_null_indices_model(dqn->v_linear_last_layer);
+	set_null_indices_model(dqn->a_linear_last_layer);
+}
+
 void reset_dueling_categorical_dqn(dueling_categorical_dqn* dqn){
     if(dqn == NULL)
         return;
@@ -695,6 +727,38 @@ void memcopy_vector_to_scores_dueling_categorical_dqn(dueling_categorical_dqn* d
     sum+=get_array_size_scores_model(dqn->a_linear_last_layer);
 }
 
+void assign_vector_to_scores_dueling_categorical_dqn(dueling_categorical_dqn* dqn, float* vector){
+    if(dqn == NULL || vector == NULL)
+        return;
+    uint64_t sum = 0;
+    assign_vector_to_scores_model(dqn->shared_hidden_layers,vector);
+    sum+=get_array_size_scores_model(dqn->shared_hidden_layers);
+    assign_vector_to_scores_model(dqn->v_hidden_layers,vector+sum);
+    sum+=get_array_size_scores_model(dqn->v_hidden_layers);
+    assign_vector_to_scores_model(dqn->v_linear_last_layer,vector+sum);
+    sum+=get_array_size_scores_model(dqn->v_linear_last_layer);
+    assign_vector_to_scores_model(dqn->a_hidden_layers,vector+sum);
+    sum+=get_array_size_scores_model(dqn->a_hidden_layers);
+    assign_vector_to_scores_model(dqn->a_linear_last_layer,vector+sum);
+    sum+=get_array_size_scores_model(dqn->a_linear_last_layer);
+}
+
+void memcopy_vector_to_indices_dueling_categorical_dqn(dueling_categorical_dqn* dqn, int* vector){
+    if(dqn == NULL || vector == NULL)
+        return;
+    uint64_t sum = 0;
+    memcopy_vector_to_indices_model(dqn->shared_hidden_layers,vector);
+    sum+=get_array_size_scores_model(dqn->shared_hidden_layers);
+    memcopy_vector_to_indices_model(dqn->v_hidden_layers,vector+sum);
+    sum+=get_array_size_scores_model(dqn->v_hidden_layers);
+    memcopy_vector_to_indices_model(dqn->v_linear_last_layer,vector+sum);
+    sum+=get_array_size_scores_model(dqn->v_linear_last_layer);
+    memcopy_vector_to_indices_model(dqn->a_hidden_layers,vector+sum);
+    sum+=get_array_size_scores_model(dqn->a_hidden_layers);
+    memcopy_vector_to_indices_model(dqn->a_linear_last_layer,vector+sum);
+    sum+=get_array_size_scores_model(dqn->a_linear_last_layer);
+}
+
 
 void memcopy_params_to_vector_dueling_categorical_dqn(dueling_categorical_dqn* dqn, float* vector){
     if(dqn == NULL || vector == NULL)
@@ -760,6 +824,22 @@ void memcopy_scores_to_vector_dueling_categorical_dqn(dueling_categorical_dqn* d
     memcopy_scores_to_vector_model(dqn->a_hidden_layers,vector+sum);
     sum+=get_array_size_scores_model(dqn->a_hidden_layers);
     memcopy_scores_to_vector_model(dqn->a_linear_last_layer,vector+sum);
+    sum+=get_array_size_scores_model(dqn->a_linear_last_layer);
+}
+
+void memcopy_indices_to_vector_dueling_categorical_dqn(dueling_categorical_dqn* dqn, int* vector){
+    if(dqn == NULL || vector == NULL)
+        return;
+    uint64_t sum = 0;
+    memcopy_indices_to_vector_model(dqn->shared_hidden_layers,vector);
+    sum+=get_array_size_scores_model(dqn->shared_hidden_layers);
+    memcopy_indices_to_vector_model(dqn->v_hidden_layers,vector+sum);
+    sum+=get_array_size_scores_model(dqn->v_hidden_layers);
+    memcopy_indices_to_vector_model(dqn->v_linear_last_layer,vector+sum);
+    sum+=get_array_size_scores_model(dqn->v_linear_last_layer);
+    memcopy_indices_to_vector_model(dqn->a_hidden_layers,vector+sum);
+    sum+=get_array_size_scores_model(dqn->a_hidden_layers);
+    memcopy_indices_to_vector_model(dqn->a_linear_last_layer,vector+sum);
     sum+=get_array_size_scores_model(dqn->a_linear_last_layer);
 }
 
@@ -855,6 +935,16 @@ void reinitialize_weights_according_to_scores_dueling_categorical_dqn(dueling_ca
     reinitialize_weights_according_to_scores_model(dqn->v_linear_last_layer,percentage,goodness);
     reinitialize_weights_according_to_scores_model(dqn->a_hidden_layers,percentage,goodness);
     reinitialize_weights_according_to_scores_model(dqn->a_linear_last_layer,percentage,goodness);
+}
+
+void reinitialize_weights_according_to_scores_and_inner_info_dueling_categorical_dqn(dueling_categorical_dqn* dqn){
+    if(dqn == NULL)
+        return;
+    reinitialize_weights_according_to_scores_and_inner_info_model(dqn->shared_hidden_layers);
+    reinitialize_weights_according_to_scores_and_inner_info_model(dqn->v_hidden_layers);
+    reinitialize_weights_according_to_scores_and_inner_info_model(dqn->v_linear_last_layer);
+    reinitialize_weights_according_to_scores_and_inner_info_model(dqn->a_hidden_layers);
+    reinitialize_weights_according_to_scores_and_inner_info_model(dqn->a_linear_last_layer);
 }
 
 void reinitialize_w_dueling_categorical_dqn(dueling_categorical_dqn* dqn){
@@ -1029,7 +1119,7 @@ float* get_loss_for_dueling_categorical_dqn(dueling_categorical_dqn* online_net,
     compute_q_functions(target_net);
     compute_q_functions(online_net);
     int action_index = argmax(online_net->q_functions,online_net->action_size);
-	reset_dueling_categorical_dqn(online_net);
+    reset_dueling_categorical_dqn(online_net);
     compute_probability_distribution(state_t,state_sizes,online_net);
     int i;
     float* tzj = (float*)calloc(online_net->n_atoms,sizeof(float));
@@ -1227,10 +1317,7 @@ float compute_kl_dueling_categorical_dqn(dueling_categorical_dqn* online_net, fl
     // log(e^x/sum(e^x)) ~ x - max(x)
     for(i = 0; i < online_net->action_size; i++){
         // getting the maximum of the q functions of the network and saving its index
-        if(max_q1 < online_net->q_functions[i]){
-            max_q1 = online_net->q_functions[i];
-            index = i;
-        }
+        max_q1 = max_float(max_q1,online_net->q_functions[i]);
         // getting the maximum of the q functions we want to diverge from
         max_q2 = max_float(max_q2,q_functions[i]);
     }
@@ -1266,6 +1353,95 @@ float compute_kl_dueling_categorical_dqn(dueling_categorical_dqn* online_net, fl
     free(softmax_derivative_arr);
     free(other_distr);
     free(error);
+    return ret;
+}
+
+
+float compute_l1_dueling_categorical_dqn(dueling_categorical_dqn* online_net, float* state_t, float* q_functions,  float weight, float alpha, float clip){
+    // getting the input size of the network
+    int size = get_input_layer_size_dueling_categorical_dqn(online_net);
+    // feed forward
+    compute_probability_distribution(state_t,size,online_net);
+    // q functions
+    compute_q_functions(online_net);
+    int i,j;
+    float ret = 0;
+    float* softmax_arr = (float*)calloc(online_net->action_size,sizeof(float));
+    float* softmax_arr2 = (float*)calloc(online_net->action_size,sizeof(float));// new
+    float* error = (float*)calloc(online_net->action_size,sizeof(float));// new
+    float* derivative_softmax_error= (float*)calloc(online_net->action_size,sizeof(float));// new
+    // softmax of the q functions to get the policy
+    softmax(online_net->q_functions,softmax_arr,online_net->action_size);
+    softmax(q_functions,softmax_arr2,online_net->action_size);
+    // computing the error for the threshold
+    for(i = 0; i < online_net->action_size; i++){
+		float temp = softmax_arr[i]-softmax_arr2[i];
+		float temp2 = float_abs(temp);
+		error[i] = alpha*weight*temp/(2.0*temp2);
+		ret+=temp2/2.0;
+	}
+	derivative_softmax(derivative_softmax_error,softmax_arr,error,online_net->action_size);
+	if(clip < 1){
+		clip_vector(derivative_softmax_error,-clip,clip,online_net->action_size);
+	}
+	
+	// we got the partial derivatives of the q functions, now we need to compute the partial derivatives respect to the softmax final layer
+    for(i = 0; i < online_net->action_size; i++){
+        for(j = 0; j < online_net->n_atoms; j++){
+            online_net->error[i*online_net->n_atoms+j]+=derivative_softmax_error[i]*online_net->support[j];
+        }
+    }
+    
+    free(softmax_arr);
+    free(softmax_arr2);
+    free(error);
+    free(derivative_softmax_error);
+
+    return ret;
+}
+
+float compute_l1_dueling_categorical_dqn_opt(dueling_categorical_dqn* online_net,dueling_categorical_dqn* online_net_wlp, float* state_t, float* q_functions,  float weight, float alpha, float clip){
+    // getting the input size of the network
+    int size = get_input_layer_size_dueling_categorical_dqn(online_net);
+    if(clip<0)
+        clip = -clip;
+    // feed forward
+    compute_probability_distribution_opt(state_t,size,online_net,online_net_wlp);
+    // q functions
+    compute_q_functions(online_net_wlp);
+    int i,j;
+    float ret = 0;
+    float* softmax_arr = (float*)calloc(online_net->action_size,sizeof(float));
+    float* softmax_arr2 = (float*)calloc(online_net->action_size,sizeof(float));// new
+    float* error = (float*)calloc(online_net->action_size,sizeof(float));// new
+    float* derivative_softmax_error= (float*)calloc(online_net->action_size,sizeof(float));// new
+    // softmax of the q functions to get the policy
+    softmax(online_net_wlp->q_functions,softmax_arr,online_net->action_size);
+    softmax(q_functions,softmax_arr2,online_net->action_size);
+    // computing the error for the threshold
+    for(i = 0; i < online_net->action_size; i++){
+		float temp = softmax_arr[i]-softmax_arr2[i];
+		float temp2 = float_abs(temp);
+		error[i] = alpha*weight*temp/(2.0*temp2);
+		ret+=temp2/2.0;
+	}
+	derivative_softmax(derivative_softmax_error,softmax_arr,error,online_net->action_size);
+	if(clip < 1){
+		clip_vector(derivative_softmax_error,-clip,clip,online_net->action_size);
+	}
+	
+	// we got the partial derivatives of the q functions, now we need to compute the partial derivatives respect to the softmax final layer
+    for(i = 0; i < online_net->action_size; i++){
+        for(j = 0; j < online_net->n_atoms; j++){
+            online_net_wlp->error[i*online_net->n_atoms+j]+=derivative_softmax_error[i]*online_net->support[j];
+        }
+    }
+    
+    free(softmax_arr);
+    free(softmax_arr2);
+    free(error);
+    free(derivative_softmax_error);
+
     return ret;
 }
 
@@ -1521,19 +1697,19 @@ int get_input_layer_size_dueling_categorical_dqn(dueling_categorical_dqn* dqn){
 }
 
 void inference_dqn(dueling_categorical_dqn* dqn){
-	inference_model(dqn->shared_hidden_layers);
-	inference_model(dqn->a_hidden_layers);
-	inference_model(dqn->v_hidden_layers);
-	inference_model(dqn->a_linear_last_layer);
-	inference_model(dqn->v_linear_last_layer);
+    inference_model(dqn->shared_hidden_layers);
+    inference_model(dqn->a_hidden_layers);
+    inference_model(dqn->v_hidden_layers);
+    inference_model(dqn->a_linear_last_layer);
+    inference_model(dqn->v_linear_last_layer);
 }
 
 void train_dqn(dueling_categorical_dqn* dqn){
-	train_model(dqn->shared_hidden_layers);
-	train_model(dqn->a_hidden_layers);
-	train_model(dqn->v_hidden_layers);
-	train_model(dqn->a_linear_last_layer);
-	train_model(dqn->v_linear_last_layer);
+    train_model(dqn->shared_hidden_layers);
+    train_model(dqn->a_hidden_layers);
+    train_model(dqn->v_hidden_layers);
+    train_model(dqn->a_linear_last_layer);
+    train_model(dqn->v_linear_last_layer);
 }
 
 void dueling_dqn_eliminate_noisy_layers(dueling_categorical_dqn* dqn){
@@ -1545,9 +1721,9 @@ void dueling_dqn_eliminate_noisy_layers(dueling_categorical_dqn* dqn){
 }
 
 void assign_noise_arrays_dueling_categorical_dqn(dueling_categorical_dqn* dqn, float** noise_biases1, float** noise1,float** noise_biases2, float** noise2,float** noise_biases3, float** noise3,float** noise_biases4, float** noise4,float** noise_biases5, float** noise5){
-	assign_noise_arrays_model(dqn->shared_hidden_layers, noise_biases1, noise1);
-	assign_noise_arrays_model(dqn->a_hidden_layers, noise_biases2, noise2);
-	assign_noise_arrays_model(dqn->v_hidden_layers, noise_biases3, noise3);
-	assign_noise_arrays_model(dqn->a_linear_last_layer, noise_biases4, noise4);
-	assign_noise_arrays_model(dqn->v_linear_last_layer, noise_biases5, noise5);
+    assign_noise_arrays_model(dqn->shared_hidden_layers, noise_biases1, noise1);
+    assign_noise_arrays_model(dqn->a_hidden_layers, noise_biases2, noise2);
+    assign_noise_arrays_model(dqn->v_hidden_layers, noise_biases3, noise3);
+    assign_noise_arrays_model(dqn->a_linear_last_layer, noise_biases4, noise4);
+    assign_noise_arrays_model(dqn->v_linear_last_layer, noise_biases5, noise5);
 }
