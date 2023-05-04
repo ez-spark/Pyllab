@@ -1,9 +1,10 @@
 #include "../src/llab.h"
 
 int main(){
-    dueling_categorical_dqn* dqn = parse_dueling_categorical_dqn_file("./model/model_027.txt");
+    dueling_categorical_dqn* dqn = parse_dueling_categorical_dqn_file("./model/model_041.txt");
     save_dueling_categorical_dqn_given_directory(dqn,0,"./");
-    //dueling_categorical_dqn* dqn2 = load_dueling_categorical_dqn("2.bin");
+    dueling_categorical_dqn* dqn2 = load_dueling_categorical_dqn("0.bin");
+    
     int batch_size = 2;
     float** states1 = (float**)malloc(sizeof(float*)*batch_size);
     float** states2 = (float**)malloc(sizeof(float*)*batch_size);
@@ -19,8 +20,8 @@ int main(){
     for(i = 0; i < batch_size; i++){
         dqns[i] = copy_dueling_categorical_dqn_without_learning_parameters(dqn);
         targets[i] = copy_dueling_categorical_dqn_without_learning_parameters(target);
-        states1[i] = (float*)calloc(4,sizeof(float));
-        states2[i] = (float*)calloc(4,sizeof(float));
+        states1[i] = (float*)calloc(8,sizeof(float));
+        states2[i] = (float*)calloc(8,sizeof(float));
     }
     
     reset_dueling_categorical_dqn(dqn);
@@ -35,6 +36,15 @@ int main(){
         free_dueling_categorical_dqn_without_learning_parameters(targets[i]);
     }
     free_dueling_categorical_dqn(dqn);
+    dueling_dqn_eliminate_noisy_layers(dqn2);
+    save_dueling_categorical_dqn_given_directory(dqn2,1,"./");
+    free_dueling_categorical_dqn(dqn2);
+    dqn2 = load_dueling_categorical_dqn("1.bin");
+    free_dueling_categorical_dqn(dqn2);
+    dueling_dqn_eliminate_noisy_layers(target);
+    save_dueling_categorical_dqn_given_directory(target,2,"./");
+    free_dueling_categorical_dqn(target);
+    target = load_dueling_categorical_dqn("2.bin");
     free_dueling_categorical_dqn(target);
     free(dqns);
     free(targets);

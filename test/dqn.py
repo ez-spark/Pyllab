@@ -22,7 +22,7 @@ class DQNAgent:
         self.target_net = pyllab.py_copy_dueling_categorical_dqn(self.online_net)
         self.online_net.make_multi_thread(batch_size)
         self.target_net.make_multi_thread(batch_size)
-        self.lr = 0.001
+        self.lr = 0.0001
         self.gamma = 0.99
         self.exploration_proba = 1.0
         self.exploration_proba_decay = 0.005
@@ -131,29 +131,31 @@ total_steps = 0
 
 
 def make_video(ag):
-    env_to_wrap = gym.make("CartPole-v1")
-    env = wrappers.Monitor(env_to_wrap, 'videos', force = True)
+    env  = gym.make("CartPole-v1",render_mode="human")
     rewards = 0
     steps = 0
     done = False
-    state = env.reset()
+    state = env.reset()[0]
     state = np.array([state])
     while not done:
         action = ag.compute_real_action(state)
-        state, reward, done, _ = env.step(action)
+        state = env.step(action)
+        state = state[0]
+        reward = state[1]
+        done = state[2]
         state = np.array([state])            
         steps += 1
         rewards += reward
+        env.render()
     print(rewards)
     env.close()
-    env_to_wrap.close()
 
 # We iterate over episodes
 for e in range(n_episodes):
     # We initialize the first state and reshape it to fit 
     #  with the input layer of the DNN
     
-    current_state = env.reset()
+    current_state = env.reset()[0]
     current_state = np.array([current_state])
     for step in range(max_iteration_ep):
         total_steps = total_steps + 1
@@ -161,7 +163,10 @@ for e in range(n_episodes):
         action = agent.compute_action(current_state)
         # the envrionment runs the action and returns
         # the next state, a reward and whether the agent is done
-        next_state, reward, done, _ = env.step(action)
+        next_state = env.step(action)
+        next_state = next_state[0]
+        reward = next_state[1]
+        done = next_state[2]
         next_state = np.array([next_state])
         
         # We sotre each experience in the memory buffer
@@ -179,9 +184,9 @@ for e in range(n_episodes):
         #print("train")
         agent.train()
     if e%100== 0 or e == n_episodes-1:
-        agent.save(e,'./')
+        #agent.save(e,'./')
         make_video(agent)
-        filename = str(e)+'.bin'
+        #filename = str(e)+'.bin'
         #agent2 = DQNAgent(state_size, action_size, n_atoms, v_min, v_max, filename, batch_size, action_size, mode = True)
         #make_video(agent2)
 

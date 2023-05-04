@@ -28,32 +28,30 @@ class DQNAgent:
         self.v_min = v_min
         self.v_max = v_max
         self.mode = mode
-        self.online_net = pyllab.duelingCategoricalDQN(filename = filename,input_size = state_size,action_size = action_size, n_atoms = n_atoms, v_min = v_min, v_max = v_max, mode = mode)
+        qr_dqn = True
+        self.online_net = pyllab.duelingCategoricalDQN(filename = filename,qr_dqn = qr_dqn, input_size = state_size,action_size = action_size, n_atoms = n_atoms, v_min = v_min, v_max = v_max, mode = mode)
         self.inference_net = None
         self.target_net = pyllab.py_copy_dueling_categorical_dqn(self.online_net)
         self.online_net.make_multi_thread(batch_size)
         self.target_net.make_multi_thread(batch_size)
         if rain:
-            self.rainbow = pyllab.Rainbow(online_net = self.online_net,target_net = self.target_net, threads = batch_size, sampling_flag = pyllab.PY_RANKED_SAMPLING, batch_size = batch_size, diversity_driven_q_functions = 2*batch_size, epsilon = 0.8, stop_epsilon_greedy = 5, epochs_to_copy_target = 1, k_percentage = 0.5, feed_forward_flag = pyllab.PY_EDGE_POPUP)
+            self.rainbow = pyllab.Rainbow(online_net = self.online_net,target_net = self.target_net, threads = batch_size, batch_size = batch_size, diversity_driven_q_functions = 2*batch_size, epsilon = 0.9, gd_flag = pyllab.PY_RADAM)
     # The agent computes the action to perform given a state 
     def compute_action(self, current_state):
         return self.rainbow.get_action(current_state)
     def compute_real_action(self,current_state):
-        action = self.inference_net.get_best_action(current_state,self.online_net.get_input_size())
-        self.inference_net.reset()
+        action = self.online_net.get_best_action(current_state,self.online_net.get_input_size())
+        self.online_net.reset()
         return action
-    # when an episode is finished, we update the exploration probability using 
-    # espilon greedy algorithm
 
     # At each time step, we store the corresponding experience
-    def store_episode(self,current_state, action, reward, next_state, done):
-        #We use a dictionary to store them
-        self.rainbow.add_experience(current_state,next_state,action,reward,done)
+    def store_episode(self,current_state, action, reward, next_state, done, train_flag):
+        self.rainbow.add_experience(current_state,next_state,action,reward,done, train_flag = train_flag)
+        if train_flag:
+            self.rainbow.update_exploration_probability()
     
     def set_inference_net(self):
         self.inference_net = pyllab.py_copy_dueling_categorical_dqn(self.online_net)
-        #self.inference_net = pyllab.duelingCategoricalDQN(filename = self.filename,input_size = self.input_size,action_size = self.action_size, n_atoms = self.n_atoms, v_min = self.v_min, v_max = self.v_max, mode = self.mode)
-        #pyllab.py_paste_dueling_categorical_dqn(self.online_net,self.inference_net)
         self.inference_net.eliminate_noise_in_layers()
 
     def save(self, number_of_file, directory):
@@ -82,8 +80,8 @@ total_steps = 0
 
 
 def make_video(ag, directory):
-    env = gym.make("CartPole-v1", render_mode="rgb_array")
-    #env = wrappers.Monitor(env_to_wrap, directory, force=True)
+    env = gym.make("CartPole-v1", render_mode="human")
+    #env = gym.make("CartPole-v1")
     rewards = 0
     steps = 0
     done = False
@@ -91,7 +89,7 @@ def make_video(ag, directory):
     state = np.array([state])
     l = []
     while not done and steps < 500:
-        l.append(env.render())
+        #l.append(env.render())
         action = ag.compute_real_action(state)
         t = env.step(action)
         state = t[0]
@@ -104,21 +102,6 @@ def make_video(ag, directory):
     print(rewards)
     env.close()
 
-    # Define the codec and create VideoWriter object
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    out = cv2.VideoWriter(directory+'/output.mp4', fourcc, 25, (600, 400))
-
-    # Iterate through each numpy array in the list and add it to the video
-    for frame in l:
-        # Convert the numpy array to a 8-bit image
-        frame = np.uint8(frame)
-        # Write the frame to the video file
-        out.write(frame)
-
-    # Release the video writer and destroy any windows
-    out.release()
-    cv2.destroyAllWindows()
-    
     
     
     
@@ -149,7 +132,9 @@ for e in range(n_episodes):
             reward = -10
         next_state = np.array([next_state])
         # We sotre each experience in the memory buffer
-        agent.store_episode(current_state, action, reward, next_state, done)
+        train_flag = done
+        
+        agent.store_episode(current_state, action, reward, next_state, done, train_flag)
         
         # if the episode is ended, we leave the loop after
         # updating the exploration probability

@@ -172,7 +172,7 @@ int main( int argc,char** argv){
         }
         reset_model(test_m);
         
-        make_the_model_only_for_ff(test_m);
+        //make_the_model_only_for_ff(test_m);
         for(i = 0; i < testing_instances; i++){
             // Feed forward
             

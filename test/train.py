@@ -1,6 +1,5 @@
 import pyllab
 import numpy as np
-from sklearn.utils import shuffle
 
 def load_data():
     f = open('./data/train.bin','rb')
@@ -24,7 +23,7 @@ def load_data():
 
 batch_size = 10
 epochs = 10
-d = pyllab.get_dict_from_model_setup_file("./model/model_023.txt")
+d = pyllab.get_dict_from_model_setup_file("./model/model_011.txt")
 model = pyllab.Model(d = d)
 #model.set_training_edge_popup(0.5)
 model.make_multi_thread(batch_size)
@@ -33,7 +32,6 @@ inputs, outputs = load_data()
 train = pyllab.Training(lr = 0.001, momentum = 0.9,batch_size = batch_size,gradient_descent_flag = pyllab.PY_ADAM,current_beta1 = pyllab.PY_BETA1_ADAM,current_beta2 = pyllab.PY_BETA2_ADAM, regularization = pyllab.PY_NO_REGULARIZATION,total_number_weights = 0, lambda_value = 0, lr_decay_flag = pyllab.PY_LR_NO_DECAY,timestep_threshold = 0,lr_minimum = 0,lr_maximum = 1,decay = 0)
 for i in range(epochs):
     model.save(i)
-    inputs, outputs = shuffle(inputs, outputs)
     for j in range(0,inputs.shape[0],batch_size):
         model.ff_error_bp_opt_multi_thread(1, 28,28, inputs[j:j+batch_size], outputs[j:j+batch_size], model.get_output_dimension_from_model())
         model.sum_models_partial_derivatives()

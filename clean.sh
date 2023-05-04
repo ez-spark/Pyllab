@@ -1,7 +1,7 @@
-rm -rf Pyllab.egg-info
+sudo rm -rf Pyllab.egg-info
 sudo rm -rf dist
 sudo rm -rf wheelhouse
-rm -rf build
+sudo rm -rf build
 rm -rf ./test/data
 rm -rf ./test/videos
 rm ./test/*.bin

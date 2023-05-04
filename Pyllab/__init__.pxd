@@ -73,6 +73,8 @@ cdef extern from "../src/llab.h":
         pass
     ctypedef struct rainbow:
         pass
+    ctypedef struct iq:
+        pass
     cdef enum:
         N_NORMALIZATION
     cdef enum:
@@ -545,6 +547,12 @@ cdef extern from "../src/dueling_categorical_dqn.h":
     void set_k_percentage_of_ith_layer_dueling_categorical_dqn_a_lin(dueling_categorical_dqn* dqn, int ith, float k_percentage)
     int get_input_layer_size_dueling_categorical_dqn(dueling_categorical_dqn* dqn)
     void dueling_dqn_eliminate_noisy_layers(dueling_categorical_dqn* dqn)
+    void memcopy_indices_to_vector_dueling_categorical_dqn(dueling_categorical_dqn* dqn, int* vector)
+    void reinitialize_weights_according_to_scores_dueling_categorical_dqn_only_percentage(dueling_categorical_dqn* dqn, float percentage)
+    void memcopy_vector_to_indices_dueling_categorical_dqn2(dueling_categorical_dqn* dqn, int* vector)
+    void set_is_qr(dueling_categorical_dqn* dqn, int is_qr)
+    void compute_probability_distribution_qr_dqn(float* input , int input_size, dueling_categorical_dqn* dqn)
+    float* compute_q_functions_qr_dqn(dueling_categorical_dqn* dqn)
     
 cdef extern from "../src/fully_connected.h":
     void fully_connected_feed_forward(float* input, float* output, float* weight,float* bias, int input_size, int output_size)
@@ -641,6 +649,14 @@ cdef extern from "../src/initialization.h":
     float random_general_gaussian_kaiming_init(float n)
     float signed_r2(float n)
     float signed_kaiming_constant(float n)
+
+cdef extern from "../src/iq.h":
+    iq* init_iq(model* q_network, model** q_networks, float** states, int* actions, int* done, uint64_t size, uint64_t state_size, uint64_t batch_size, uint64_t threads,
+            int feed_forward_flag, int training_mode, int adaptive_clipping_flag, int gd_flag, int lr_decay_flag, int lr_epoch_threshold,
+            float momentum, float alpha1, float alpha2, float gamma, float beta1, float beta2, float beta3, float k_percentage, float adaptive_clipping_gradient_value,
+            float lr, float lr_minimum, float lr_maximum, float initial_lr, float lr_decay)
+    void free_iqn(iq* iqn)
+    void train_iqn(iq* iqn, int epochs, char* directory_to_save)
 
 cdef extern from "../src/math_functions.h":
     void softmax(float* input, float* output, int size)
@@ -1411,6 +1427,8 @@ cdef extern from "../src/utils.h":
     int* get_new_copy_int_array(int* array, int size)
     void set_int_vector_with_value(int value, int* v, int dimension)
     int argmax(float* vector, int dimension)
+    void scores_and_indices_readapter(int** indices, float** scores, int size_1, int size_2, float step, dueling_categorical_dqn* dqn)
+    void scores_and_indices_readapter_float(int** indices, float** scores, int size_1, int size_2, float step, dueling_categorical_dqn* dqn)
 
 cdef extern from "../src/vae_model.h":
     vaemodel* variational_auto_encoder_model(model* encoder, model* decoder, int latent_size)

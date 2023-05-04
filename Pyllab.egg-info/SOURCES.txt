@@ -1,8 +1,0 @@
-LICENSE
-README.md
-setup.py
-Pyllab/__init__.c
-Pyllab.egg-info/PKG-INFO
-Pyllab.egg-info/SOURCES.txt
-Pyllab.egg-info/dependency_links.txt
-Pyllab.egg-info/top_level.txt
